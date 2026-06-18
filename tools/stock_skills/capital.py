@@ -48,6 +48,15 @@ def analyze_capital(capital: CapitalSnapshot | None) -> CapitalAnalysis:
     if stance == "neutral":
         stance = "stabilizes" if score >= 50 else "contradicts"
 
+    # Denoise the single end-of-day reading with the same-day flow direction:
+    # late-session acceleration is more trustworthy than a mid-session snapshot.
+    if capital.intraday_trend == "accelerating-in":
+        score += 4
+        notes.append("Inflow accelerated into the close.")
+    elif capital.intraday_trend == "accelerating-out":
+        score -= 4
+        notes.append("Outflow accelerated into the close.")
+
     return CapitalAnalysis(
         score=round(max(0.0, min(100.0, score)), 2),
         stance=stance,

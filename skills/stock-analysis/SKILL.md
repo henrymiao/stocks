@@ -9,9 +9,11 @@ description: Use when analyzing stocks, watchlists, technology/semiconductor/AI 
 
 Use this skill for repository-local stock analysis workflows built around `tools/stock_skills`. It provides a disciplined analyst/trader framework:
 
-- analyst frame: investment hypothesis, sector logic, macro risk, cross-market linkage.
-- trader frame: trend status, support/resistance, invalidation level, action label, and position context.
+- analyst frame: investment hypothesis, sector strength, market regime, valuation, macro risk, cross-market linkage.
+- trader frame: trend status, support/resistance, invalidation level, action label, ATR-based stop, and risk-sized position.
 - review frame: recommendation journaling, outcome review, and explainable signal-weight suggestions.
+
+Analysis is multi-layer: the same-day move is judged against the instrument's **sector** (peer breadth and relative strength) and the broad **market regime** (index trend), not in isolation — a breakout without sector resonance or against a falling market earns less confidence. **Valuation** is profile-aware: a growth name (AI/semiconductor/PCB) tolerates a far higher PE than a value name, and a high PE is only "expensive" if growth (PEG) does not justify it. **Position sizing** is risk-based: the stop is the tighter of the technical invalidation and an ATR volatility stop, and the suggested size spends a fixed account-risk budget over that stop distance (wider stop → smaller position). The total score weighs eight components: trend, capital_flow, sector, cross_market, macro_risk, market_regime, fundamental, position_fit.
 
 This skill supports analysis and decision support only. It must not place real trades.
 
@@ -39,13 +41,35 @@ Run all offline tests:
 python3 -m unittest discover -s tests -v
 ```
 
-Run a fixture-based dry run without Futu OpenD:
+Analyze a real instrument via Futu OpenD (snapshot + daily K-line + capital flow + sector strength + market regime + macro proxies + valuation):
 
 ```bash
-python3 -m tools.stock_skills.cli dry-run --code SZ.002463 --output /tmp/hudian-recommendation.json
+python3 -m tools.stock_skills.cli analyze --code SZ.002463 --output /tmp/hudian-recommendation.json
 ```
 
-Inspect the dry-run label:
+By default `analyze` also fetches the instrument's core sector (peer constituents, for relative strength), the A-share index backdrop (`SH.000001`, `SZ.399006`), live macro proxy ETFs (VIXY/TLT/UUP/USO/GLD), and valuation (PE-TTM/PB/EPS/dividend). Optional flags: `--bars N` (daily bars, default 30), `--cross US.QQQ US.NVDA` (cross-market references), `--indices ...` (override index codes), `--sector-limit N` (peer sample size, default 30), `--macro-codes ...` (override macro proxies), `--macro-json '{"fed_bias":"hike"}'` (hand-typed macro override), `--eps-growth 40` (YoY EPS growth %% → enables PEG), `--profile growth|value|neutral` (override valuation profile; default inferred from watchlist tags), `--risk-budget-pct 1.0` (account %% to risk per trade), `--atr-multiple 2.0` (volatility-stop width), `--cost-basis 140` (report open P&L), `--no-sector` / `--no-market` / `--no-macro` / `--no-fundamental` (skip those fetches), `--last-trim-price 149.5` (position context), `--weights data/models/signal_weights.json`. Components without a data feed score a neutral 50 and are flagged in `source_refs`. The trader plan includes a concrete stop price and suggested position size as %% of account.
+
+Replay the frozen `SZ.002463` fixture offline (pipeline check only, no OpenD):
+
+```bash
+python3 -m tools.stock_skills.cli dry-run --code SZ.002463 --output /tmp/fixture-check.json
+```
+
+`dry-run` rejects any code other than `SZ.002463`: it is a fixed sample for verifying the scoring pipeline, not analysis of the given code. Use `analyze` for real instruments.
+
+Review past recommendations and (optionally) evolve the weights:
+
+```bash
+# Suggest only — writes reviews, prints proposed weights, does NOT change weights:
+python3 -m tools.stock_skills.cli review --window 3d
+
+# Apply — writes weights back, creating a .bak backup and a weight_history.jsonl entry:
+python3 -m tools.stock_skills.cli review --window 5d --apply
+```
+
+`review` reads `data/journal/recommendations.jsonl` (written by `analyze`), fetches each call's later daily bars via OpenD, scores 1/3/5/10-day outcomes into `data/journal/reviews.jsonl`, then suggests signal-weight changes. Weights only change with `--apply`, and every applied change is reversible (`signal_weights.json.bak`) and explainable (`weight_history.jsonl`).
+
+Inspect a label:
 
 ```bash
 python3 -c "import json; p=json.load(open('/tmp/hudian-recommendation.json')); print(p['label'], p['total_score'])"
@@ -54,17 +78,21 @@ python3 -c "import json; p=json.load(open('/tmp/hudian-recommendation.json')); p
 ## Workflow
 
 1. Load the user's intent and relevant stock codes.
-2. If the request needs current market data, use `futuapi` and ensure OpenD is running.
-3. If the request is code review, dry-run verification, or framework work, do not require OpenD.
+2. For a real-instrument analysis with current data, run `analyze` (it calls `futuapi` through `futu_fetcher.py`; OpenD must be running).
+3. For code review, pipeline verification, or framework work, use `dry-run` or the unit tests — these do not require OpenD.
 4. Use `tools.stock_skills` modules to keep reasoning structured:
    - `trend.py`: breakout, failed breakout, support/resistance, invalidation.
-   - `capital.py`: order-size flow confirmation/divergence.
-   - `macro.py`: macro and cross-market risk regimes.
+   - `capital.py`: order-size flow confirmation/divergence (denoised — uses the full-day cumulative flow plus the intraday direction, not a single mid-session reading).
+   - `sector.py`: sector strength from peer constituents (median move, breadth) and the instrument's relative strength (leading / in-line / lagging / sector-weak).
+   - `market.py`: market regime from broad indices (上证 SH.000001 / 创业板 SZ.399006, or QQQ/SPY) → risk-on / neutral / risk-off.
+   - `macro.py`: macro risk from live proxy ETFs (VIXY fear, TLT yields, UUP dollar, USO oil, GLD gold) via `analyze_macro_from_proxies`; `analyze_macro_risk` still accepts hand-typed overrides. Plus `analyze_cross_market` for the US/global tape.
+   - `fundamental.py`: profile-aware valuation (growth/value/neutral) from PE-TTM/PB/EPS/dividend, with PEG when EPS growth is supplied. Profile is inferred from watchlist tags.
+   - `position.py`: ATR (`compute_atr`) and risk-based sizing (`analyze_position`) — stop = tighter of invalidation and ATR stop; size = risk budget ÷ stop distance.
    - `engine.py`: total score, action label, analyst hypothesis, trader plan.
-   - `journal.py`: JSONL recommendation records.
-   - `review.py`: outcome review and weight suggestions.
-   - `futu_fetcher.py`: wrapper around existing `futuapi` quote scripts.
-5. Present output as analysis with clear uncertainty and invalidation conditions.
+   - `journal.py`: JSONL recommendation records. `analyze` appends to `data/journal/recommendations.jsonl` by default (`--no-journal` to skip).
+   - `review.py`: outcome review and weight suggestions, driven by the `review` command. Weight changes are advisory unless `--apply` is passed, and applied changes are backed up and logged to `weight_history.jsonl`.
+   - `futu_fetcher.py`: wrapper around `futuapi` scripts. Fetches snapshot, daily K-line, capital flow, and historical K-line for review (quote-only — it must never call trade scripts).
+5. Present output as analysis with clear uncertainty and invalidation conditions. State which components fell back to the neutral default (see `source_refs`).
 
 ## Action Labels
 

@@ -59,5 +59,48 @@ class ReviewTests(unittest.TestCase):
         self.assertTrue(suggestion["notes"])
 
 
+    def test_failed_bullish_call_is_attributed_to_weakest_component(self):
+        recommendation = {
+            "code": "SZ.002463",
+            "label": "hold",
+            "timestamp": "2026-06-18T15:00:00+08:00",
+            "invalidation_level": 130.0,
+            "component_scores": {
+                "trend": 70,
+                "capital_flow": 65,
+                "sector": 60,
+                "cross_market": 40,  # weakest: this warning was overridden
+                "macro_risk": 55,
+                "position_fit": 75,
+            },
+        }
+        future_bars = [
+            KLineBar("2026-06-19", 147.0, 147.5, 143.0, 143.5, 90_000_000, 13_000_000_000.0),
+        ]
+
+        outcome = evaluate_recommendation(recommendation, entry_price=147.9, future_bars=future_bars, review_window="1d")
+
+        self.assertFalse(outcome["directional_success"])
+        self.assertFalse(outcome["invalidated"])
+        self.assertEqual(outcome["dominant_failure"], "cross_market")
+        self.assertIn("40", outcome["attribution_reason"])
+
+    def test_failure_without_component_scores_uses_fallback(self):
+        recommendation = {
+            "code": "SZ.002463",
+            "label": "hold",
+            "timestamp": "2026-06-18T15:00:00+08:00",
+            "invalidation_level": 130.0,
+        }
+        future_bars = [
+            KLineBar("2026-06-19", 147.0, 147.5, 143.0, 143.5, 90_000_000, 13_000_000_000.0),
+        ]
+
+        outcome = evaluate_recommendation(recommendation, entry_price=147.9, future_bars=future_bars, review_window="1d")
+
+        self.assertFalse(outcome["directional_success"])
+        self.assertEqual(outcome["dominant_failure"], "macro_risk")
+
+
 if __name__ == "__main__":
     unittest.main()

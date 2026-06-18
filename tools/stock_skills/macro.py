@@ -38,6 +38,55 @@ def analyze_macro_risk(inputs: dict[str, object]) -> MacroAnalysis:
     return MacroAnalysis(score=score, regime=regime, notes=notes)
 
 
+# Macro proxies (ETFs that track the underlying when the raw index has no Futu feed),
+# with the score impact of a rising proxy. Negative weight = "up is risk-off".
+_MACRO_PROXIES = {
+    "US.VIXY": (-16, "VIX 恐慌指标"),   # fear up -> risk-off
+    "US.UUP": (-10, "美元指数"),        # stronger dollar -> risk-off
+    "US.USO": (-8, "原油"),            # oil spike -> inflation/geopolitics risk-off
+    "US.GLD": (-4, "黄金"),            # gold bid -> mild risk-off / hedging
+    "US.TLT": (10, "长端美债价格"),     # bond price up = yields down -> risk-on for growth
+}
+_BIG_MOVE = 0.015  # 1.5% is a meaningful one-day move for these proxies
+
+
+def analyze_macro_from_proxies(snapshots: dict[str, MarketSnapshot]) -> MacroAnalysis:
+    """Derive a macro risk regime from live proxy ETFs instead of hand-typed inputs.
+
+    Each proxy nudges the score by its weight, scaled by the size of the move; a
+    rising VIX/dollar/oil pushes toward risk-off, a bond-price rally (falling
+    yields) toward risk-on. Falls back to neutral when no proxy data is available.
+    """
+    score = 50.0
+    notes: list[str] = []
+    used = 0
+    for code, (weight, label) in _MACRO_PROXIES.items():
+        snapshot = snapshots.get(code)
+        if snapshot is None:
+            continue
+        change = _pct_change(snapshot)
+        if change is None:
+            continue
+        used += 1
+        # Scale: a full _BIG_MOVE applies the full weight, capped at 1.5x for larger moves.
+        magnitude = max(-1.5, min(1.5, change / _BIG_MOVE))
+        score += weight * magnitude
+        direction = "up" if change > 0 else "down"
+        notes.append(f"{label} ({code}) {direction} {round(change * 100, 2)}%.")
+
+    if used == 0:
+        return MacroAnalysis(score=50.0, regime="neutral", notes=["No macro proxy data; macro regime is neutral."])
+
+    score = round(max(0.0, min(100.0, score)), 2)
+    if score >= 60:
+        regime = "risk-on"
+    elif score <= 40:
+        regime = "risk-off"
+    else:
+        regime = "neutral"
+    return MacroAnalysis(score=score, regime=regime, notes=notes)
+
+
 def _pct_change(snapshot: MarketSnapshot) -> float | None:
     if snapshot.prev_close <= 0:
         return None

@@ -45,6 +45,8 @@ def _weighted_total(scores: ComponentScores, weights: dict[str, float]) -> float
         + scores.sector * weights["sector"]
         + scores.cross_market * weights["cross_market"]
         + scores.macro_risk * weights["macro_risk"]
+        + scores.market_regime * weights.get("market_regime", 0.0)
+        + scores.fundamental * weights.get("fundamental", 0.0)
         + scores.position_fit * weights["position_fit"],
         2,
     )
@@ -60,6 +62,14 @@ def build_recommendation(
     position_fit_score: float,
     weights: dict[str, float],
     source_refs: list[str],
+    market_score: float = 50.0,
+    market_regime: str = "neutral",
+    sector_stance: str = "unknown",
+    fundamental_score: float = 50.0,
+    fundamental_stance: str = "unknown",
+    position_stop_price: float | None = None,
+    position_size_pct: float | None = None,
+    position_stance: str = "unknown",
 ) -> Recommendation:
     component_scores = ComponentScores(
         trend=trend.score,
@@ -68,6 +78,8 @@ def build_recommendation(
         cross_market=cross_market.score,
         macro_risk=macro.score,
         position_fit=position_fit_score,
+        market_regime=market_score,
+        fundamental=fundamental_score,
     )
     total_score = _weighted_total(component_scores, weights)
     price_location = detect_price_location(state, trend)
@@ -80,16 +92,25 @@ def build_recommendation(
     last_trim = state.user_context.get("last_trim_price")
     trim_text = f" Prior partial trim near {last_trim} should reduce chase pressure." if last_trim else ""
 
+    sizing_text = ""
+    if position_stop_price is not None:
+        sizing_text = f" Risk plan: stop near {position_stop_price}"
+        if position_size_pct is not None:
+            sizing_text += f", suggested size ~{position_size_pct}% of account ({position_stance})."
+        else:
+            sizing_text += f" ({position_stance})."
+
     analyst_hypothesis = (
         f"investment hypothesis: {state.snapshot.name} remains worth tracking if sector demand and earnings logic "
         f"continue to support the trade. Trend status is {trend.status}, capital stance is {capital.stance}, "
+        f"sector stance is {sector_stance}, valuation is {fundamental_stance}, market regime is {market_regime}, "
         f"macro regime is {macro.regime}, and cross-market regime is {cross_market.regime}."
     )
     trader_plan = (
         f"trader plan: current price {state.snapshot.last_price}. Support levels: {support_text}. "
         f"Resistance levels: {resistance_text}. Use invalidation near {invalidation}. "
         f"Action label is {label}; avoid chasing near resistance unless a new volume-confirmed breakout appears."
-        f"{trim_text}"
+        f"{trim_text}{sizing_text}"
     )
 
     return Recommendation(
@@ -106,5 +127,6 @@ def build_recommendation(
         invalidation_level=invalidation,
         confidence=confidence,
         source_refs=source_refs,
+        entry_price=state.snapshot.last_price,
         user_context=state.user_context,
     )

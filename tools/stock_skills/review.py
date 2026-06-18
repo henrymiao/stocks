@@ -9,6 +9,28 @@ from .models import KLineBar
 POSITIVE_LABELS = {"strong-watch", "low-buy-zone", "hold"}
 NEGATIVE_LABELS = {"trim-on-strength", "risk-reduce", "avoid"}
 
+# Components ranked by score; the lowest is the strongest warning that was overridden.
+_ATTRIBUTABLE_COMPONENTS = ("trend", "capital_flow", "sector", "cross_market", "macro_risk", "market_regime", "fundamental", "position_fit")
+
+
+def _attribute_failure(recommendation: dict[str, Any], invalidated: bool) -> tuple[str, str]:
+    """Pick the component most responsible for a failed call, using the scores recorded at the time.
+
+    For a losing bullish call we blame the component that gave the strongest warning
+    (the lowest score) yet was overridden by the overall recommendation. This keeps weight
+    adjustments evidence-based instead of always crediting one factor.
+    """
+    scores = recommendation.get("component_scores")
+    if isinstance(scores, dict):
+        present = {key: scores[key] for key in _ATTRIBUTABLE_COMPONENTS if isinstance(scores.get(key), int | float)}
+        if present:
+            weakest, value = min(present.items(), key=lambda item: item[1])
+            return weakest, f"{weakest} gave the lowest component score ({value}) at recommendation time."
+    # Fallback when no scores were recorded: keep the original coarse heuristic.
+    if invalidated:
+        return "trend", "No component scores recorded; defaulted to trend after invalidation."
+    return "macro_risk", "No component scores recorded; defaulted to macro_risk."
+
 
 def evaluate_recommendation(
     recommendation: dict[str, Any],
@@ -38,12 +60,11 @@ def evaluate_recommendation(
     else:
         directional_success = not invalidated
 
-    if invalidated:
-        dominant_failure = "trend"
-    elif final_return_pct < 0 and label in POSITIVE_LABELS:
-        dominant_failure = "macro_risk"
-    else:
+    if directional_success:
         dominant_failure = "none"
+        attribution_reason = "Call was directionally successful."
+    else:
+        dominant_failure, attribution_reason = _attribute_failure(recommendation, invalidated)
 
     return {
         "code": recommendation.get("code"),
@@ -58,6 +79,7 @@ def evaluate_recommendation(
         "invalidated": invalidated,
         "directional_success": directional_success,
         "dominant_failure": dominant_failure,
+        "attribution_reason": attribution_reason,
     }
 
 

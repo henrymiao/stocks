@@ -31,6 +31,16 @@ class CapitalTests(unittest.TestCase):
         self.assertLessEqual(result.score, 35)
         self.assertEqual(result.stance, "contradicts")
 
+    def test_intraday_acceleration_tilts_score(self):
+        base = dict(net_inflow=24_492_584.5, super_inflow=744_236_606.14, big_inflow=-411_741_404.48, mid_inflow=-210_842_830.36, small_inflow=-97_159_786.8, timestamp="2026-06-18T15:00:00+08:00")
+        flat = analyze_capital(CapitalSnapshot(**base, intraday_trend="flat"))
+        accel_in = analyze_capital(CapitalSnapshot(**base, intraday_trend="accelerating-in"))
+        accel_out = analyze_capital(CapitalSnapshot(**base, intraday_trend="accelerating-out"))
+
+        self.assertGreater(accel_in.score, flat.score)
+        self.assertLess(accel_out.score, flat.score)
+        self.assertTrue(any("into the close" in note for note in accel_in.notes))
+
 
 if __name__ == "__main__":
     unittest.main()

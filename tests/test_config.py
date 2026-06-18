@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.stock_skills.config import load_watchlist, load_weights
+from tools.stock_skills.config import load_watchlist, load_weights, save_weights
 
 
 class ConfigTests(unittest.TestCase):
@@ -34,12 +34,14 @@ class ConfigTests(unittest.TestCase):
             path.write_text(
                 json.dumps(
                     {
-                        "trend": 0.25,
-                        "capital_flow": 0.20,
-                        "sector": 0.15,
-                        "cross_market": 0.15,
-                        "macro_risk": 0.15,
-                        "position_fit": 0.10,
+                        "trend": 0.20,
+                        "capital_flow": 0.13,
+                        "sector": 0.14,
+                        "cross_market": 0.11,
+                        "macro_risk": 0.11,
+                        "market_regime": 0.12,
+                        "fundamental": 0.10,
+                        "position_fit": 0.09,
                     }
                 ),
                 encoding="utf-8",
@@ -48,7 +50,8 @@ class ConfigTests(unittest.TestCase):
             weights = load_weights(path)
 
         self.assertAlmostEqual(sum(weights.values()), 1.0)
-        self.assertEqual(weights["trend"], 0.25)
+        self.assertEqual(weights["trend"], 0.20)
+        self.assertEqual(weights["fundamental"], 0.10)
 
     def test_load_weights_rejects_missing_component(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -65,11 +68,13 @@ class ConfigTests(unittest.TestCase):
                 """
                 {
                   "trend": NaN,
-                  "capital_flow": 0.20,
-                  "sector": 0.15,
-                  "cross_market": 0.15,
-                  "macro_risk": 0.15,
-                  "position_fit": 0.10
+                  "capital_flow": 0.13,
+                  "sector": 0.14,
+                  "cross_market": 0.11,
+                  "macro_risk": 0.11,
+                  "market_regime": 0.12,
+                  "fundamental": 0.10,
+                  "position_fit": 0.09
                 }
                 """,
                 encoding="utf-8",
@@ -85,11 +90,13 @@ class ConfigTests(unittest.TestCase):
                 """
                 {
                   "trend": Infinity,
-                  "capital_flow": 0.20,
-                  "sector": 0.15,
-                  "cross_market": 0.15,
-                  "macro_risk": 0.15,
-                  "position_fit": 0.10
+                  "capital_flow": 0.13,
+                  "sector": 0.14,
+                  "cross_market": 0.11,
+                  "macro_risk": 0.11,
+                  "market_regime": 0.12,
+                  "fundamental": 0.10,
+                  "position_fit": 0.09
                 }
                 """,
                 encoding="utf-8",
@@ -105,11 +112,13 @@ class ConfigTests(unittest.TestCase):
                 json.dumps(
                     {
                         "trend": True,
-                        "capital_flow": 0.20,
-                        "sector": 0.15,
-                        "cross_market": 0.15,
-                        "macro_risk": 0.15,
-                        "position_fit": 0.10,
+                        "capital_flow": 0.13,
+                        "sector": 0.14,
+                        "cross_market": 0.11,
+                        "macro_risk": 0.11,
+                        "market_regime": 0.12,
+                        "fundamental": 0.10,
+                        "position_fit": 0.09,
                     }
                 ),
                 encoding="utf-8",
@@ -124,12 +133,14 @@ class ConfigTests(unittest.TestCase):
             path.write_text(
                 json.dumps(
                     {
-                        "trend": "0.25",
-                        "capital_flow": 0.20,
-                        "sector": 0.15,
-                        "cross_market": 0.15,
-                        "macro_risk": 0.15,
-                        "position_fit": 0.10,
+                        "trend": "0.22",
+                        "capital_flow": 0.13,
+                        "sector": 0.14,
+                        "cross_market": 0.11,
+                        "macro_risk": 0.11,
+                        "market_regime": 0.12,
+                        "fundamental": 0.10,
+                        "position_fit": 0.09,
                     }
                 ),
                 encoding="utf-8",
@@ -137,6 +148,34 @@ class ConfigTests(unittest.TestCase):
 
             with self.assertRaises(ValueError):
                 load_weights(path)
+
+
+    def test_save_weights_backs_up_and_records_history(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "signal_weights.json"
+            original = {"trend": 0.20, "capital_flow": 0.13, "sector": 0.14, "cross_market": 0.11, "macro_risk": 0.11, "market_regime": 0.12, "fundamental": 0.10, "position_fit": 0.09}
+            path.write_text(json.dumps(original), encoding="utf-8")
+
+            updated = {"trend": 0.18, "capital_flow": 0.13, "sector": 0.14, "cross_market": 0.11, "macro_risk": 0.11, "market_regime": 0.12, "fundamental": 0.12, "position_fit": 0.09}
+            entry = save_weights(path, updated, reason="fundamental failures")
+
+            reloaded = load_weights(path)
+            backup = load_weights(path.with_suffix(".json.bak"))
+            history_lines = (Path(tmpdir) / "weight_history.jsonl").read_text(encoding="utf-8").strip().splitlines()
+
+        self.assertEqual(reloaded["fundamental"], 0.12)
+        self.assertEqual(backup, original)  # backup preserves the pre-change weights (reversible)
+        self.assertEqual(entry["reason"], "fundamental failures")
+        self.assertEqual(entry["previous"]["fundamental"], 0.10)
+        self.assertEqual(len(history_lines), 1)
+
+    def test_save_weights_rejects_invalid_sum(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "signal_weights.json"
+            bad = {"trend": 0.9, "capital_flow": 0.13, "sector": 0.14, "cross_market": 0.11, "macro_risk": 0.11, "market_regime": 0.12, "fundamental": 0.10, "position_fit": 0.09}
+            with self.assertRaises(ValueError):
+                save_weights(path, bad)
+            self.assertFalse(path.exists())
 
 
 if __name__ == "__main__":

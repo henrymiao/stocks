@@ -37,6 +37,9 @@ class CapitalSnapshot:
     mid_inflow: float
     small_inflow: float
     timestamp: str
+    # Intraday momentum derived from the same-day flow series, used to denoise a single reading:
+    # "accelerating-in" / "accelerating-out" / "flat" / None (unknown).
+    intraday_trend: str | None = None
 
 
 @dataclass(frozen=True)
@@ -57,6 +60,8 @@ class ComponentScores:
     cross_market: float
     macro_risk: float
     position_fit: float
+    market_regime: float = 50.0
+    fundamental: float = 50.0
 
     def to_record(self) -> dict[str, float]:
         return asdict(self)
@@ -94,6 +99,54 @@ class CrossMarketAnalysis:
 
 
 @dataclass(frozen=True)
+class SectorAnalysis:
+    score: float
+    stance: str  # leading / in-line / lagging / sector-weak / unknown
+    breadth: float | None  # share of constituents up, 0..1
+    median_change: float | None
+    relative_strength: float | None  # instrument change minus sector median
+    notes: list[str]
+
+
+@dataclass(frozen=True)
+class MarketAnalysis:
+    score: float
+    regime: str  # risk-on / neutral / risk-off
+    notes: list[str]
+
+
+@dataclass(frozen=True)
+class FundamentalSnapshot:
+    code: str
+    pe_ttm: float | None
+    pb: float | None
+    eps: float | None
+    dividend_ratio: float | None  # trailing dividend yield, percent (e.g. 0.34 = 0.34%)
+    market_val: float | None
+    eps_growth: float | None = None  # YoY EPS growth, percent (e.g. 35.0 = +35%); optional
+
+
+@dataclass(frozen=True)
+class FundamentalAnalysis:
+    score: float
+    stance: str  # cheap / fair / expensive / unknown
+    profile: str  # growth / value / neutral
+    peg: float | None
+    notes: list[str]
+
+
+@dataclass(frozen=True)
+class PositionAnalysis:
+    score: float
+    stance: str  # core-hold / trading-position / partial-trim / wait / risk-reduce
+    stop_price: float | None
+    stop_distance_pct: float | None  # how far the stop sits below entry, percent
+    atr: float | None
+    suggested_size_pct: float | None  # position size as % of account from the risk budget
+    notes: list[str]
+
+
+@dataclass(frozen=True)
 class Recommendation:
     code: str
     name: str
@@ -108,6 +161,7 @@ class Recommendation:
     invalidation_level: float | None
     confidence: float
     source_refs: list[str]
+    entry_price: float = 0.0
     user_context: dict[str, Any] = field(default_factory=dict)
 
     def to_record(self) -> dict[str, Any]:

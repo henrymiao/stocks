@@ -1,0 +1,8 @@
+{
+  "trend": 0.25,
+  "capital_flow": 0.2,
+  "sector": 0.15,
+  "cross_market": 0.15,
+  "macro_risk": 0.15,
+  "position_fit": 0.1
+}

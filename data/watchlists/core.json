@@ -1,0 +1,17 @@
+{
+  "watchlist": [
+    {"code": "SZ.002463", "name": "沪电股份", "enabled": true, "tags": ["a-share", "pcb", "ai-hardware"]},
+    {"code": "SZ.002938", "name": "鹏鼎控股", "enabled": true, "tags": ["a-share", "pcb", "consumer-electronics"]},
+    {"code": "SH.600584", "name": "长电科技", "enabled": true, "tags": ["a-share", "semiconductor", "packaging"]},
+    {"code": "US.MRVL", "name": "Marvell", "enabled": true, "tags": ["us", "ai-infrastructure", "semiconductor"]},
+    {"code": "US.GOOGL", "name": "Alphabet", "enabled": true, "tags": ["us", "mega-cap", "ai"]},
+    {"code": "US.CRCL", "name": "Circle", "enabled": true, "tags": ["us", "crypto-equity", "stablecoin"]},
+    {"code": "US.SOXL", "name": "Direxion Daily Semiconductor Bull 3X", "enabled": true, "tags": ["us", "semiconductor", "leveraged"]},
+    {"code": "US.SOXS", "name": "Direxion Daily Semiconductor Bear 3X", "enabled": true, "tags": ["us", "semiconductor", "hedge"]},
+    {"code": "US.NVDA", "name": "NVIDIA", "enabled": true, "tags": ["us", "ai-hardware", "semiconductor"]},
+    {"code": "US.QQQ", "name": "Invesco QQQ Trust", "enabled": true, "tags": ["us", "growth-proxy", "macro"]},
+    {"code": "US.SPY", "name": "SPDR S&P 500 ETF", "enabled": true, "tags": ["us", "market-proxy", "macro"]},
+    {"code": "CC.BTC", "name": "Bitcoin", "enabled": true, "tags": ["crypto", "risk-appetite"]},
+    {"code": "CC.ETH", "name": "Ethereum", "enabled": true, "tags": ["crypto", "risk-appetite"]}
+  ]
+}

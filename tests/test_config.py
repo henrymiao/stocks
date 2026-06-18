@@ -58,6 +58,86 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 load_weights(path)
 
+    def test_load_weights_rejects_nan_component(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "weights.json"
+            path.write_text(
+                """
+                {
+                  "trend": NaN,
+                  "capital_flow": 0.20,
+                  "sector": 0.15,
+                  "cross_market": 0.15,
+                  "macro_risk": 0.15,
+                  "position_fit": 0.10
+                }
+                """,
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                load_weights(path)
+
+    def test_load_weights_rejects_infinity_component(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "weights.json"
+            path.write_text(
+                """
+                {
+                  "trend": Infinity,
+                  "capital_flow": 0.20,
+                  "sector": 0.15,
+                  "cross_market": 0.15,
+                  "macro_risk": 0.15,
+                  "position_fit": 0.10
+                }
+                """,
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                load_weights(path)
+
+    def test_load_weights_rejects_boolean_component(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "weights.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "trend": True,
+                        "capital_flow": 0.20,
+                        "sector": 0.15,
+                        "cross_market": 0.15,
+                        "macro_risk": 0.15,
+                        "position_fit": 0.10,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                load_weights(path)
+
+    def test_load_weights_rejects_string_numeric_component(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "weights.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "trend": "0.25",
+                        "capital_flow": 0.20,
+                        "sector": 0.15,
+                        "cross_market": 0.15,
+                        "macro_risk": 0.15,
+                        "position_fit": 0.10,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                load_weights(path)
+
 
 if __name__ == "__main__":
     unittest.main()

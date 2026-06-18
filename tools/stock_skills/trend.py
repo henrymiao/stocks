@@ -37,14 +37,14 @@ def analyze_trend(snapshot: MarketSnapshot, bars: list[KLineBar]) -> TrendAnalys
         score += 32
         status = "breakout-confirmed"
         notes.append("Price closed above recent resistance with volume expansion.")
-    elif recent.high >= prior_high * 0.995 and snapshot.last_price <= prior_high:
-        score += 12
-        status = "high-level-consolidation"
-        notes.append("Price tested resistance but did not close above it.")
     elif snapshot.last_price < prior.low or snapshot.last_price < prior_low or close_change < -0.03:
         score -= 18
         status = "breakdown-risk"
         notes.append("Price closed below recent support area.")
+    elif recent.high >= prior_high * 0.995 and snapshot.last_price <= prior_high:
+        score += 12
+        status = "high-level-consolidation"
+        notes.append("Price tested resistance but did not close above it.")
     elif snapshot.last_price > prior.close:
         score += 10
         status = "constructive"

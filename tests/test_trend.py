@@ -48,6 +48,18 @@ class TrendTests(unittest.TestCase):
         self.assertLessEqual(result.score, 45)
         self.assertEqual(result.status, "breakdown-risk")
 
+    def test_breakdown_takes_priority_over_failed_resistance_test(self):
+        bars = [
+            KLineBar("2026-06-16", 134.2, 144.65, 134.04, 140.64, 110_149_555, 15_332_666_433.54),
+            KLineBar("2026-06-17", 138.0, 149.9, 137.1, 146.55, 99_154_170, 14_460_550_533.78),
+            KLineBar("2026-06-18", 146.0, 149.4, 141.0, 141.5, 120_000_000, 17_000_000_000.0),
+        ]
+        snapshot = MarketSnapshot("SZ.002463", "沪电股份", 141.5, 146.0, 149.4, 141.0, 146.55, 120_000_000, 17_000_000_000.0, "2026-06-18T15:00:00+08:00")
+
+        result = analyze_trend(snapshot, bars)
+
+        self.assertEqual(result.status, "breakdown-risk")
+
 
 if __name__ == "__main__":
     unittest.main()

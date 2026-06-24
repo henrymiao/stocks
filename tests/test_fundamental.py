@@ -58,6 +58,37 @@ class FundamentalTests(unittest.TestCase):
         self.assertEqual(result.stance, "unknown")
         self.assertLessEqual(result.score, 50)
 
+    def test_no_quality_inputs_keeps_quality_none(self):
+        result = analyze_fundamental(fund(pe=55.0), profile="growth")
+        self.assertIsNone(result.quality)
+
+    def test_business_quality_separates_two_names_at_the_same_multiple(self):
+        strong = FundamentalSnapshot(
+            "X", pe_ttm=60.0, pb=8.0, eps=2.0, dividend_ratio=0.0, market_val=1e10,
+            eps_growth=None, revenue_growth=35.0, gross_margin=55.0, net_margin=25.0, roe=22.0,
+        )
+        weak = FundamentalSnapshot(
+            "Y", pe_ttm=60.0, pb=8.0, eps=2.0, dividend_ratio=0.0, market_val=1e10,
+            eps_growth=None, revenue_growth=-5.0, gross_margin=18.0, net_margin=2.0, roe=4.0,
+        )
+        s = analyze_fundamental(strong, profile="growth")
+        w = analyze_fundamental(weak, profile="growth")
+
+        self.assertGreater(s.score, w.score)
+        self.assertIsNotNone(s.quality)
+        self.assertGreater(s.quality, 60)
+        self.assertLess(w.quality, 50)
+
+    def test_strong_quality_lifts_an_expensive_multiple_to_fair(self):
+        snap = FundamentalSnapshot(
+            "X", pe_ttm=95.0, pb=9.0, eps=1.0, dividend_ratio=0.0, market_val=1e10,
+            eps_growth=None, revenue_growth=40.0, gross_margin=60.0, net_margin=30.0, roe=25.0,
+        )
+        result = analyze_fundamental(snap, profile="growth")
+
+        self.assertEqual(result.stance, "fair")  # lifted off "expensive" by quality
+        self.assertGreater(result.score, 45)
+
 
 if __name__ == "__main__":
     unittest.main()

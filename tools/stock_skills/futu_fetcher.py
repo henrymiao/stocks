@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from collections.abc import Callable
 from datetime import datetime
@@ -38,20 +39,39 @@ def _now_iso() -> str:
     return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
+def _is_unsupported_sector_error(exc: Exception) -> bool:
+    """True when get_owner_plate failed because the code is an ETF.
+
+    Futu's sector (所属板块) interface rejects ETFs with a "does not support ETFs
+    type" message. We treat that as "no sector data" rather than a hard failure,
+    so analyze falls back to the neutral sector score automatically — the same
+    outcome as passing --no-sector. Any other error (e.g. OpenD down) still raises.
+    """
+    if isinstance(exc, subprocess.CalledProcessError):
+        text = f"{exc.stdout or ''}{exc.stderr or ''}"
+    else:
+        text = str(exc)
+    text = text.lower()
+    return "etf" in text and "support" in text
+
+
 class FutuFetcher:
     def __init__(
         self,
-        python_bin: str = "/Users/shuren/.futu-venv/bin/python",
-        skill_dir: str = "/Users/shuren/.agents/skills/futuapi",
+        python_bin: str | None = None,
+        skill_dir: str | None = None,
         runner: Runner = _default_runner,
     ) -> None:
-        self.python_bin = python_bin
-        self.skill_dir = Path(skill_dir)
+        self.python_bin = python_bin or os.environ.get("FUTU_PYTHON_BIN", "python3")
+        self.skill_dir = Path(
+            skill_dir
+            or os.environ.get("FUTUAPI_SKILL_DIR", "/Users/allglitter/.codex/skills/futuapi")
+        )
         self.runner = runner
 
     def _script(self, category: str, name: str) -> str:
         path = self.skill_dir / "scripts" / category / name
-        if not path.exists():
+        if self.runner is _default_runner and not path.exists():
             raise FileNotFoundError(f"Futu script not found: {path}")
         return str(path)
 
@@ -112,7 +132,12 @@ class FutuFetcher:
 
     def get_owner_plates(self, code: str) -> list[dict]:
         command = [self.python_bin, self._script("quote", "get_owner_plate.py"), code, "--json"]
-        payload = self._run_json(command)
+        try:
+            payload = self._run_json(command)
+        except (RuntimeError, subprocess.CalledProcessError) as exc:
+            if _is_unsupported_sector_error(exc):
+                return []  # ETF: no peer group, skip sector → neutral score downstream
+            raise
         return payload.get("data", [])
 
     def pick_core_plate(self, code: str) -> dict | None:
@@ -250,12 +275,24 @@ class FutuFetcher:
             intraday_trend=intraday_trend,
         )
 
-    def get_fundamentals(self, code: str, eps_growth: float | None = None) -> FundamentalSnapshot | None:
-        """Valuation snapshot (PE-TTM, PB, EPS, dividend yield, market cap).
+    def get_fundamentals(
+        self,
+        code: str,
+        eps_growth: float | None = None,
+        revenue_growth: float | None = None,
+        gross_margin: float | None = None,
+        net_margin: float | None = None,
+        roe: float | None = None,
+    ) -> FundamentalSnapshot | None:
+        """Valuation + business-quality snapshot.
 
-        The packaged get_snapshot.py omits these, so we run a small inline snippet
-        through the same Futu venv to read the raw market-snapshot columns.
-        `eps_growth` (YoY %, optional) is passed through for PEG when the caller has it.
+        Valuation columns (PE-TTM, PB, EPS, dividend yield, market cap) are read live
+        from the Futu market snapshot via an inline snippet (the packaged
+        get_snapshot.py omits them). Growth/profitability inputs (`eps_growth`,
+        `revenue_growth`, `gross_margin`, `net_margin`, `roe`, all YoY/percent) are not
+        carried by the market snapshot, so they are supplied by the caller (CLI flags or
+        a future financial-statement fetch) and passed straight through. Any left as
+        None simply do not contribute to the quality sub-score.
         """
         snippet = _FUNDAMENTAL_SNIPPET.format(skill=str(self.skill_dir), code=code)
         command = [self.python_bin, "-c", snippet]
@@ -272,6 +309,10 @@ class FutuFetcher:
             dividend_ratio=row.get("dividend_ratio"),
             market_val=row.get("market_val"),
             eps_growth=eps_growth,
+            revenue_growth=revenue_growth,
+            gross_margin=gross_margin,
+            net_margin=net_margin,
+            roe=roe,
         )
 
     def build_state(

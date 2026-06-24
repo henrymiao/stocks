@@ -13,7 +13,7 @@ Use this skill for repository-local stock analysis workflows built around `tools
 - trader frame: trend status, support/resistance, invalidation level, action label, ATR-based stop, and risk-sized position.
 - review frame: recommendation journaling, outcome review, and explainable signal-weight suggestions.
 
-Analysis is multi-layer: the same-day move is judged against the instrument's **sector** (peer breadth and relative strength) and the broad **market regime** (index trend), not in isolation — a breakout without sector resonance or against a falling market earns less confidence. **Valuation** is profile-aware: a growth name (AI/semiconductor/PCB) tolerates a far higher PE than a value name, and a high PE is only "expensive" if growth (PEG) does not justify it. **Position sizing** is risk-based: the stop is the tighter of the technical invalidation and an ATR volatility stop, and the suggested size spends a fixed account-risk budget over that stop distance (wider stop → smaller position). The total score weighs eight components: trend, capital_flow, sector, cross_market, macro_risk, market_regime, fundamental, position_fit.
+Analysis is multi-layer: the same-day move is judged against the instrument's **multi-timeframe trend** (MA10/20/50 alignment — a breakout that fires against a falling MA20<MA50 is demoted as a likely false breakout, one aligned with an uptrend is rewarded), its **sector** (peer breadth and relative strength) and the broad **market regime** (index trend), not in isolation — a breakout without trend/sector resonance or against a falling market earns less confidence. **Valuation** is profile-aware: a growth name (AI/semiconductor/PCB) tolerates a far higher PE than a value name, and a high PE is only "expensive" if growth (PEG) does not justify it; when growth/margin/ROE inputs are supplied, a **business-quality** sub-score lifts or lowers the read beyond the raw multiple. **Position sizing** is risk-based: the stop is the tighter of the technical invalidation and an ATR volatility stop, and the suggested size spends a fixed account-risk budget over that stop distance (wider stop → smaller position). The total score weighs eight components: trend, capital_flow, sector, cross_market, macro_risk, market_regime, fundamental, position_fit. The three backdrop components (cross_market, macro_risk, market_regime) read the same risk-on/off tape, so the engine **de-duplicates** them: it blends them into one backdrop score and shrinks its deviation from neutral (`backdrop_blend`), so an agreeing broad tape counts roughly once, not three times. Whether each component actually earns its weight is measurable with `backtest` (win rate, expectancy, per-component edge).
 
 This skill supports analysis and decision support only. It must not place real trades.
 
@@ -22,7 +22,7 @@ This skill supports analysis and decision support only. It must not place real t
 Assume the workspace root is:
 
 ```text
-/Users/shuren/WorkSpace/codes/stocks
+/Users/allglitter/codes/stocks
 ```
 
 Core files:
@@ -47,7 +47,23 @@ Analyze a real instrument via Futu OpenD (snapshot + daily K-line + capital flow
 python3 -m tools.stock_skills.cli analyze --code SZ.002463 --output /tmp/hudian-recommendation.json
 ```
 
-By default `analyze` also fetches the instrument's core sector (peer constituents, for relative strength), the A-share index backdrop (`SH.000001`, `SZ.399006`), live macro proxy ETFs (VIXY/TLT/UUP/USO/GLD), and valuation (PE-TTM/PB/EPS/dividend). Optional flags: `--bars N` (daily bars, default 30), `--cross US.QQQ US.NVDA` (cross-market references), `--indices ...` (override index codes), `--sector-limit N` (peer sample size, default 30), `--macro-codes ...` (override macro proxies), `--macro-json '{"fed_bias":"hike"}'` (hand-typed macro override), `--eps-growth 40` (YoY EPS growth %% → enables PEG), `--profile growth|value|neutral` (override valuation profile; default inferred from watchlist tags), `--risk-budget-pct 1.0` (account %% to risk per trade), `--atr-multiple 2.0` (volatility-stop width), `--cost-basis 140` (report open P&L), `--no-sector` / `--no-market` / `--no-macro` / `--no-fundamental` (skip those fetches), `--last-trim-price 149.5` (position context), `--weights data/models/signal_weights.json`. Components without a data feed score a neutral 50 and are flagged in `source_refs`. The trader plan includes a concrete stop price and suggested position size as %% of account.
+By default `analyze` also fetches the instrument's core sector (peer constituents, for relative strength), a market-aware index backdrop (`US.*` → `US.QQQ`/`US.SPY`, `SH.*`/`SZ.*` → `SH.000001`/`SZ.399006`, `HK.*` → `HK.800000`/`HK.800700`), live macro proxy ETFs (VIXY/TLT/UUP/USO/GLD), and valuation (PE-TTM/PB/EPS/dividend). US watchlist names tagged as AI, semiconductor, growth, crypto, or stablecoin also get default cross-market references such as QQQ/SPY/NVDA/SMH or BTC/ETH. Optional flags: `--bars N` (daily bars, default 30; ≥50 enables the MA20/MA50 trend regime), `--cross US.QQQ US.NVDA` (override cross-market references), `--indices ...` (override index codes), `--sector-limit N` (peer sample size, default 30), `--macro-codes ...` (override macro proxies), `--macro-json '{"fed_bias":"hike"}'` (hand-typed macro override), `--eps-growth 40` (YoY EPS growth %% → enables PEG), `--revenue-growth / --gross-margin / --net-margin / --roe` (business-quality inputs, percent → feed the quality sub-score), `--profile growth|value|neutral` (override valuation profile; default inferred from watchlist tags), `--risk-budget-pct 1.0` (account %% to risk per trade), `--atr-multiple 2.0` (volatility-stop width), `--cost-basis 140` (report open P&L), `--no-sector` / `--no-market` / `--no-macro` / `--no-fundamental` (skip those fetches), `--last-trim-price 149.5` (position context), `--weights data/models/signal_weights.json`. Components without a data feed score a neutral 50 and are flagged in `source_refs`. The trader plan includes a concrete stop price and suggested position size as %% of account.
+
+Back-test past calls into win rate, expectancy, and per-component edge (offline; reads the journals, run `review` first to populate outcomes):
+
+```bash
+python3 -m tools.stock_skills.cli backtest --recommendations data/journal/recommendations.jsonl --reviews data/journal/reviews.jsonl --output /tmp/backtest.json
+```
+
+`backtest` reports overall win rate / expectancy / payoff / average MFE/MAE, the same split by label and by code, and a `component_edge` section: for each factor it compares the win rate when that factor was bullish (score ≥55) versus bearish (≤45). A positive `edge` means a high score for that factor genuinely preceded better outcomes — evidence the weight is earned; a negative edge flags a factor that is not pulling its weight. Expectancy and win/loss P&L are direction-aware (a `risk-reduce`/`avoid` call profits when price falls).
+
+To populate the journals immediately from the repo's existing 复盘 notes (so `backtest` has data without waiting for live calls), run the backfill importer:
+
+```bash
+python3 -m tools.stock_skills.import_reviews   # parse notes → recommendations.jsonl + offline-synthesised reviews.jsonl
+```
+
+It self-synthesises review outcomes by using each code's later-dated note prices as the realised future price; entry/label parses are best-effort (flagged in `source_refs`), and the live `review` can refine them with true OHLC later.
 
 Replay the frozen `SZ.002463` fixture offline (pipeline check only, no OpenD):
 
@@ -81,14 +97,15 @@ python3 -c "import json; p=json.load(open('/tmp/hudian-recommendation.json')); p
 2. For a real-instrument analysis with current data, run `analyze` (it calls `futuapi` through `futu_fetcher.py`; OpenD must be running).
 3. For code review, pipeline verification, or framework work, use `dry-run` or the unit tests — these do not require OpenD.
 4. Use `tools.stock_skills` modules to keep reasoning structured:
-   - `trend.py`: breakout, failed breakout, support/resistance, invalidation.
+   - `trend.py`: breakout, failed breakout, support/resistance, invalidation, plus an MA10/20/50 multi-timeframe overlay (`trend_regime`) that demotes counter-trend breakouts and rewards trend-aligned ones.
    - `capital.py`: order-size flow confirmation/divergence (denoised — uses the full-day cumulative flow plus the intraday direction, not a single mid-session reading).
    - `sector.py`: sector strength from peer constituents (median move, breadth) and the instrument's relative strength (leading / in-line / lagging / sector-weak).
-   - `market.py`: market regime from broad indices (上证 SH.000001 / 创业板 SZ.399006, or QQQ/SPY) → risk-on / neutral / risk-off.
+   - `market.py`: market regime from market-aware broad indices (A-share: 上证 SH.000001 / 创业板 SZ.399006; US: QQQ/SPY; HK: 恒指 HK.800000 / 恒生科技 HK.800700) → risk-on / neutral / risk-off.
    - `macro.py`: macro risk from live proxy ETFs (VIXY fear, TLT yields, UUP dollar, USO oil, GLD gold) via `analyze_macro_from_proxies`; `analyze_macro_risk` still accepts hand-typed overrides. Plus `analyze_cross_market` for the US/global tape.
-   - `fundamental.py`: profile-aware valuation (growth/value/neutral) from PE-TTM/PB/EPS/dividend, with PEG when EPS growth is supplied. Profile is inferred from watchlist tags.
+   - `fundamental.py`: profile-aware valuation (growth/value/neutral) from PE-TTM/PB/EPS/dividend, with PEG when EPS growth is supplied, plus a business-quality sub-score from revenue growth / gross margin / net margin / ROE when those are supplied (strong quality can lift an otherwise "expensive" multiple to "fair"). Profile is inferred from watchlist tags.
    - `position.py`: ATR (`compute_atr`) and risk-based sizing (`analyze_position`) — stop = tighter of invalidation and ATR stop; size = risk budget ÷ stop distance.
-   - `engine.py`: total score, action label, analyst hypothesis, trader plan.
+   - `engine.py`: total score, action label, analyst hypothesis, trader plan. `backdrop_blend` de-duplicates the three correlated backdrop factors so an agreeing tape is not triple-counted.
+   - `backtest.py`: offline aggregation of `reviews.jsonl` into win rate, expectancy, MFE/MAE, label/code breakdowns, and per-component predictive edge. Driven by the `backtest` command.
    - `journal.py`: JSONL recommendation records. `analyze` appends to `data/journal/recommendations.jsonl` by default (`--no-journal` to skip).
    - `review.py`: outcome review and weight suggestions, driven by the `review` command. Weight changes are advisory unless `--apply` is passed, and applied changes are backed up and logged to `weight_history.jsonl`.
    - `futu_fetcher.py`: wrapper around `futuapi` scripts. Fetches snapshot, daily K-line, capital flow, and historical K-line for review (quote-only — it must never call trade scripts).

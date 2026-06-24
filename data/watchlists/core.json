@@ -9,6 +9,7 @@
     {"code": "US.SOXL", "name": "Direxion Daily Semiconductor Bull 3X", "enabled": true, "tags": ["us", "semiconductor", "leveraged"]},
     {"code": "US.SOXS", "name": "Direxion Daily Semiconductor Bear 3X", "enabled": true, "tags": ["us", "semiconductor", "hedge"]},
     {"code": "US.NVDA", "name": "NVIDIA", "enabled": true, "tags": ["us", "ai-hardware", "semiconductor"]},
+    {"code": "US.MU", "name": "Micron Technology", "enabled": true, "tags": ["us", "semiconductor", "ai-hardware", "memory"]},
     {"code": "US.QQQ", "name": "Invesco QQQ Trust", "enabled": true, "tags": ["us", "growth-proxy", "macro"]},
     {"code": "US.SPY", "name": "SPDR S&P 500 ETF", "enabled": true, "tags": ["us", "market-proxy", "macro"]},
     {"code": "CC.BTC", "name": "Bitcoin", "enabled": true, "tags": ["crypto", "risk-appetite"]},

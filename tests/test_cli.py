@@ -55,8 +55,12 @@ class FakeFetcher:
             KLineBar("2026-06-22", 141.0, 142.0, 138.0, 139.0, 90_000_000, 13_000_000_000.0),
         ]
 
-    def get_fundamentals(self, code, eps_growth=None):
-        return FundamentalSnapshot(code, pe_ttm=66.1, pb=18.0, eps=1.99, dividend_ratio=0.34, market_val=2.85e11, eps_growth=eps_growth)
+    def get_fundamentals(self, code, eps_growth=None, revenue_growth=None, gross_margin=None, net_margin=None, roe=None):
+        return FundamentalSnapshot(
+            code, pe_ttm=66.1, pb=18.0, eps=1.99, dividend_ratio=0.34, market_val=2.85e11,
+            eps_growth=eps_growth, revenue_growth=revenue_growth, gross_margin=gross_margin,
+            net_margin=net_margin, roe=roe,
+        )
 
 
 class CliTests(unittest.TestCase):
@@ -143,6 +147,21 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         refs = " ".join(payload["source_refs"])
+        self.assertNotIn("cross_market: neutral default", refs)
+
+    def test_us_analyze_uses_us_market_and_theme_cross_defaults(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main(["analyze", "--code", "US.MRVL", "--output", str(output), "--journal", str(journal)])
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        refs = " ".join(payload["source_refs"])
+        self.assertIn("cross_market:US.QQQ,US.SPY,US.NVDA,US.SMH", refs)
+        self.assertIn("market:US.QQQ,US.SPY", refs)
+        self.assertNotIn("market:SH.000001", refs)
         self.assertNotIn("cross_market: neutral default", refs)
 
     def test_review_evaluates_journal_and_only_applies_with_flag(self):

@@ -60,7 +60,7 @@ def validate_weights(payload: dict[str, Any]) -> dict[str, float]:
 
     weights: dict[str, float] = {}
     for key, value in payload.items():
-        if isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(value):
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
             raise ValueError(f"Invalid signal weight for {key}: {value!r}")
         weights[key] = float(value)
 

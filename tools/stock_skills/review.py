@@ -22,7 +22,7 @@ def _attribute_failure(recommendation: dict[str, Any], invalidated: bool) -> tup
     """
     scores = recommendation.get("component_scores")
     if isinstance(scores, dict):
-        present = {key: scores[key] for key in _ATTRIBUTABLE_COMPONENTS if isinstance(scores.get(key), int | float)}
+        present = {key: scores[key] for key in _ATTRIBUTABLE_COMPONENTS if isinstance(scores.get(key), (int, float))}
         if present:
             weakest, value = min(present.items(), key=lambda item: item[1])
             return weakest, f"{weakest} gave the lowest component score ({value}) at recommendation time."

@@ -38,18 +38,44 @@ def detect_price_location(state: InstrumentState, trend: TrendAnalysis) -> str:
     return "middle"
 
 
+# market_regime, cross_market and macro_risk all read the same underlying
+# risk-on/off backdrop. Summing them at full weight triple-counts one factor, so a
+# single broad-tape move can dominate the score three times over. We instead blend
+# the three into one backdrop score and shrink its deviation from neutral toward a
+# single-factor influence. The shrink only bites when the three AGREE (a strongly
+# off-neutral blend) — when they disagree the blend already sits near 50 and the
+# discount changes little. A neutral backdrop still contributes exactly its weight*50,
+# so the existing label thresholds stay calibrated.
+_BACKDROP_KEYS = ("market_regime", "cross_market", "macro_risk")
+_BACKDROP_REDUNDANCY = 0.6  # 1.0 = old triple-count; <1 de-duplicates the shared signal
+
+
+def backdrop_blend(scores: ComponentScores, weights: dict[str, float]) -> tuple[float, float, float | None]:
+    """Return (weighted contribution, total backdrop weight, discounted backdrop score)."""
+    component = {
+        "market_regime": scores.market_regime,
+        "cross_market": scores.cross_market,
+        "macro_risk": scores.macro_risk,
+    }
+    parts = [(component[key], weights.get(key, 0.0)) for key in _BACKDROP_KEYS]
+    total_w = sum(w for _, w in parts)
+    if total_w <= 0:
+        return 0.0, 0.0, None
+    avg = sum(score * w for score, w in parts) / total_w
+    discounted = 50.0 + (avg - 50.0) * _BACKDROP_REDUNDANCY
+    return round(discounted * total_w, 4), total_w, round(discounted, 2)
+
+
 def _weighted_total(scores: ComponentScores, weights: dict[str, float]) -> float:
-    return round(
+    stock_specific = (
         scores.trend * weights["trend"]
         + scores.capital_flow * weights["capital_flow"]
         + scores.sector * weights["sector"]
-        + scores.cross_market * weights["cross_market"]
-        + scores.macro_risk * weights["macro_risk"]
-        + scores.market_regime * weights.get("market_regime", 0.0)
         + scores.fundamental * weights.get("fundamental", 0.0)
-        + scores.position_fit * weights["position_fit"],
-        2,
+        + scores.position_fit * weights["position_fit"]
     )
+    backdrop_contribution, _, _ = backdrop_blend(scores, weights)
+    return round(stock_specific + backdrop_contribution, 2)
 
 
 def build_recommendation(

@@ -1,6 +1,6 @@
 import unittest
 
-from tools.stock_skills.engine import build_recommendation, classify_total_score
+from tools.stock_skills.engine import backdrop_blend, build_recommendation, classify_total_score
 from tools.stock_skills.models import (
     CapitalAnalysis,
     ComponentScores,
@@ -12,8 +12,54 @@ from tools.stock_skills.models import (
     TrendAnalysis,
 )
 
+BACKDROP_WEIGHTS = {
+    "trend": 0.22,
+    "capital_flow": 0.12,
+    "sector": 0.15,
+    "cross_market": 0.09,
+    "macro_risk": 0.09,
+    "market_regime": 0.10,
+    "fundamental": 0.13,
+    "position_fit": 0.10,
+}
+
+
+def _scores(market_regime=50.0, cross_market=50.0, macro_risk=50.0):
+    return ComponentScores(
+        trend=50.0,
+        capital_flow=50.0,
+        sector=50.0,
+        cross_market=cross_market,
+        macro_risk=macro_risk,
+        position_fit=50.0,
+        market_regime=market_regime,
+        fundamental=50.0,
+    )
+
 
 class EngineTests(unittest.TestCase):
+    def test_backdrop_neutral_is_unchanged(self):
+        contribution, total_w, discounted = backdrop_blend(_scores(), BACKDROP_WEIGHTS)
+        self.assertAlmostEqual(total_w, 0.28)
+        self.assertEqual(discounted, 50.0)
+        self.assertAlmostEqual(contribution, 50.0 * 0.28)  # neutral backdrop unaffected
+
+    def test_backdrop_discounts_three_agreeing_bearish_signals(self):
+        # All three say "risk-off 20". Triple-counting would dock 20*0.28; the
+        # redundancy discount pulls the shared signal back toward neutral so the
+        # penalty is smaller (contribution higher) — counted ~once, not three times.
+        contribution, _, discounted = backdrop_blend(_scores(20.0, 20.0, 20.0), BACKDROP_WEIGHTS)
+        self.assertEqual(discounted, 32.0)  # 50 + (20-50)*0.6
+        self.assertGreater(contribution, 20.0 * 0.28)
+        self.assertLess(discounted, 50.0)  # still bearish, just not triple-bearish
+
+    def test_backdrop_disagreement_stays_near_neutral(self):
+        # Bullish index vs bearish macro: independent info that cancels — the blend
+        # sits near neutral and the discount barely matters.
+        _, _, discounted = backdrop_blend(_scores(70.0, 70.0, 20.0), BACKDROP_WEIGHTS)
+        self.assertGreater(discounted, 45.0)
+        self.assertLess(discounted, 55.0)
+
     def test_classify_total_score_respects_extended_resistance(self):
         self.assertEqual(classify_total_score(84, price_location="near_resistance"), "trim-on-strength")
         self.assertEqual(classify_total_score(84, price_location="healthy_pullback"), "strong-watch")

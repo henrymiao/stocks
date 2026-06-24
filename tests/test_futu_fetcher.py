@@ -71,8 +71,8 @@ CAPITAL_PAYLOAD = {
 
 def _fetcher(runner):
     return FutuFetcher(
-        python_bin="/Users/shuren/.futu-venv/bin/python",
-        skill_dir="/Users/shuren/.agents/skills/futuapi",
+        python_bin="python3",
+        skill_dir="/fake/futuapi",
         runner=runner,
     )
 
@@ -168,6 +168,21 @@ class FutuFetcherTests(unittest.TestCase):
         core = _fetcher(runner).pick_core_plate("SZ.002463")
 
         self.assertEqual(core["plate_code"], "SH.IND001")  # INDUSTRY beats CONCEPT, noise skipped
+
+    def test_pick_core_plate_returns_none_for_etf(self):
+        # Futu's sector interface rejects ETFs; analyze should fall back to neutral, not crash.
+        etf_error = {
+            "ret": -1,
+            "action": "获取所属板块",
+            "error": "Get Stock's Sector interface does not support ETFs type.",
+        }
+        runner = FakeRunner({"get_owner_plate.py": etf_error})
+        self.assertIsNone(_fetcher(runner).pick_core_plate("US.SOXL"))
+
+    def test_get_owner_plates_surfaces_non_etf_error(self):
+        runner = FakeRunner({"get_owner_plate.py": {"error": "OpenD not connected"}})
+        with self.assertRaises(RuntimeError):
+            _fetcher(runner).get_owner_plates("SZ.002463")
 
     def test_get_plate_constituent_changes_computes_pct(self):
         plate_stock = {"data": [{"code": "SZ.000001", "name": "A"}, {"code": "SZ.000002", "name": "B"}]}

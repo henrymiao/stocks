@@ -75,6 +75,11 @@ class TrendAnalysis:
     resistance_levels: list[float]
     invalidation_level: float | None
     notes: list[str]
+    # Multi-timeframe context (None when there are too few bars to compute the MA).
+    ma_fast: float | None = None   # e.g. MA10
+    ma_mid: float | None = None    # e.g. MA20
+    ma_slow: float | None = None   # e.g. MA50
+    trend_regime: str = "unknown"  # uptrend / downtrend / range / unknown
 
 
 @dataclass(frozen=True)
@@ -124,6 +129,12 @@ class FundamentalSnapshot:
     dividend_ratio: float | None  # trailing dividend yield, percent (e.g. 0.34 = 0.34%)
     market_val: float | None
     eps_growth: float | None = None  # YoY EPS growth, percent (e.g. 35.0 = +35%); optional
+    # Business-quality inputs (optional; percent units). When present they let the
+    # fundamental score look past raw valuation to growth and profitability.
+    revenue_growth: float | None = None  # YoY revenue growth, percent
+    gross_margin: float | None = None    # gross margin, percent
+    net_margin: float | None = None      # net margin, percent
+    roe: float | None = None             # return on equity, percent
 
 
 @dataclass(frozen=True)
@@ -133,6 +144,7 @@ class FundamentalAnalysis:
     profile: str  # growth / value / neutral
     peg: float | None
     notes: list[str]
+    quality: float | None = None  # 0..100 business-quality sub-score (None when no quality inputs)
 
 
 @dataclass(frozen=True)

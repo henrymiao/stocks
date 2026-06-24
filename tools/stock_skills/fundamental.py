@@ -14,6 +14,63 @@ GROWTH_TAGS = {"ai", "ai-hardware", "ai-infrastructure", "semiconductor", "pcb",
 VALUE_TAGS = {"bank", "brokerage", "utility", "dividend", "value", "insurance"}
 
 
+def _score_quality(snapshot: FundamentalSnapshot, profile: str) -> tuple[float, float | None, list[str]]:
+    """Score business quality (growth + profitability), not just the valuation multiple.
+
+    Returns (delta_applied_to_main_score, quality_subscore_0_100, notes). When no
+    quality inputs are supplied, returns (0, None, []) so valuation-only behaviour
+    is preserved. Profile matters: growth names are rewarded for revenue growth and
+    margins, value names for ROE and stable profitability.
+    """
+    contributions: list[float] = []
+    notes: list[str] = []
+    has_input = False
+
+    rev = snapshot.revenue_growth
+    if rev is not None:
+        has_input = True
+        if profile == "growth":
+            delta = 8.0 if rev > 25 else 4.0 if rev >= 10 else 0.0 if rev >= 0 else -8.0
+        else:
+            delta = 4.0 if rev > 15 else 1.0 if rev >= 0 else -6.0
+        contributions.append(delta)
+        notes.append(f"Revenue growth {rev}% → {'+' if delta >= 0 else ''}{delta}.")
+
+    gm = snapshot.gross_margin
+    if gm is not None:
+        has_input = True
+        delta = (5.0 if profile == "growth" else 4.0) if gm > 40 else 1.0 if gm >= 25 else -3.0 if gm < 15 else 0.0
+        contributions.append(delta)
+        notes.append(f"Gross margin {gm}% → {'+' if delta >= 0 else ''}{delta}.")
+
+    nm = snapshot.net_margin
+    if nm is not None:
+        has_input = True
+        delta = 4.0 if nm > 15 else 1.0 if nm >= 5 else -6.0 if nm < 0 else 0.0
+        contributions.append(delta)
+        notes.append(f"Net margin {nm}% → {'+' if delta >= 0 else ''}{delta}.")
+
+    roe = snapshot.roe
+    if roe is not None:
+        has_input = True
+        weight = 1.5 if profile == "value" else 1.0
+        base = 6.0 if roe > 20 else 3.0 if roe >= 12 else -4.0 if roe < 5 else 0.0
+        if roe < 0:
+            base = -6.0
+        delta = round(base * weight, 2)
+        contributions.append(delta)
+        notes.append(f"ROE {roe}% → {'+' if delta >= 0 else ''}{delta}.")
+
+    if not has_input:
+        return 0.0, None, []
+
+    raw = sum(contributions)
+    quality_subscore = round(max(0.0, min(100.0, 50.0 + raw)), 2)
+    applied = round(max(-18.0, min(18.0, raw)), 2)
+    notes.append(f"Quality sub-score {quality_subscore} (applied {'+' if applied >= 0 else ''}{applied} to valuation).")
+    return applied, quality_subscore, notes
+
+
 def infer_profile(tags: list[str] | None) -> str:
     """Classify a name as growth / value / neutral from its watchlist tags."""
     if not tags:
@@ -112,10 +169,24 @@ def analyze_fundamental(snapshot: FundamentalSnapshot | None, profile: str = "ne
             score += 3
             notes.append(f"Dividend yield {snapshot.dividend_ratio}%.")
 
+    # Business quality (growth + profitability). Only active when quality inputs exist,
+    # so valuation-only callers see no change. This is what turns "估值打分" into a real
+    # fundamental read: a rich multiple on a high-growth, high-margin, high-ROE business
+    # is treated very differently from the same multiple on a deteriorating one.
+    quality_delta, quality_subscore, quality_notes = _score_quality(snapshot, profile)
+    if quality_subscore is not None:
+        score += quality_delta
+        notes.extend(quality_notes)
+        # Let strong quality lift the stance off a purely-valuation "expensive" read.
+        if stance == "expensive" and quality_subscore >= 65 and (peg is None or peg <= 2.0):
+            stance = "fair"
+            notes.append("Strong business quality offsets a rich multiple → stance lifted to fair.")
+
     return FundamentalAnalysis(
         score=round(max(0.0, min(100.0, score)), 2),
         stance=stance,
         profile=profile,
         peg=peg,
         notes=notes,
+        quality=quality_subscore,
     )

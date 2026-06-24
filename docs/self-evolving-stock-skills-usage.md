@@ -17,6 +17,7 @@ Optional flags:
 - `--macro-codes US.VIXY US.TLT ...`: override the macro proxy ETFs (default: VIXY/TLT/UUP/USO/GLD).
 - `--macro-json '{"fed_bias":"hike"}'`: hand-typed macro override (bypasses the proxy fetch).
 - `--eps-growth 40`: YoY EPS growth % → enables PEG in the valuation score.
+- `--revenue-growth / --gross-margin / --net-margin / --roe`: business-quality inputs (percent) → feed the fundamental quality sub-score.
 - `--profile growth|value|neutral`: override the valuation profile (default inferred from watchlist tags).
 - `--risk-budget-pct 1.0`: account % to risk per trade for position sizing (default 1.0).
 - `--atr-multiple 2.0`: ATR multiple for the volatility stop (default 2.0).
@@ -25,7 +26,7 @@ Optional flags:
 - `--last-trim-price 149.5`: prior partial-trim price for position context.
 - `--weights path`: a `signal_weights.json` to use instead of the built-in weights.
 
-The score combines eight components — trend, capital_flow, sector, cross_market, macro_risk, market_regime, fundamental, position_fit. Capital flow is denoised (full-day cumulative + intraday direction). Sector strength compares the instrument against its peer constituents; market regime reads the broad index trend; macro risk is derived from live proxy ETFs. **Valuation is profile-aware**: growth names (AI/semiconductor/PCB tags) tolerate a higher PE than value names, and a high PE is only "expensive" if growth (PEG, when `--eps-growth` is given) does not justify it. **Position sizing is risk-based**: the stop is the tighter of the technical invalidation and an ATR volatility stop, and the suggested size spends `--risk-budget-pct` of the account over that stop distance — so a wider (more volatile) stop yields a smaller position and every trade risks roughly the same amount. The trader plan reports the concrete stop price and suggested size. Components without a data feed (cross_market without `--cross`, and any skipped fetch) score a neutral 50 and are flagged in `source_refs`. OpenD must be running for `analyze`.
+The score combines eight components — trend, capital_flow, sector, cross_market, macro_risk, market_regime, fundamental, position_fit. **Trend is multi-timeframe**: on top of the 5-day breakout logic, an MA10/20/50 overlay sets a `trend_regime`; a breakout against a falling MA20<MA50 is demoted (false-breakout risk) and a trend-aligned breakout is rewarded (needs ≥~20 daily bars; below that the regime is `unknown` and the legacy logic is unchanged). Capital flow is denoised (full-day cumulative + intraday direction). Sector strength compares the instrument against its peer constituents; market regime reads the broad index trend; macro risk is derived from live proxy ETFs. The three backdrop factors (cross_market, macro_risk, market_regime) read the same risk-on/off tape, so the engine **de-duplicates** them via `backdrop_blend`: it blends them into one backdrop score and shrinks its deviation from neutral, so an agreeing tape counts ~once instead of three times (a neutral backdrop is unaffected, keeping label thresholds calibrated). **Valuation is profile-aware**: growth names (AI/semiconductor/PCB tags) tolerate a higher PE than value names, and a high PE is only "expensive" if growth (PEG, when `--eps-growth` is given) does not justify it; supplying `--revenue-growth/--gross-margin/--net-margin/--roe` adds a **business-quality** sub-score that can lift an otherwise-expensive multiple to "fair". **Position sizing is risk-based**: the stop is the tighter of the technical invalidation and an ATR volatility stop, and the suggested size spends `--risk-budget-pct` of the account over that stop distance — so a wider (more volatile) stop yields a smaller position and every trade risks roughly the same amount. The trader plan reports the concrete stop price and suggested size. Components without a data feed (cross_market without `--cross`, and any skipped fetch) score a neutral 50 and are flagged in `source_refs`. OpenD must be running for `analyze`.
 
 By default `analyze` appends the recommendation to `data/journal/recommendations.jsonl` (the input for `review`). Pass `--no-journal` to skip, or `--journal path` to use a different file.
 
@@ -48,6 +49,72 @@ How it works:
 3. Appends each outcome to `data/journal/reviews.jsonl`, including `dominant_failure` and `attribution_reason`. Failure attribution is evidence-based: a losing call is blamed on the component that gave the lowest score (the strongest warning that was overridden) at recommendation time.
 4. Suggests weight changes from recurring failure factors.
 5. With `--apply`, writes the new weights to `data/models/signal_weights.json`. The change is **reversible** (previous file saved to `signal_weights.json.bak`) and **explainable** (appended to `data/models/weight_history.jsonl` with old/new values and a reason). Without `--apply`, nothing is written back.
+
+## Backtest (offline win rate / expectancy / component edge)
+
+Turn the review history into measured accuracy instead of an assumption. Reads the journals only — no OpenD (run `review` first so `reviews.jsonl` has outcomes):
+
+```bash
+python3 -m tools.stock_skills.cli backtest \
+  --recommendations data/journal/recommendations.jsonl \
+  --reviews data/journal/reviews.jsonl \
+  --output /tmp/backtest.json
+```
+
+The report has two parts:
+
+1. `summary`: `win_rate`, `wins`/`losses`, `invalidated`, `avg_return_pct`, `avg_win_pct`/`avg_loss_pct`, `payoff_ratio`, `expectancy_pct`, average `MFE`/`MAE`, and the same split `by_label` and `by_code`.
+2. `component_edge`: for each of the eight factors, the win rate when that factor was bullish (score ≥55) vs bearish (≤45), and the `edge` (bullish minus bearish win rate). A positive edge is evidence the factor's weight is earned; a persistently negative edge flags a factor that is hurting more than helping and is a candidate for down-weighting (manually, or via `review --apply`).
+
+This closes the loop the critique called out: trend/factor "accuracy" is now something you can measure on your own call history rather than take on faith.
+
+## Analyze without OpenD (offline, from pre-fetched JSON)
+
+When this process cannot reach OpenD (e.g. a sandbox), fetch on a machine that *can*
+reach OpenD (the host), redirect the futuapi quote scripts' JSON into the mounted
+workspace, then score it here — no OpenD, no network:
+
+```bash
+# On the host (OpenD running & logged in):
+S=~/.codex/skills/futuapi/scripts/quote        # or wherever the futuapi skill lives
+mkdir -p data/live
+python3 $S/get_snapshot.py     US.SOXL --json            > data/live/SOXL.snap.json
+python3 $S/get_kline.py        US.SOXL --ktype 1d --num 60 --json > data/live/SOXL.kline.json
+python3 $S/get_capital_flow.py US.SOXL --json            > data/live/SOXL.cap.json   # optional
+
+# Anywhere (no OpenD needed):
+python3 -m tools.stock_skills.cli analyze-offline --code US.SOXL \
+  --snapshot data/live/SOXL.snap.json --kline data/live/SOXL.kline.json \
+  --capital data/live/SOXL.cap.json --output /tmp/soxl.json
+```
+
+`analyze-offline` scores trend (with the MA20/MA50 regime when ≥~20 bars are supplied),
+capital flow, and position sizing fully; fundamentals are scored if passed via flags
+(`--pe-ttm`, `--eps-growth`, `--revenue-growth`, …). The backdrop components
+(sector/market/macro/cross) have no offline feed, so they score a neutral 50 and are
+flagged in `source_refs`. A script error payload (e.g. "无法连接 OpenD") is surfaced as an
+error rather than silently parsed.
+
+## Backfill the journals from existing 复盘 notes
+
+To give `backtest` data immediately — without waiting to accumulate live calls — import
+the repo's hand-written review notes:
+
+```bash
+python3 -m tools.stock_skills.import_reviews            # writes data/journal/*.jsonl
+python3 -m tools.stock_skills.import_reviews --dry-run  # preview, write nothing
+python3 -m tools.stock_skills.cli backtest              # immediately usable
+```
+
+It parses each per-code note (`xiaopeng/`, `google/`, `600584/`, `002463/`, `002625/`,
+`soxl-soxs/`, `circle/`, `MRVL/`) into a recommendation (code, date, entry price, a
+keyword-heuristic label) and — because each code has several dated notes — **synthesises
+review outcomes offline** by treating a later note's price as the realised future price
+of an earlier call. So a win rate appears with no OpenD. Caveats are written into each
+record's `source_refs`: entry prices and labels are best-effort parses, invalidation is
+off by default (`--parse-invalidation` to enable), and self-review uses close-only
+synthetic bars. Re-run the live `review` (with OpenD) for precise OHLC outcomes. Writes
+are deduplicated by code+timestamp, so importing is idempotent.
 
 ## Dry Run (offline fixture)
 

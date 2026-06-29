@@ -57,6 +57,12 @@ def analyze_capital(capital: CapitalSnapshot | None) -> CapitalAnalysis:
         score -= 4
         notes.append("Outflow accelerated into the close.")
 
+    # Flag when the by-size net flow came from the full-day distribution fallback rather than
+    # the intraday series — the intraday feed had frozen, so this is the corrected reading and
+    # no intraday-momentum signal is available.
+    if capital.source == "distribution":
+        notes.append("Full-day capital distribution used (intraday feed was stale/missing).")
+
     return CapitalAnalysis(
         score=round(max(0.0, min(100.0, score)), 2),
         stance=stance,

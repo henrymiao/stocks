@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from .backtest import run_backtest
 from .capital import analyze_capital
 from .config import load_watchlist, load_weights, save_weights
-from .engine import build_recommendation
+from .engine import build_recommendation, is_inverse_instrument
 from .fundamental import analyze_fundamental, infer_profile
 from .journal import append_record, read_records
 from .macro import analyze_cross_market, analyze_macro_from_proxies, analyze_macro_risk
@@ -133,6 +134,7 @@ def _recommend(
     risk_budget_pct: float = 1.0,
     atr_multiple: float = 2.0,
     cost_basis: float | None = None,
+    inverse: bool = False,
 ) -> Recommendation:
     """Run every analyzer over `state`. Missing components score a neutral 50 and are flagged in source_refs."""
     trend = analyze_trend(state.snapshot, state.daily_bars)
@@ -170,6 +172,8 @@ def _recommend(
         refs.append("fundamental: neutral default (no valuation data)")
     if atr is None:
         refs.append("position_fit: neutral (no ATR; need >=2 daily bars)")
+    if inverse:
+        refs.append("inverse-etf: backdrop (market/cross/macro) scores inverted")
 
     return build_recommendation(
         state=state,
@@ -189,6 +193,7 @@ def _recommend(
         position_stop_price=position.stop_price,
         position_size_pct=position.suggested_size_pct,
         position_stance=position.stance,
+        inverse=inverse,
     )
 
 
@@ -265,29 +270,52 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     fundamentals: FundamentalSnapshot | None = None
     profile = args.profile or infer_profile(tags)
     if not args.no_fundamental:
+        # Business-quality inputs: hand-typed --flags win; any left unset are auto-filled
+        # from the latest income statement so analyze no longer needs them by hand.
+        eps_growth, revenue_growth = args.eps_growth, args.revenue_growth
+        gross_margin, net_margin = args.gross_margin, args.net_margin
+        financials = None
+        if not args.no_financials and any(
+            value is None for value in (eps_growth, revenue_growth, gross_margin, net_margin)
+        ):
+            financials = fetcher.get_financials(args.code)
+        if financials:
+            eps_growth = eps_growth if eps_growth is not None else financials.eps_growth
+            revenue_growth = revenue_growth if revenue_growth is not None else financials.revenue_growth
+            gross_margin = gross_margin if gross_margin is not None else financials.gross_margin
+            net_margin = net_margin if net_margin is not None else financials.net_margin
+
         fundamentals = fetcher.get_fundamentals(
             args.code,
-            eps_growth=args.eps_growth,
-            revenue_growth=args.revenue_growth,
-            gross_margin=args.gross_margin,
-            net_margin=args.net_margin,
+            eps_growth=eps_growth,
+            revenue_growth=revenue_growth,
+            gross_margin=gross_margin,
+            net_margin=net_margin,
             roe=args.roe,
         )
         if fundamentals:
-            peg_note = f", eps_growth={args.eps_growth}%" if args.eps_growth is not None else ""
+            # ROE is absent from the income statement, but trailing ROE == PB / PE (E/BV),
+            # so derive it from the multiples we already have when the user didn't pass one.
+            if fundamentals.roe is None and fundamentals.pb and fundamentals.pe_ttm:
+                fundamentals = replace(fundamentals, roe=round(fundamentals.pb / fundamentals.pe_ttm * 100, 1))
+            peg_note = f", eps_growth={eps_growth}%" if eps_growth is not None else ""
             quality_inputs = [
                 f"{name}={value}"
                 for name, value in (
-                    ("rev_growth", args.revenue_growth),
-                    ("gross_margin", args.gross_margin),
-                    ("net_margin", args.net_margin),
-                    ("roe", args.roe),
+                    ("rev_growth", revenue_growth),
+                    ("gross_margin", gross_margin),
+                    ("net_margin", net_margin),
+                    ("roe", fundamentals.roe),
                 )
                 if value is not None
             ]
             quality_note = (", quality:" + ",".join(quality_inputs)) if quality_inputs else ""
-            refs.append(f"fundamental:profile={profile},pe_ttm={fundamentals.pe_ttm}{peg_note}{quality_note}")
+            origin = f"auto@{financials.period}" if financials else "manual"
+            refs.append(f"fundamental:profile={profile},pe_ttm={fundamentals.pe_ttm}{peg_note}{quality_note}({origin})")
+            if financials and financials.revenue_breakdown:
+                refs.append("revenue_breakdown:" + ",".join(f"{name}={pct:g}%" for name, pct in financials.revenue_breakdown))
 
+    inverse = args.inverse if args.inverse is not None else is_inverse_instrument(state.snapshot.name, tags)
     weights = load_weights(args.weights) if args.weights else DEFAULT_WEIGHTS
     recommendation = _recommend(
         state=state,
@@ -303,6 +331,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         risk_budget_pct=args.risk_budget_pct,
         atr_multiple=args.atr_multiple,
         cost_basis=args.cost_basis,
+        inverse=inverse,
     )
     _write(args.output, recommendation)
     if not args.no_journal:
@@ -391,6 +420,7 @@ def _cmd_analyze_offline(args: argparse.Namespace) -> int:
     if fundamentals is not None:
         refs.append(f"offline:fundamental(profile={profile},pe_ttm={fundamentals.pe_ttm})")
 
+    inverse = args.inverse if args.inverse is not None else is_inverse_instrument(state.snapshot.name, tags)
     weights = load_weights(args.weights) if args.weights else DEFAULT_WEIGHTS
     recommendation = _recommend(
         state=state,
@@ -406,6 +436,7 @@ def _cmd_analyze_offline(args: argparse.Namespace) -> int:
         risk_budget_pct=args.risk_budget_pct,
         atr_multiple=args.atr_multiple,
         cost_basis=args.cost_basis,
+        inverse=inverse,
     )
     _write(args.output, recommendation)
     if not args.no_journal:
@@ -461,6 +492,7 @@ def main(argv: list[str] | None = None) -> int:
     analyze.add_argument("--no-macro", action="store_true", help="Skip the macro-proxy fetch (scores neutral)")
     analyze.add_argument("--macro-json", default=None, help='Hand-typed macro override, e.g. \'{"fed_bias":"hike"}\' (bypasses proxy fetch)')
     analyze.add_argument("--no-fundamental", action="store_true", help="Skip the fundamental fetch (scores neutral)")
+    analyze.add_argument("--no-financials", action="store_true", help="Skip auto-fetching financial statements (growth/margins/ROE); valuation multiples only")
     analyze.add_argument("--eps-growth", type=float, default=None, help="YoY EPS growth %% for PEG (e.g. 40 = +40%%); enables PEG scoring")
     analyze.add_argument("--revenue-growth", type=float, default=None, help="YoY revenue growth %% for the business-quality sub-score")
     analyze.add_argument("--gross-margin", type=float, default=None, help="Gross margin %% for the business-quality sub-score")
@@ -471,6 +503,7 @@ def main(argv: list[str] | None = None) -> int:
     analyze.add_argument("--risk-budget-pct", type=float, default=1.0, help="Account %% to risk per trade for position sizing (default: 1.0)")
     analyze.add_argument("--atr-multiple", type=float, default=2.0, help="ATR multiple for the volatility stop (default: 2.0)")
     analyze.add_argument("--cost-basis", type=float, default=None, help="Existing cost basis, to report open P&L in the plan")
+    analyze.add_argument("--inverse", action=argparse.BooleanOptionalAction, default=None, help="Treat as an inverse/short ETF (invert backdrop scores); default auto-detected from name/tags")
 
     review = subparsers.add_parser("review", help="Review past recommendations against later price action and suggest weight changes")
     review.add_argument("--window", choices=sorted(REVIEW_WINDOW_DAYS), default="3d", help="Review horizon in trading days (default: 3d)")
@@ -500,6 +533,7 @@ def main(argv: list[str] | None = None) -> int:
     offline.add_argument("--risk-budget-pct", type=float, default=1.0, help="Account %% to risk per trade (default: 1.0)")
     offline.add_argument("--atr-multiple", type=float, default=2.0, help="ATR multiple for the volatility stop (default: 2.0)")
     offline.add_argument("--cost-basis", type=float, default=None, help="Existing cost basis, to report open P&L")
+    offline.add_argument("--inverse", action=argparse.BooleanOptionalAction, default=None, help="Treat as an inverse/short ETF (invert backdrop scores); default auto-detected from name/tags")
     offline.add_argument("--last-trim-price", type=float, default=None, help="Prior partial-trim price for position context")
     offline.add_argument("--weights", default=None, help="Path to a signal_weights.json; defaults to built-in weights")
     offline.add_argument("--journal", default=DEFAULT_RECOMMENDATIONS, help=f"Recommendation journal path (default: {DEFAULT_RECOMMENDATIONS})")

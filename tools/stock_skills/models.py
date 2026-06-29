@@ -40,6 +40,10 @@ class CapitalSnapshot:
     # Intraday momentum derived from the same-day flow series, used to denoise a single reading:
     # "accelerating-in" / "accelerating-out" / "flat" / None (unknown).
     intraday_trend: str | None = None
+    # Where the by-size net flow came from: "intraday" (live cumulative flow series) or
+    # "distribution" (full-day capital distribution, used as a fallback when the intraday
+    # feed froze mid-session). Distribution carries no time series, so intraday_trend is None.
+    source: str = "intraday"
 
 
 @dataclass(frozen=True)
@@ -135,6 +139,23 @@ class FundamentalSnapshot:
     gross_margin: float | None = None    # gross margin, percent
     net_margin: float | None = None      # net margin, percent
     roe: float | None = None             # return on equity, percent
+
+
+@dataclass(frozen=True)
+class FinancialsSnapshot:
+    """Quality metrics distilled from the latest income statement + revenue breakdown.
+
+    Used to auto-fill the business-quality inputs of FundamentalSnapshot so analyze no
+    longer needs hand-typed --revenue-growth/--gross-margin/--net-margin flags. All
+    margins/growth are percent; growth is YoY for the latest reported period.
+    """
+    code: str
+    period: str | None  # e.g. "2026/Q1"
+    revenue_growth: float | None = None
+    eps_growth: float | None = None
+    gross_margin: float | None = None
+    net_margin: float | None = None
+    revenue_breakdown: list[tuple[str, float]] = field(default_factory=list)  # (segment, percent)
 
 
 @dataclass(frozen=True)

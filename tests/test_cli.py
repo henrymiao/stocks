@@ -62,6 +62,9 @@ class FakeFetcher:
             net_margin=net_margin, roe=roe,
         )
 
+    def get_financials(self, code):
+        return None  # no statement feed in the fake; analyze falls back to valuation-only
+
 
 class CliTests(unittest.TestCase):
     def test_dry_run_replays_fixture(self):

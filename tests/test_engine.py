@@ -1,6 +1,11 @@
 import unittest
 
-from tools.stock_skills.engine import backdrop_blend, build_recommendation, classify_total_score
+from tools.stock_skills.engine import (
+    backdrop_blend,
+    build_recommendation,
+    classify_total_score,
+    is_inverse_instrument,
+)
 from tools.stock_skills.models import (
     CapitalAnalysis,
     ComponentScores,
@@ -106,6 +111,52 @@ class EngineTests(unittest.TestCase):
         self.assertIn("invalidation", recommendation.trader_plan)
         self.assertEqual(recommendation.invalidation_level, 142.81)
         self.assertIsInstance(recommendation.component_scores, ComponentScores)
+
+
+    def test_is_inverse_instrument_detects_name_and_tags(self):
+        self.assertTrue(is_inverse_instrument("Direxion Daily Semiconductor Bear 3x Shares ETF"))
+        self.assertTrue(is_inverse_instrument("ProShares UltraShort QQQ"))
+        self.assertTrue(is_inverse_instrument("Anything", tags=["inverse"]))
+        self.assertFalse(is_inverse_instrument("Direxion Daily Semiconductor Bull 3x Shares ETF"))
+        self.assertFalse(is_inverse_instrument("NVIDIA", tags=["semiconductor"]))
+
+    def test_inverse_reflects_backdrop_scores_only(self):
+        state = InstrumentState(
+            snapshot=MarketSnapshot("US.SOXS", "Direxion Daily Semiconductor Bear 3x Shares ETF", 4.0, 4.1, 4.2, 3.9, 4.05, 1_000, 4_000.0, "2026-06-23T16:00:00-04:00"),
+            daily_bars=[
+                KLineBar("2026-06-22", 4.2, 4.3, 3.9, 4.05, 1_000, 4_050.0),
+                KLineBar("2026-06-23", 4.1, 4.2, 3.9, 4.0, 1_100, 4_400.0),
+            ],
+            intraday_bars=[],
+        )
+        trend = TrendAnalysis(40, "downtrend", [3.8], [4.2], 3.8, [])
+        capital = CapitalAnalysis(45, "contradicts", [])
+        macro = MacroAnalysis(90, "risk-on", ["VIX falling."])
+        cross = CrossMarketAnalysis(70, "risk-on", ["QQQ green."])
+        weights = dict(BACKDROP_WEIGHTS)
+
+        common = dict(
+            state=state, trend=trend, capital=capital, macro=macro, cross_market=cross,
+            sector_score=50, position_fit_score=60, weights=weights, source_refs=["x"],
+            market_score=60.0,
+        )
+        rec_long = build_recommendation(**common, inverse=False)
+        rec_inv = build_recommendation(**common, inverse=True)
+
+        # Long: backdrop scores pass through unchanged.
+        self.assertEqual(rec_long.component_scores.macro_risk, 90)
+        self.assertEqual(rec_long.component_scores.cross_market, 70)
+        self.assertEqual(rec_long.component_scores.market_regime, 60)
+        # Inverse: the three backdrop scores are reflected around 50.
+        self.assertEqual(rec_inv.component_scores.macro_risk, 10)
+        self.assertEqual(rec_inv.component_scores.cross_market, 30)
+        self.assertEqual(rec_inv.component_scores.market_regime, 40)
+        # The instrument's own trend/capital are untouched by inversion.
+        self.assertEqual(rec_inv.component_scores.trend, rec_long.component_scores.trend)
+        self.assertEqual(rec_inv.component_scores.capital_flow, rec_long.component_scores.capital_flow)
+        # A risk-on backdrop should now count AGAINST the inverse ETF.
+        self.assertLess(rec_inv.total_score, rec_long.total_score)
+        self.assertIn("inverse instrument", rec_inv.analyst_hypothesis)
 
 
 if __name__ == "__main__":

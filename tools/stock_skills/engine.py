@@ -11,6 +11,23 @@ from .models import (
 )
 
 
+# Inverse / short ETFs (e.g. SOXS, SQQQ, SH) move OPPOSITE to the broad tape, so the
+# backdrop factors — which read a long-biased risk-on/off signal — point the wrong way
+# for them: a risk-on tape is bearish for an inverse semiconductor ETF, not bullish.
+# When an instrument is inverse we reflect the three backdrop scores around 50, leaving
+# the instrument's own trend/capital/position scores (computed from its own price/flow)
+# untouched. Detection is by name marker or an explicit "inverse" tag/flag.
+_INVERSE_NAME_MARKERS = ("bear", "inverse", "ultrashort", "-1x", "-2x", "-3x")
+_INVERSE_TAGS = {"inverse", "short", "bear"}
+
+
+def is_inverse_instrument(name: str | None, tags: list[str] | None = None) -> bool:
+    lowered = (name or "").lower()
+    if any(marker in lowered for marker in _INVERSE_NAME_MARKERS):
+        return True
+    return any(str(tag).lower() in _INVERSE_TAGS for tag in (tags or []))
+
+
 def classify_total_score(total_score: float, price_location: str) -> str:
     if total_score >= 80:
         return "trim-on-strength" if price_location == "near_resistance" else "strong-watch"
@@ -96,15 +113,19 @@ def build_recommendation(
     position_stop_price: float | None = None,
     position_size_pct: float | None = None,
     position_stance: str = "unknown",
+    inverse: bool = False,
 ) -> Recommendation:
+    # An inverse instrument moves opposite the broad tape, so reflect the three backdrop
+    # scores around 50; its own trend/capital/position scores are left as-is.
+    backdrop = (lambda s: round(100.0 - s, 4)) if inverse else (lambda s: s)
     component_scores = ComponentScores(
         trend=trend.score,
         capital_flow=capital.score,
         sector=sector_score,
-        cross_market=cross_market.score,
-        macro_risk=macro.score,
+        cross_market=backdrop(cross_market.score),
+        macro_risk=backdrop(macro.score),
         position_fit=position_fit_score,
-        market_regime=market_score,
+        market_regime=backdrop(market_score),
         fundamental=fundamental_score,
     )
     total_score = _weighted_total(component_scores, weights)
@@ -126,11 +147,15 @@ def build_recommendation(
         else:
             sizing_text += f" ({position_stance})."
 
+    inverse_note = (
+        " Note: inverse instrument — backdrop scores are reflected, so a risk-on tape counts against it."
+        if inverse else ""
+    )
     analyst_hypothesis = (
         f"investment hypothesis: {state.snapshot.name} remains worth tracking if sector demand and earnings logic "
         f"continue to support the trade. Trend status is {trend.status}, capital stance is {capital.stance}, "
         f"sector stance is {sector_stance}, valuation is {fundamental_stance}, market regime is {market_regime}, "
-        f"macro regime is {macro.regime}, and cross-market regime is {cross_market.regime}."
+        f"macro regime is {macro.regime}, and cross-market regime is {cross_market.regime}.{inverse_note}"
     )
     trader_plan = (
         f"trader plan: current price {state.snapshot.last_price}. Support levels: {support_text}. "

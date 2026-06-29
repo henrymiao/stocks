@@ -4,12 +4,49 @@ import json
 import os
 import subprocess
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
-from .models import CapitalSnapshot, FundamentalSnapshot, InstrumentState, KLineBar, MarketSnapshot
+from .models import CapitalSnapshot, FinancialsSnapshot, FundamentalSnapshot, InstrumentState, KLineBar, MarketSnapshot
+
+# Income-statement field ids exposed by futuapi's get_financials_statements.py.
+_FIELD_TOTAL_REVENUE = 5001
+_FIELD_GROSS_PROFIT = 5010
+_FIELD_NET_INCOME_PARENT = 5051
+_FIELD_BASIC_EPS = 5054
 
 Runner = Callable[[list[str]], str]
+
+# A regular session's INTRADAY capital-flow series should run right up to the close. If the
+# last point sits more than this far before the close on a session that has already ended, the
+# feed froze mid-session and its cumulative reading is only a partial day — fall back to the
+# full-day capital distribution instead. The observed freeze was hours wide, so the margin is
+# generous enough never to trip on a feed that merely ends a minute or two early.
+_STALE_INTRADAY_GAP = timedelta(minutes=30)
+
+
+def _default_skill_dir() -> str:
+    """Default futuapi skill dir: Claude Code's install location.
+
+    Overridable via the ``skill_dir`` argument or the ``FUTUAPI_SKILL_DIR`` env var (both
+    handled by ``FutuFetcher.__init__``). Uses ``Path.home()`` so it is not tied to a username.
+    """
+    return str(Path.home() / ".claude" / "skills" / "futuapi")
+
+
+def _market_close_hour(code: str) -> int:
+    """Regular-session close hour in the instrument's local market timezone.
+
+    US closes at 16:00 ET; A-shares close at 15:00 CST. HK truly closes at 16:00, but 15:00 is
+    only used here as a *floor* for the staleness check (a feed running past it is never flagged),
+    so the simpler split is safe.
+    """
+    return 16 if code.startswith("US.") else 15
+
+
+def _market_tz(code: str) -> ZoneInfo:
+    return ZoneInfo("America/New_York") if code.startswith("US.") else ZoneInfo("Asia/Shanghai")
 
 # Inline snippet to pull valuation columns the packaged get_snapshot.py does not expose.
 _FUNDAMENTAL_SNIPPET = (
@@ -65,7 +102,8 @@ class FutuFetcher:
         self.python_bin = python_bin or os.environ.get("FUTU_PYTHON_BIN", "python3")
         self.skill_dir = Path(
             skill_dir
-            or os.environ.get("FUTUAPI_SKILL_DIR", "/Users/allglitter/.codex/skills/futuapi")
+            or os.environ.get("FUTUAPI_SKILL_DIR")
+            or _default_skill_dir()
         )
         self.runner = runner
 
@@ -102,33 +140,57 @@ class FutuFetcher:
         )
 
     def get_snapshots(self, codes: list[str]) -> list[MarketSnapshot]:
-        """Batch snapshot. Futu accepts up to 400 codes per call; we chunk to stay safe."""
+        """Batch snapshot. Futu accepts up to 400 codes per call; we chunk to stay safe.
+
+        Tolerant of partial failures: Futu's get_market_snapshot rejects the *whole*
+        batch if any single code lacks a market-data entitlement (e.g. CC.* crypto
+        without a crypto quote card) or is unknown. When a batched call fails we retry
+        the chunk code-by-code and keep whatever succeeds, so one bad code no longer
+        sinks the entire backdrop/sector fetch — the dropped components just fall back
+        to their neutral score downstream. Callers needing a hard guarantee for a
+        single instrument use get_snapshot() (singular), which still raises.
+        """
         snapshots: list[MarketSnapshot] = []
         for start in range(0, len(codes), 400):
             chunk = codes[start : start + 400]
-            if not chunk:
-                continue
-            command = [self.python_bin, self._script("quote", "get_snapshot.py"), *chunk, "--json"]
-            payload = self._run_json(command)
-            for row in payload.get("data", []):
-                try:
-                    snapshots.append(
-                        MarketSnapshot(
-                            code=row["code"],
-                            name=row.get("name", row["code"]),
-                            last_price=float(row["last_price"]),
-                            open=float(row["open"]),
-                            high=float(row["high"]),
-                            low=float(row["low"]),
-                            prev_close=float(row["prev_close"]),
-                            volume=int(row["volume"]),
-                            turnover=float(row["turnover"]),
-                            timestamp=_now_iso(),
-                        )
-                    )
-                except (KeyError, ValueError, TypeError):
-                    continue
+            if chunk:
+                snapshots.extend(self._snapshots_for_chunk(chunk))
         return snapshots
+
+    def _snapshots_for_chunk(self, chunk: list[str]) -> list[MarketSnapshot]:
+        command = [self.python_bin, self._script("quote", "get_snapshot.py"), *chunk, "--json"]
+        try:
+            payload = self._run_json(command)
+        except (RuntimeError, subprocess.CalledProcessError):
+            # The batch was rejected because at least one code is unentitled/unknown.
+            # A single-code chunk that fails is simply dropped; a multi-code chunk is
+            # retried per code so the good ones still come back.
+            if len(chunk) == 1:
+                return []
+            salvaged: list[MarketSnapshot] = []
+            for code in chunk:
+                salvaged.extend(self._snapshots_for_chunk([code]))
+            return salvaged
+        parsed = (self._row_to_snapshot(row) for row in payload.get("data", []))
+        return [snap for snap in parsed if snap is not None]
+
+    @staticmethod
+    def _row_to_snapshot(row: dict) -> MarketSnapshot | None:
+        try:
+            return MarketSnapshot(
+                code=row["code"],
+                name=row.get("name", row["code"]),
+                last_price=float(row["last_price"]),
+                open=float(row["open"]),
+                high=float(row["high"]),
+                low=float(row["low"]),
+                prev_close=float(row["prev_close"]),
+                volume=int(row["volume"]),
+                turnover=float(row["turnover"]),
+                timestamp=_now_iso(),
+            )
+        except (KeyError, ValueError, TypeError):
+            return None
 
     def get_owner_plates(self, code: str) -> list[dict]:
         command = [self.python_bin, self._script("quote", "get_owner_plate.py"), code, "--json"]
@@ -237,21 +299,47 @@ class FutuFetcher:
         return bars
 
     def get_capital(self, code: str) -> CapitalSnapshot | None:
+        """By-size net capital flow, robust to a frozen intraday feed.
+
+        The INTRADAY capital-flow stream is normally the right source: its last point is the
+        full-day cumulative total and the series lets us read intraday momentum. But that
+        stream can freeze mid-session and keep returning a partial-day reading long after the
+        close (e.g. stuck at 11:09 when queried at 23:07), which flips the by-size net flow to
+        the wrong sign. When the feed looks stale — or is missing — we fall back to the
+        full-day capital distribution, which is authoritative for the by-size totals.
+        """
         command = [self.python_bin, self._script("quote", "get_capital_flow.py"), code, "--json"]
         payload = self._run_json(command)
         rows = payload.get("data", [])
-        if not rows:
-            return None
 
+        if rows and not self._intraday_feed_is_stale(code, rows):
+            return self._capital_from_intraday(rows)
+
+        # No trustworthy intraday reading (empty, or frozen mid-session on a finished day):
+        # the full-day distribution gives the correct by-size net flow.
+        distribution = self.get_capital_distribution(code)
+        if distribution is not None:
+            return distribution
+
+        # Distribution unavailable too (e.g. instrument type unsupported) — use whatever
+        # intraday we have rather than dropping the factor entirely; otherwise None.
+        if rows:
+            return self._capital_from_intraday(rows)
+        return None
+
+    @staticmethod
+    def _capital_from_intraday(rows: list[dict]) -> CapitalSnapshot:
+        """Build a snapshot from the INTRADAY cumulative flow series.
+
+        The last point is the full-day total; comparing the second half of the series against
+        the first half tells us whether money accelerated in or out, which denoises the read.
+        """
         def _flow(row: dict, key: str) -> float:
             value = row.get(key, 0)
             if value in (None, "N/A"):
                 return 0.0
             return float(value)
 
-        # Futu returns the same-day intraday cumulative series. The last point is the
-        # full-day total; comparing the second half against the first half tells us
-        # whether money accelerated in or out, which denoises a single reading.
         last = rows[-1]
         intraday_trend: str | None = None
         if len(rows) >= 4:
@@ -273,6 +361,84 @@ class FutuFetcher:
             small_inflow=_flow(last, "sml_in_flow"),
             timestamp=str(last.get("last_valid_time") or last.get("capital_flow_item_time") or _now_iso()),
             intraday_trend=intraday_trend,
+            source="intraday",
+        )
+
+    @staticmethod
+    def _intraday_feed_is_stale(code: str, rows: list[dict], now: datetime | None = None) -> bool:
+        """True when the intraday capital-flow feed froze before the close of a finished session.
+
+        Heuristic: take the last point's timestamp; if the session for that day has already
+        ended (now is at/after the market close) yet the last point sits well before that close,
+        the feed stopped updating mid-session and its cumulative total is only a partial day.
+        Timestamps that cannot be parsed (or a feed queried while the session is still live) are
+        treated as not stale, so the normal intraday path is preserved.
+        """
+        last = rows[-1]
+        # Use the bar's market time (capital_flow_item_time). last_valid_time is only the fetch
+        # time — it is identical on every row and equals "now", so it can never reveal a feed
+        # that stopped early.
+        raw = last.get("capital_flow_item_time") or last.get("last_valid_time")
+        if not raw:
+            return False  # no timestamp to judge against → trust the feed
+        try:
+            last_dt = datetime.strptime(str(raw)[:19], "%Y-%m-%d %H:%M:%S")
+        except (TypeError, ValueError):
+            return False  # unparseable timestamp → trust the feed
+        tz = _market_tz(code)
+        last_dt = last_dt.replace(tzinfo=tz)
+        close_dt = last_dt.replace(hour=_market_close_hour(code), minute=0, second=0, microsecond=0)
+        now_market = now.astimezone(tz) if now is not None else datetime.now(tz)
+        session_finished = now_market >= close_dt  # we're past that day's close → the full day should be in
+        froze_early = (close_dt - last_dt) > _STALE_INTRADAY_GAP
+        return session_finished and froze_early
+
+    def get_capital_distribution(self, code: str) -> CapitalSnapshot | None:
+        """Full-day capital distribution → by-size net flow (net = inflow − outflow per size).
+
+        Authoritative for the full session regardless of the intraday feed's health, but it
+        carries no time series, so intraday_trend is None. Tolerant of errors (e.g. the
+        instrument type is unsupported by the interface): returns None rather than raising, so
+        the capital factor simply scores neutral downstream.
+        """
+        command = [self.python_bin, self._script("quote", "get_capital_distribution.py"), code, "--json"]
+        try:
+            payload = self._run_json(command)
+        except (RuntimeError, subprocess.CalledProcessError):
+            return None
+
+        def _val(key: str) -> float | None:
+            value = payload.get(key)
+            if value in (None, "N/A", ""):
+                return None
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return None
+
+        nets: dict[str, float] = {}
+        for size in ("super", "big", "mid", "small"):
+            inflow = _val(f"capital_in_{size}")
+            outflow = _val(f"capital_out_{size}")
+            if inflow is None and outflow is None:
+                continue
+            nets[size] = (inflow or 0.0) - (outflow or 0.0)
+        if not nets:
+            return None  # empty payload (e.g. {"data": {}}) → no usable distribution
+
+        super_net = nets.get("super", 0.0)
+        big_net = nets.get("big", 0.0)
+        mid_net = nets.get("mid", 0.0)
+        small_net = nets.get("small", 0.0)
+        return CapitalSnapshot(
+            net_inflow=super_net + big_net + mid_net + small_net,
+            super_inflow=super_net,
+            big_inflow=big_net,
+            mid_inflow=mid_net,
+            small_inflow=small_net,
+            timestamp=str(payload.get("update_time") or _now_iso()),
+            intraday_trend=None,
+            source="distribution",
         )
 
     def get_fundamentals(
@@ -292,7 +458,9 @@ class FutuFetcher:
         `revenue_growth`, `gross_margin`, `net_margin`, `roe`, all YoY/percent) are not
         carried by the market snapshot, so they are supplied by the caller (CLI flags or
         a future financial-statement fetch) and passed straight through. Any left as
-        None simply do not contribute to the quality sub-score.
+        None simply do not contribute to the quality sub-score. In practice analyze
+        auto-fills them from get_financials() (latest income statement) unless the
+        caller overrides with explicit flags.
         """
         snippet = _FUNDAMENTAL_SNIPPET.format(skill=str(self.skill_dir), code=code)
         command = [self.python_bin, "-c", snippet]
@@ -314,6 +482,75 @@ class FutuFetcher:
             net_margin=net_margin,
             roe=roe,
         )
+
+    def get_financials(self, code: str) -> FinancialsSnapshot | None:
+        """Quality metrics from the latest income statement (+ revenue breakdown).
+
+        Reads futuapi's get_financials_statements.py for the most recent reported
+        period and distills growth (revenue/EPS YoY) and profitability (gross/net
+        margin) — the business-quality inputs that the market snapshot does not carry.
+        Margins and growth are currency-independent ratios, so a CNY-reporting issue
+        priced in HKD/USD needs no FX adjustment. Returns None when the statement feed
+        is unavailable, so analyze simply falls back to valuation-only scoring.
+        """
+        try:
+            payload = self._run_json(
+                [self.python_bin, self._script("quote", "get_financials_statements.py"), code, "--json"]
+            )
+        except (RuntimeError, subprocess.CalledProcessError):
+            return None
+        reports = (payload.get("data") or {}).get("report_list") or []
+        if not reports:
+            return None
+        latest = max(reports, key=lambda r: r.get("date_time", 0))
+        items = {it.get("field_id"): it for it in latest.get("item_list", [])}
+
+        def _data(field_id: int) -> float | None:
+            item = items.get(field_id)
+            value = item.get("data") if item else None
+            return float(value) if value is not None else None
+
+        def _yoy(field_id: int) -> float | None:
+            item = items.get(field_id)
+            value = item.get("yoy") if item else None
+            return round(float(value), 1) if value is not None else None
+
+        revenue = _data(_FIELD_TOTAL_REVENUE)
+
+        def _margin(numerator: float | None) -> float | None:
+            if numerator is None or not revenue:
+                return None
+            return round(numerator / revenue * 100, 1)
+
+        return FinancialsSnapshot(
+            code=code,
+            period=latest.get("period_text"),
+            revenue_growth=_yoy(_FIELD_TOTAL_REVENUE),
+            eps_growth=_yoy(_FIELD_BASIC_EPS),
+            gross_margin=_margin(_data(_FIELD_GROSS_PROFIT)),
+            net_margin=_margin(_data(_FIELD_NET_INCOME_PARENT)),
+            revenue_breakdown=self._revenue_breakdown(code),
+        )
+
+    def _revenue_breakdown(self, code: str, top: int = 4) -> list[tuple[str, float]]:
+        """Top revenue segments as (name, percent). Best-effort: never fatal to analyze."""
+        try:
+            payload = self._run_json(
+                [self.python_bin, self._script("quote", "get_financials_revenue_breakdown.py"), code, "--json"]
+            )
+        except (RuntimeError, subprocess.CalledProcessError):
+            return []
+        groups = (payload.get("data") or {}).get("breakdown_list") or []
+        # type 1 is the by-business-segment split; fall back to whatever group exists.
+        group = next((g for g in groups if g.get("type") == 1), groups[0] if groups else None)
+        if not group:
+            return []
+        segments: list[tuple[str, float]] = []
+        for item in group.get("item_list", [])[:top]:
+            name, ratio = item.get("name"), item.get("ratio")
+            if name and ratio is not None:
+                segments.append((str(name), round(float(ratio), 1)))
+        return segments
 
     def build_state(
         self,

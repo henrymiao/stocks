@@ -41,6 +41,13 @@ class CapitalTests(unittest.TestCase):
         self.assertLess(accel_out.score, flat.score)
         self.assertTrue(any("into the close" in note for note in accel_in.notes))
 
+    def test_distribution_source_is_flagged_in_notes(self):
+        # When the reading came from the full-day distribution fallback (intraday feed was
+        # stale), the analysis should say so for traceability.
+        capital = CapitalSnapshot(900_000_000, 400_000_000, 250_000_000, 150_000_000, 100_000_000, "2026-06-18T15:00:00+08:00", source="distribution")
+        result = analyze_capital(capital)
+        self.assertTrue(any("distribution" in note for note in result.notes))
+
 
 if __name__ == "__main__":
     unittest.main()

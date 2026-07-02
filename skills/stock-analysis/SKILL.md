@@ -94,22 +94,24 @@ python3 -c "import json; p=json.load(open('/tmp/hudian-recommendation.json')); p
 ## Workflow
 
 1. Load the user's intent and relevant stock codes.
-2. For a real-instrument analysis with current data, run `analyze` (it calls `futuapi` through `futu_fetcher.py`; OpenD must be running).
-3. For code review, pipeline verification, or framework work, use `dry-run` or the unit tests — these do not require OpenD.
-4. Use `tools.stock_skills` modules to keep reasoning structured:
+2. Confirm the user's **holding horizon and leverage** before framing risk. The trader plan's tight stop (invalidation/ATR) is a short-term / leveraged construct; an unleveraged mid-term holder should be given thesis-based exits (quarterly fundamentals) plus a wide structural backstop instead. When a position mixes both, split it explicitly (mid-term core with wide stop + short-term sleeve with tight stop) rather than applying one stop to everything.
+3. For a real-instrument analysis with current data, run `analyze` (it calls `futuapi` through `futu_fetcher.py`; OpenD must be running).
+4. For code review, pipeline verification, or framework work, use `dry-run` or the unit tests — these do not require OpenD.
+5. Use `tools.stock_skills` modules to keep reasoning structured:
    - `trend.py`: breakout, failed breakout, support/resistance, invalidation, plus an MA10/20/50 multi-timeframe overlay (`trend_regime`) that demotes counter-trend breakouts and rewards trend-aligned ones.
    - `capital.py`: order-size flow confirmation/divergence (denoised — uses the full-day cumulative flow plus the intraday direction, not a single mid-session reading).
    - `sector.py`: sector strength from peer constituents (median move, breadth) and the instrument's relative strength (leading / in-line / lagging / sector-weak).
    - `market.py`: market regime from market-aware broad indices (A-share: 上证 SH.000001 / 创业板 SZ.399006; US: QQQ/SPY; HK: 恒指 HK.800000 / 恒生科技 HK.800700) → risk-on / neutral / risk-off.
    - `macro.py`: macro risk from live proxy ETFs (VIXY fear, TLT yields, UUP dollar, USO oil, GLD gold) via `analyze_macro_from_proxies`; `analyze_macro_risk` still accepts hand-typed overrides. Plus `analyze_cross_market` for the US/global tape.
    - `fundamental.py`: profile-aware valuation (growth/value/neutral) from PE-TTM/PB/EPS/dividend, with PEG when EPS growth is supplied, plus a business-quality sub-score from revenue growth / gross margin / net margin / ROE (strong quality can lift an otherwise "expensive" multiple to "fair"). Profile is inferred from watchlist tags. The quality inputs are auto-fetched: `analyze` calls `futu_fetcher.get_financials` (latest income statement → revenue/EPS YoY, gross/net margin) and derives ROE from PB/PE; the `--revenue-growth/--gross-margin/--net-margin/--eps-growth/--roe` flags override per-field, and `--no-financials` skips the statement fetch (valuation multiples only). The latest revenue breakdown (主营构成) is added to `source_refs`.
-   - `position.py`: ATR (`compute_atr`) and risk-based sizing (`analyze_position`) — stop = tighter of invalidation and ATR stop; size = risk budget ÷ stop distance.
+   - `position.py`: ATR (`compute_atr`) and risk-based sizing (`analyze_position`) — stop = tighter of invalidation and ATR stop; size = risk budget ÷ stop distance. **Known artifact**: when price sits almost on the stop (tiny stop distance), the formula suggests an absurdly large size (e.g. ~90% of account on a name 1% above its invalidation). Treat any suggested size above ~25% as "price is hugging the stop — no edge, tiny margin for error", not as a real allocation; say so explicitly when presenting.
    - `engine.py`: total score, action label, analyst hypothesis, trader plan. `backdrop_blend` de-duplicates the three correlated backdrop factors so an agreeing tape is not triple-counted.
    - `backtest.py`: offline aggregation of `reviews.jsonl` into win rate, expectancy, MFE/MAE, label/code breakdowns, and per-component predictive edge. Driven by the `backtest` command.
    - `journal.py`: JSONL recommendation records. `analyze` appends to `data/journal/recommendations.jsonl` by default (`--no-journal` to skip).
    - `review.py`: outcome review and weight suggestions, driven by the `review` command. Weight changes are advisory unless `--apply` is passed, and applied changes are backed up and logged to `weight_history.jsonl`.
    - `futu_fetcher.py`: wrapper around `futuapi` scripts. Fetches snapshot, daily K-line, capital flow, and historical K-line for review (quote-only — it must never call trade scripts).
-5. Present output as analysis with clear uncertainty and invalidation conditions. State which components fell back to the neutral default (see `source_refs`).
+6. Present output as analysis with clear uncertainty and invalidation conditions. State which components fell back to the neutral default (see `source_refs`).
+7. **Always state the data timestamp and session phase** (pre-open / intraday / after-close) with the conclusion. Neutral-50 fallbacks are not merely cosmetic — during pre-open or a holiday the capital/sector feeds go blank and the label can flip (an instrument scored `hold` on full closing data has re-scored `trim-on-strength` pre-open on the same fundamentals). For a 复盘 of a finished day, prefer completed-session data; treat any intraday or pre-open label as provisional and re-confirm after the close.
 
 ## Action Labels
 

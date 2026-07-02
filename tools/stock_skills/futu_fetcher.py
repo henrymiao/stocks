@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from .models import CapitalSnapshot, FinancialsSnapshot, FundamentalSnapshot, InstrumentState, KLineBar, MarketSnapshot
+from .models import CapitalSnapshot, ExtendedHoursSnapshot, FinancialsSnapshot, FundamentalSnapshot, InstrumentState, KLineBar, MarketSnapshot
 
 # Income-statement field ids exposed by futuapi's get_financials_statements.py.
 _FIELD_TOTAL_REVENUE = 5001
@@ -60,6 +60,23 @@ _FUNDAMENTAL_SNIPPET = (
     "g=lambda k:(None if r is None or str(r.get(k)) in ('nan','N/A','None') else float(r.get(k)));"
     "print(json.dumps({{'data':[{{'code':{code!r},'pe_ttm':g('pe_ttm_ratio'),'pb':g('pb_ratio'),"
     "'eps':g('earning_per_share'),'dividend_ratio':g('dividend_ratio_ttm'),'market_val':g('total_market_val')}}]}}"
+    " if r is not None else {{'data':[]}}))"
+)
+
+# Pull the pre-market / after-hours columns the packaged get_snapshot.py does not expose
+# (and which get_kline does not return as bars).
+_EXTENDED_HOURS_SNIPPET = (
+    "import sys,os,json;"
+    "sys.path.insert(0, os.path.join({skill!r}, 'scripts'));"
+    "from common import create_quote_context, safe_close;"
+    "ctx=create_quote_context();"
+    "ret,data=ctx.get_market_snapshot([{code!r}]);"
+    "safe_close(ctx);"
+    "r=data.iloc[0] if ret==0 and len(data) else None;"
+    "g=lambda k:(None if r is None or str(r.get(k)) in ('nan','N/A','None') else float(r.get(k)));"
+    "print(json.dumps({{'data':[{{'code':{code!r},'prev_close':g('prev_close_price'),"
+    "'pre_price':g('pre_price'),'pre_change_rate':g('pre_change_rate'),'pre_volume':g('pre_volume'),"
+    "'after_price':g('after_price'),'after_change_rate':g('after_change_rate'),'after_volume':g('after_volume')}}]}}"
     " if r is not None else {{'data':[]}}))"
 )
 
@@ -481,6 +498,32 @@ class FutuFetcher:
             gross_margin=gross_margin,
             net_margin=net_margin,
             roe=roe,
+        )
+
+    def get_extended_hours(self, code: str) -> ExtendedHoursSnapshot | None:
+        """Pre-market and after-hours price/change for a US instrument.
+
+        Read live from the Futu market snapshot's pre_*/after_* columns via an inline
+        snippet — the packaged get_snapshot.py omits them, and get_kline returns no
+        extended-hours bars. Fields are None outside the relevant session, or for
+        markets without pre/post trading (e.g. A-shares).
+        """
+        snippet = _EXTENDED_HOURS_SNIPPET.format(skill=str(self.skill_dir), code=code)
+        command = [self.python_bin, "-c", snippet]
+        payload = self._run_json(command)
+        rows = payload.get("data", [])
+        if not rows:
+            return None
+        row = rows[0]
+        return ExtendedHoursSnapshot(
+            code=row.get("code", code),
+            prev_close=row.get("prev_close"),
+            pre_price=row.get("pre_price"),
+            pre_change_rate=row.get("pre_change_rate"),
+            pre_volume=row.get("pre_volume"),
+            after_price=row.get("after_price"),
+            after_change_rate=row.get("after_change_rate"),
+            after_volume=row.get("after_volume"),
         )
 
     def get_financials(self, code: str) -> FinancialsSnapshot | None:

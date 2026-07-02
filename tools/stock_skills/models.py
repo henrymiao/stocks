@@ -125,6 +125,23 @@ class MarketAnalysis:
 
 
 @dataclass(frozen=True)
+class ExtendedHoursSnapshot:
+    """Pre-market and after-hours price/change (US instruments).
+
+    Read from the Futu market snapshot's pre_*/after_* columns. Fields are None
+    outside the relevant session, or for markets without extended-hours trading.
+    """
+    code: str
+    prev_close: float | None          # regular-session close, the change reference
+    pre_price: float | None           # pre-market last price
+    pre_change_rate: float | None     # pre-market % vs prev close
+    pre_volume: float | None
+    after_price: float | None         # after-hours last price
+    after_change_rate: float | None   # after-hours % vs prev close
+    after_volume: float | None
+
+
+@dataclass(frozen=True)
 class FundamentalSnapshot:
     code: str
     pe_ttm: float | None

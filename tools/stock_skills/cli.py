@@ -467,6 +467,42 @@ def _cmd_backtest(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_prepost(args: argparse.Namespace) -> int:
+    """Print pre-market / after-hours price and change for one or more US codes."""
+    from .futu_fetcher import FutuFetcher
+
+    fetcher = FutuFetcher()
+    rows = []
+    for code in args.codes:
+        eh = fetcher.get_extended_hours(code)
+        if eh is None:
+            rows.append({"code": code, "error": "no snapshot"})
+            continue
+        rows.append(
+            {
+                "code": eh.code,
+                "prev_close": eh.prev_close,
+                "pre_price": eh.pre_price,
+                "pre_change_rate": eh.pre_change_rate,
+                "pre_volume": eh.pre_volume,
+                "after_price": eh.after_price,
+                "after_change_rate": eh.after_change_rate,
+                "after_volume": eh.after_volume,
+            }
+        )
+    if args.json:
+        print(json.dumps({"data": rows}, ensure_ascii=False, indent=2))
+    else:
+        for r in rows:
+            if "error" in r:
+                print(f"{r['code']:10s} {r['error']}")
+                continue
+            pre = f"pre {r['pre_price']} ({r['pre_change_rate']:+.2f}%)" if r["pre_price"] is not None else "pre —"
+            post = f"after {r['after_price']} ({r['after_change_rate']:+.2f}%)" if r["after_price"] is not None else "after —"
+            print(f"{r['code']:10s} prev_close {r['prev_close']}  |  {pre}  |  {post}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Self-evolving stock skill tools")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -545,6 +581,10 @@ def main(argv: list[str] | None = None) -> int:
     backtest.add_argument("--code", default=None, help="Only back-test this code")
     backtest.add_argument("--output", default=None, help="Optional path to also write the JSON report")
 
+    prepost = subparsers.add_parser("prepost", help="Show pre-market / after-hours price and change for US codes (via Futu OpenD)")
+    prepost.add_argument("codes", nargs="+", help="One or more codes, e.g. US.SOXL US.SMH US.NVDA")
+    prepost.add_argument("--json", action="store_true", help="Emit JSON instead of a text table")
+
     args = parser.parse_args(argv)
 
     if args.command == "dry-run":
@@ -557,6 +597,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_analyze_offline(args)
     if args.command == "backtest":
         return _cmd_backtest(args)
+    if args.command == "prepost":
+        return _cmd_prepost(args)
     return 2
 
 

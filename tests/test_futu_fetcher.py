@@ -355,6 +355,32 @@ class FutuFetcherTests(unittest.TestCase):
         self.assertEqual(fund.eps_growth, 40.0)  # passed through, not from the feed
         self.assertEqual(runner.commands[0][1], "-c")
 
+    def test_get_extended_hours_parses_pre_and_after(self):
+        # Like fundamentals, the extended-hours snippet runs via `python -c`.
+        payload = {"data": [{
+            "code": "US.SOXL", "prev_close": 266.71,
+            "pre_price": 239.5, "pre_change_rate": -10.2, "pre_volume": 1772357.0,
+            "after_price": 269.25, "after_change_rate": 0.95, "after_volume": 1329114.0,
+        }]}
+
+        class CRunner:
+            def __init__(self):
+                self.commands = []
+
+            def __call__(self, command):
+                self.commands.append(command)
+                import json as _json
+                return _json.dumps(payload)
+
+        runner = CRunner()
+        eh = _fetcher(runner).get_extended_hours("US.SOXL")
+
+        self.assertEqual(eh.pre_price, 239.5)
+        self.assertEqual(eh.pre_change_rate, -10.2)
+        self.assertEqual(eh.after_price, 269.25)
+        self.assertEqual(eh.prev_close, 266.71)
+        self.assertEqual(runner.commands[0][1], "-c")
+
 
     def test_get_financials_distills_quality_and_breakdown(self):
         runner = FakeRunner({

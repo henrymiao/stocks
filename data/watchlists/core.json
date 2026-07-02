@@ -6,6 +6,7 @@
     {"code": "US.MRVL", "name": "Marvell", "enabled": true, "tags": ["us", "ai-infrastructure", "semiconductor"]},
     {"code": "US.GOOGL", "name": "Alphabet", "enabled": true, "tags": ["us", "mega-cap", "ai"]},
     {"code": "US.CRCL", "name": "Circle", "enabled": true, "tags": ["us", "crypto-equity", "stablecoin"]},
+    {"code": "US.COIN", "name": "Coinbase", "enabled": true, "tags": ["us", "crypto-equity", "exchange"]},
     {"code": "US.SOXL", "name": "Direxion Daily Semiconductor Bull 3X", "enabled": true, "tags": ["us", "semiconductor", "leveraged"]},
     {"code": "US.SOXS", "name": "Direxion Daily Semiconductor Bear 3X", "enabled": true, "tags": ["us", "semiconductor", "hedge"]},
     {"code": "US.NVDA", "name": "NVIDIA", "enabled": true, "tags": ["us", "ai-hardware", "semiconductor"]},

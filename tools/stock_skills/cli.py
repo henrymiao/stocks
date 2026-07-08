@@ -138,7 +138,7 @@ def _recommend(
 ) -> Recommendation:
     """Run every analyzer over `state`. Missing components score a neutral 50 and are flagged in source_refs."""
     trend = analyze_trend(state.snapshot, state.daily_bars)
-    capital = analyze_capital(state.capital)
+    capital = analyze_capital(state.capital, price_change=_instrument_change(state))
     # Live proxies take precedence; hand-typed inputs are a fallback/override for offline use.
     if macro_snapshots:
         macro = analyze_macro_from_proxies(macro_snapshots)

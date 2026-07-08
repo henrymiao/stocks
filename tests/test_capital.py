@@ -41,6 +41,54 @@ class CapitalTests(unittest.TestCase):
         self.assertLess(accel_out.score, flat.score)
         self.assertTrue(any("into the close" in note for note in accel_in.notes))
 
+    def test_price_up_but_main_force_out_is_distribution(self):
+        # Retail (small) buying carries a rising tape while the main force (super+large) sells:
+        # a bearish divergence — must score below a naive "positive aggregate" read and be labelled.
+        capital = CapitalSnapshot(
+            net_inflow=30_000_000,
+            super_inflow=-40_000_000,
+            big_inflow=-20_000_000,
+            mid_inflow=10_000_000,
+            small_inflow=80_000_000,
+            timestamp="2026-07-08T11:30:00+08:00",
+        )
+        without = analyze_capital(capital)
+        result = analyze_capital(capital, price_change=0.02)
+        self.assertEqual(result.stance, "distribution")
+        self.assertLess(result.score, without.score)
+        self.assertLess(result.score, 50)
+        self.assertTrue(any("bearish divergence" in note for note in result.notes))
+
+    def test_price_up_and_main_force_in_confirms(self):
+        # Main force leads the buying on an up day — healthy confirmation, high score.
+        capital = CapitalSnapshot(
+            net_inflow=47_000_000,
+            super_inflow=20_000_000,
+            big_inflow=1_400_000,
+            mid_inflow=12_000_000,
+            small_inflow=13_600_000,
+            timestamp="2026-07-08T11:30:00+08:00",
+        )
+        result = analyze_capital(capital, price_change=0.06)
+        self.assertEqual(result.stance, "confirms")
+        self.assertGreater(result.score, 55)
+
+    def test_price_down_but_main_force_in_is_accumulation(self):
+        # Price falls while the main force absorbs — bullish divergence, scored above the
+        # direction-agnostic read.
+        capital = CapitalSnapshot(
+            net_inflow=5_000_000,
+            super_inflow=30_000_000,
+            big_inflow=5_000_000,
+            mid_inflow=-10_000_000,
+            small_inflow=-20_000_000,
+            timestamp="2026-07-08T11:30:00+08:00",
+        )
+        without = analyze_capital(capital)
+        result = analyze_capital(capital, price_change=-0.02)
+        self.assertEqual(result.stance, "accumulation")
+        self.assertGreater(result.score, without.score)
+
     def test_distribution_source_is_flagged_in_notes(self):
         # When the reading came from the full-day distribution fallback (intraday feed was
         # stale), the analysis should say so for traceability.

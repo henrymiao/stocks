@@ -19,11 +19,7 @@ This skill supports analysis and decision support only. It must not place real t
 
 ## Repository Paths
 
-Assume the workspace root is:
-
-```text
-/Users/allglitter/codes/stocks
-```
+Treat the current workspace root as the repository root. Do not assume a user-specific absolute path.
 
 Core files:
 
@@ -85,6 +81,8 @@ python3 -m tools.stock_skills.cli review --window 5d --apply
 
 `review` reads `data/journal/recommendations.jsonl` (written by `analyze`), fetches each call's later daily bars via OpenD, scores 1/3/5/10-day outcomes into `data/journal/reviews.jsonl`, then suggests signal-weight changes. Weights only change with `--apply`, and every applied change is reversible (`signal_weights.json.bak`) and explainable (`weight_history.jsonl`).
 
+Weight changes require at least 60 realised review rows. `--apply` below that threshold records no weight change and creates no backup; this prevents the system from adapting to a handful of correlated outcomes.
+
 Inspect a label:
 
 ```bash
@@ -137,6 +135,10 @@ OpenD is only needed for live Futu data collection through `futu_fetcher.py` or 
 - editing watchlists or weights.
 
 When live data is needed, prefer using the existing `futuapi` skill and scripts. Avoid claiming current prices are known unless fresh data was fetched successfully.
+
+`FutuFetcher` resolves `futuapi` in this order when `FUTUAPI_SKILL_DIR` is not set: `~/.codex/skills/futuapi`, `~/.agents/skills/futuapi`, then `~/.claude/skills/futuapi`. If none contains `scripts/quote/get_snapshot.py`, live analysis stops with an error listing every attempted location.
+
+Every new recommendation includes `data_quality`: available, missing, and stale components; session phase; evidence confidence; and whether the evidence is sufficient for a new entry. Missing data still leaves the directional component neutral for backward-compatible scoring, but it lowers evidence confidence and is never presented as observed neutrality.
 
 ## Safety
 

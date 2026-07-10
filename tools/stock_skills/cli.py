@@ -13,8 +13,15 @@ from .data_quality import assess_data_quality
 from .engine import build_recommendation, is_inverse_instrument
 from .fundamental import analyze_fundamental, infer_profile
 from .journal import append_record, read_records
-from .macro import analyze_cross_market, analyze_macro_from_proxies, analyze_macro_risk
-from .market import analyze_market
+from .macro import (
+    analyze_cross_market,
+    analyze_macro_from_proxies,
+    analyze_macro_risk,
+    has_cross_market_evidence,
+    has_macro_input_evidence,
+    has_macro_proxy_evidence,
+)
+from .market import analyze_market, has_market_evidence
 from .models import CapitalSnapshot, FundamentalSnapshot, InstrumentState, KLineBar, MarketSnapshot, Recommendation
 from .position import analyze_position, compute_atr
 from .review import evaluate_recommendation, suggest_weight_adjustments
@@ -160,13 +167,18 @@ def _recommend(
         last_trim_price=state.user_context.get("last_trim_price"),
         cost_basis=cost_basis,
     )
+    macro_available = (
+        has_macro_proxy_evidence(macro_snapshots)
+        if macro_snapshots
+        else has_macro_input_evidence(macro_inputs)
+    )
     availability = {
         "trend": len(state.daily_bars) >= 2,
         "capital_flow": state.capital is not None,
         "sector": bool(sector_changes),
-        "cross_market": bool(cross_snapshots),
-        "macro_risk": bool(macro_snapshots) or bool(macro_inputs),
-        "market_regime": bool(index_snapshots),
+        "cross_market": has_cross_market_evidence(cross_snapshots),
+        "macro_risk": macro_available,
+        "market_regime": has_market_evidence(index_snapshots or {}),
         "fundamental": fundamentals is not None and fundamentals.pe_ttm is not None,
         "position_fit": position.stop_price is not None,
     }
@@ -176,17 +188,17 @@ def _recommend(
     )
 
     refs = list(source_refs)
-    if not macro_snapshots and not macro_inputs:
+    if not availability["macro_risk"]:
         refs.append("macro: neutral default (no macro feed supplied)")
-    if not cross_snapshots:
+    if not availability["cross_market"]:
         refs.append("cross_market: neutral default (no cross-market snapshots supplied)")
-    if not sector_changes:
+    if not availability["sector"]:
         refs.append("sector: neutral default (no sector constituent data)")
-    if not index_snapshots:
+    if not availability["market_regime"]:
         refs.append("market_regime: neutral default (no index snapshots)")
-    if fundamentals is None:
+    if not availability["fundamental"]:
         refs.append("fundamental: neutral default (no valuation data)")
-    if atr is None:
+    if not availability["position_fit"]:
         refs.append("position_fit: neutral (no ATR; need >=2 daily bars)")
     if inverse:
         refs.append("inverse-etf: backdrop (market/cross/macro) scores inverted")

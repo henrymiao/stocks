@@ -3,10 +3,27 @@ from __future__ import annotations
 from .models import MarketAnalysis, MarketSnapshot
 
 
+_MARKET_WEIGHTS = {
+    "SH.000001": 14,  # SSE Composite
+    "SZ.399006": 12,  # ChiNext
+    "SZ.399001": 8,   # SZSE Component
+    "US.QQQ": 12,
+    "US.SPY": 8,
+}
+
+
 def _pct_change(snapshot: MarketSnapshot) -> float | None:
     if snapshot.prev_close <= 0:
         return None
     return (snapshot.last_price - snapshot.prev_close) / snapshot.prev_close
+
+
+def has_market_evidence(index_snapshots: dict[str, MarketSnapshot]) -> bool:
+    return any(
+        snapshot is not None and _pct_change(snapshot) is not None
+        for code in _MARKET_WEIGHTS
+        if (snapshot := index_snapshots.get(code)) is not None
+    )
 
 
 def analyze_market(index_snapshots: dict[str, MarketSnapshot]) -> MarketAnalysis:
@@ -17,18 +34,10 @@ def analyze_market(index_snapshots: dict[str, MarketSnapshot]) -> MarketAnalysis
     sets the backdrop: a single stock fighting a falling market deserves less
     confidence than the same stock in a rising one.
     """
-    weights = {
-        "SH.000001": 14,  # SSE Composite
-        "SZ.399006": 12,  # ChiNext
-        "SZ.399001": 8,   # SZSE Component
-        "US.QQQ": 12,
-        "US.SPY": 8,
-    }
-
     score = 50.0
     notes: list[str] = []
     used = 0
-    for code, weight in weights.items():
+    for code, weight in _MARKET_WEIGHTS.items():
         snapshot = index_snapshots.get(code)
         if snapshot is None:
             continue

@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from tools.stock_skills.cli import main
+from tools.stock_skills.cli import DEFAULT_WEIGHTS, _recommend, main
 from tools.stock_skills.journal import append_record, read_records
 from tools.stock_skills.models import CapitalSnapshot, FundamentalSnapshot, InstrumentState, KLineBar, MarketSnapshot
 
@@ -157,6 +157,90 @@ class CliTests(unittest.TestCase):
         refs = " ".join(payload["source_refs"])
         self.assertNotIn("cross_market: neutral default", refs)
         self.assertNotIn("cross_market", payload["data_quality"]["missing_components"])
+
+    def test_analyze_nonempty_unusable_evidence_is_missing(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--output",
+                        str(output),
+                        "--journal",
+                        str(journal),
+                        "--cross",
+                        "HK.800700",
+                        "--indices",
+                        "HK.800000",
+                        "--macro-codes",
+                        "HK.800000",
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        quality = payload["data_quality"]
+        self.assertEqual(
+            quality["missing_components"],
+            ["cross_market", "macro_risk", "market_regime"],
+        )
+        self.assertEqual(quality["confidence"], 0.625)
+        self.assertFalse(quality["entry_eligible"])
+        refs = " ".join(payload["source_refs"])
+        self.assertIn("cross_market: neutral default", refs)
+        self.assertIn("macro: neutral default", refs)
+        self.assertIn("market_regime: neutral default", refs)
+
+    def test_recommend_aligns_fallback_refs_with_effective_availability(self):
+        complete_state = FakeFetcher().build_state("SZ.002463")
+        state = InstrumentState(
+            snapshot=complete_state.snapshot,
+            daily_bars=complete_state.daily_bars[:1],
+            intraday_bars=[],
+            capital=complete_state.capital,
+        )
+        flat_cross = MarketSnapshot(
+            "US.QQQ", "US.QQQ", 100.0, 100.0, 100.0, 100.0, 100.0,
+            1, 100.0, "2026-06-18T15:00:00+08:00",
+        )
+        flat_market = MarketSnapshot(
+            "US.SPY", "US.SPY", 100.0, 100.0, 100.0, 100.0, 100.0,
+            1, 100.0, "2026-06-18T15:00:00+08:00",
+        )
+        fundamentals = FundamentalSnapshot(
+            "SZ.002463", pe_ttm=None, pb=18.0, eps=1.99,
+            dividend_ratio=0.34, market_val=2.85e11,
+        )
+
+        recommendation = _recommend(
+            state=state,
+            weights=DEFAULT_WEIGHTS,
+            macro_inputs={"weather": "sunny"},
+            macro_snapshots=None,
+            cross_snapshots={"US.QQQ": flat_cross},
+            sector_changes=[0.0],
+            index_snapshots={"US.SPY": flat_market},
+            source_refs=[],
+            fundamentals=fundamentals,
+        )
+
+        quality = recommendation.data_quality
+        self.assertIsNotNone(quality)
+        assert quality is not None
+        self.assertEqual(
+            quality.missing_components,
+            ("trend", "macro_risk", "fundamental", "position_fit"),
+        )
+        refs = " ".join(recommendation.source_refs)
+        self.assertIn("macro: neutral default", refs)
+        self.assertIn("fundamental: neutral default", refs)
+        self.assertIn("position_fit: neutral", refs)
+        self.assertNotIn("cross_market: neutral default", refs)
+        self.assertNotIn("market_regime: neutral default", refs)
 
     def test_us_analyze_uses_us_market_and_theme_cross_defaults(self):
         with tempfile.TemporaryDirectory() as tmpdir:

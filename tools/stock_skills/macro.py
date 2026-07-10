@@ -1,13 +1,42 @@
 from __future__ import annotations
 
+from collections.abc import Collection
+
 from .models import CrossMarketAnalysis, MacroAnalysis, MarketSnapshot
+
+
+_MACRO_INPUT_VALUES = {
+    "fed_bias": ("hike", "cut", "neutral"),
+    "geopolitical_risk": ("elevated", "normal"),
+    "oil_shock": (True, False),
+    "dollar_pressure": ("high", "normal"),
+}
+
+
+def _is_supported_macro_value(key: str, value: object) -> bool:
+    return any(
+        type(value) is type(supported) and value == supported
+        for supported in _MACRO_INPUT_VALUES.get(key, ())
+    )
+
+
+def _supported_macro_value(inputs: dict[str, object], key: str) -> object | None:
+    value = inputs.get(key)
+    return value if key in inputs and _is_supported_macro_value(key, value) else None
+
+
+def has_macro_input_evidence(inputs: dict[str, object]) -> bool:
+    return any(
+        key in inputs and _is_supported_macro_value(key, inputs[key])
+        for key in _MACRO_INPUT_VALUES
+    )
 
 
 def analyze_macro_risk(inputs: dict[str, object]) -> MacroAnalysis:
     score = 50.0
     notes: list[str] = []
 
-    fed_bias = inputs.get("fed_bias")
+    fed_bias = _supported_macro_value(inputs, "fed_bias")
     if fed_bias == "hike":
         score -= 18
         notes.append("Fed bias points toward higher rates.")
@@ -15,13 +44,13 @@ def analyze_macro_risk(inputs: dict[str, object]) -> MacroAnalysis:
         score += 12
         notes.append("Fed bias points toward easier liquidity.")
 
-    if inputs.get("geopolitical_risk") == "elevated":
+    if _supported_macro_value(inputs, "geopolitical_risk") == "elevated":
         score -= 8
         notes.append("Geopolitical risk is elevated.")
-    if inputs.get("oil_shock") is True:
+    if _supported_macro_value(inputs, "oil_shock") is True:
         score -= 8
         notes.append("Oil or energy shock may pressure inflation.")
-    if inputs.get("dollar_pressure") == "high":
+    if _supported_macro_value(inputs, "dollar_pressure") == "high":
         score -= 6
         notes.append("Dollar or yield pressure is high.")
 
@@ -48,6 +77,21 @@ _MACRO_PROXIES = {
     "US.TLT": (10, "长端美债价格"),     # bond price up = yields down -> risk-on for growth
 }
 _BIG_MOVE = 0.015  # 1.5% is a meaningful one-day move for these proxies
+
+
+def _has_snapshot_evidence(
+    snapshots: dict[str, MarketSnapshot],
+    recognized_codes: Collection[str],
+) -> bool:
+    return any(
+        snapshot is not None and _pct_change(snapshot) is not None
+        for code in recognized_codes
+        if (snapshot := snapshots.get(code)) is not None
+    )
+
+
+def has_macro_proxy_evidence(snapshots: dict[str, MarketSnapshot]) -> bool:
+    return _has_snapshot_evidence(snapshots, _MACRO_PROXIES)
 
 
 def analyze_macro_from_proxies(snapshots: dict[str, MarketSnapshot]) -> MacroAnalysis:
@@ -93,19 +137,24 @@ def _pct_change(snapshot: MarketSnapshot) -> float | None:
     return (snapshot.last_price - snapshot.prev_close) / snapshot.prev_close
 
 
+_CROSS_MARKET_WEIGHTS = {
+    "US.QQQ": 18,
+    "US.SPY": 10,
+    "US.NVDA": 18,
+    "US.SOXL": 12,
+    "CC.BTC": 8,
+    "CC.ETH": 6,
+}
+
+
+def has_cross_market_evidence(snapshots: dict[str, MarketSnapshot]) -> bool:
+    return _has_snapshot_evidence(snapshots, _CROSS_MARKET_WEIGHTS)
+
+
 def analyze_cross_market(snapshots: dict[str, MarketSnapshot]) -> CrossMarketAnalysis:
     score = 50.0
     notes: list[str] = []
-    weights = {
-        "US.QQQ": 18,
-        "US.SPY": 10,
-        "US.NVDA": 18,
-        "US.SOXL": 12,
-        "CC.BTC": 8,
-        "CC.ETH": 6,
-    }
-
-    for code, weight in weights.items():
+    for code, weight in _CROSS_MARKET_WEIGHTS.items():
         snapshot = snapshots.get(code)
         if snapshot is None:
             continue

@@ -6,7 +6,14 @@ from unittest import mock
 
 from tools.stock_skills.cli import DEFAULT_WEIGHTS, _recommend, main
 from tools.stock_skills.journal import append_record, read_records
-from tools.stock_skills.models import CapitalSnapshot, FundamentalSnapshot, InstrumentState, KLineBar, MarketSnapshot
+from tools.stock_skills.models import (
+    CapitalSnapshot,
+    FinancialsSnapshot,
+    FundamentalSnapshot,
+    InstrumentState,
+    KLineBar,
+    MarketSnapshot,
+)
 
 
 class FakeFetcher:
@@ -66,7 +73,20 @@ class FakeFetcher:
         return None  # no statement feed in the fake; analyze falls back to valuation-only
 
 
-class MissingSectorAndValuationFetcher(FakeFetcher):
+class BreakdownFetcher(FakeFetcher):
+    def get_financials(self, code):
+        return FinancialsSnapshot(
+            code=code,
+            period="2026/Q1",
+            revenue_growth=12.0,
+            eps_growth=15.0,
+            gross_margin=45.0,
+            net_margin=18.0,
+            revenue_breakdown=[("Cloud", 60.0), ("Hardware", 40.0)],
+        )
+
+
+class MissingSectorAndValuationFetcher(BreakdownFetcher):
     def get_plate_constituent_changes(self, plate_code, limit=30):
         return []
 
@@ -74,6 +94,38 @@ class MissingSectorAndValuationFetcher(FakeFetcher):
         return FundamentalSnapshot(
             code, pe_ttm=None, pb=18.0, eps=1.99,
             dividend_ratio=0.34, market_val=2.85e11,
+        )
+
+
+class MissingTrendCapitalFetcher(FakeFetcher):
+    def build_state(self, code, num_bars=30, user_context=None):
+        state = super().build_state(code, num_bars=num_bars, user_context=user_context)
+        return InstrumentState(
+            snapshot=state.snapshot,
+            daily_bars=state.daily_bars[:1],
+            intraday_bars=[],
+            capital=None,
+            user_context=state.user_context,
+        )
+
+
+class NoValidStopFetcher(FakeFetcher):
+    def build_state(self, code, num_bars=30, user_context=None):
+        snapshot = MarketSnapshot(
+            code, code, 1.0, 100.0, 200.0, 0.0, 100.0,
+            1_000, 1_000.0, "2026-06-18T15:00:00+08:00",
+        )
+        bars = [
+            KLineBar("2026-06-17", 100.0, 200.0, 0.0, 100.0, 1_000, 100_000.0),
+            KLineBar("2026-06-18", 100.0, 200.0, 0.0, 1.0, 1_000, 1_000.0),
+        ]
+        capital = CapitalSnapshot(0.0, 0.0, 0.0, 0.0, 0.0, snapshot.timestamp)
+        return InstrumentState(
+            snapshot=snapshot,
+            daily_bars=bars,
+            intraday_bars=[],
+            capital=capital,
+            user_context=user_context or {},
         )
 
 
@@ -107,7 +159,12 @@ class CliTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(payload["code"], "SZ.002463")
         self.assertEqual(payload["entry_price"], 147.9)
-        refs = " ".join(payload["source_refs"])
+        source_refs = payload["source_refs"]
+        refs = " ".join(source_refs)
+        self.assertIn("futu:snapshot:SZ.002463", source_refs)
+        self.assertIn("futu:kline:SZ.002463", source_refs)
+        self.assertIn("futu:capital:SZ.002463", source_refs)
+        self.assertNotIn("futu:snapshot+kline+capital:SZ.002463", source_refs)
         # All seven data-fed components are populated by the fake fetcher → none flagged as defaults.
         self.assertNotIn("sector: neutral default", refs)
         self.assertNotIn("market_regime: neutral default", refs)
@@ -266,7 +323,7 @@ class CliTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         refs = payload["source_refs"]
         self.assertNotIn("macro:manual-override", refs)
-        self.assertIn("macro: neutral default (no macro feed supplied)", refs)
+        self.assertIn("macro: neutral default (no usable macro evidence)", refs)
 
     def test_analyze_empty_sector_and_missing_valuation_record_only_fallbacks(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -293,8 +350,104 @@ class CliTests(unittest.TestCase):
         refs = payload["source_refs"]
         self.assertFalse(any(ref.startswith("sector:5G concept") for ref in refs))
         self.assertFalse(any(ref.startswith("fundamental:profile=") for ref in refs))
-        self.assertIn("sector: neutral default (no sector constituent data)", refs)
-        self.assertIn("fundamental: neutral default (no valuation data)", refs)
+        self.assertIn("sector: neutral default (no usable sector constituent evidence)", refs)
+        self.assertIn("fundamental: neutral default (no usable valuation evidence)", refs)
+        self.assertFalse(any(ref.startswith("revenue_breakdown:") for ref in refs))
+
+    def test_analyze_missing_trend_and_capital_do_not_claim_live_sources(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch(
+                "tools.stock_skills.futu_fetcher.FutuFetcher",
+                MissingTrendCapitalFetcher,
+            ):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--output",
+                        str(output),
+                        "--journal",
+                        str(journal),
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        refs = payload["source_refs"]
+        self.assertIn("futu:snapshot:SZ.002463", refs)
+        self.assertNotIn("futu:kline:SZ.002463", refs)
+        self.assertNotIn("futu:capital:SZ.002463", refs)
+        self.assertIn(
+            "trend: neutral default (no usable K-line evidence; need >=2 daily bars)",
+            refs,
+        )
+        self.assertIn(
+            "capital_flow: neutral default (no usable capital evidence)",
+            refs,
+        )
+        self.assertIn(
+            "position_fit: neutral (no usable ATR evidence; need >=2 daily bars)",
+            refs,
+        )
+
+    def test_analyze_atr_without_valid_stop_uses_distinct_position_fallback(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch(
+                "tools.stock_skills.futu_fetcher.FutuFetcher",
+                NoValidStopFetcher,
+            ):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--output",
+                        str(output),
+                        "--journal",
+                        str(journal),
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        refs = payload["source_refs"]
+        self.assertIn(
+            "position_fit: neutral (ATR available but no valid stop below price)",
+            refs,
+        )
+        self.assertFalse(any("no usable ATR evidence" in ref for ref in refs))
+
+    def test_analyze_usable_valuation_emits_revenue_breakdown(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch(
+                "tools.stock_skills.futu_fetcher.FutuFetcher",
+                BreakdownFetcher,
+            ):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--output",
+                        str(output),
+                        "--journal",
+                        str(journal),
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn(
+            "revenue_breakdown:Cloud=60%,Hardware=40%",
+            payload["source_refs"],
+        )
 
     def test_recommend_aligns_fallback_refs_with_effective_availability(self):
         complete_state = FakeFetcher().build_state("SZ.002463")

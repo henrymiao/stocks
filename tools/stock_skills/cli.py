@@ -200,18 +200,25 @@ def _recommend(
     )
 
     refs = list(source_refs)
+    if not availability["trend"]:
+        refs.append("trend: neutral default (no usable K-line evidence; need >=2 daily bars)")
+    if not availability["capital_flow"]:
+        refs.append("capital_flow: neutral default (no usable capital evidence)")
     if not availability["macro_risk"]:
-        refs.append("macro: neutral default (no macro feed supplied)")
+        refs.append("macro: neutral default (no usable macro evidence)")
     if not availability["cross_market"]:
-        refs.append("cross_market: neutral default (no cross-market snapshots supplied)")
+        refs.append("cross_market: neutral default (no usable cross-market evidence)")
     if not availability["sector"]:
-        refs.append("sector: neutral default (no sector constituent data)")
+        refs.append("sector: neutral default (no usable sector constituent evidence)")
     if not availability["market_regime"]:
-        refs.append("market_regime: neutral default (no index snapshots)")
+        refs.append("market_regime: neutral default (no usable index evidence)")
     if not availability["fundamental"]:
-        refs.append("fundamental: neutral default (no valuation data)")
+        refs.append("fundamental: neutral default (no usable valuation evidence)")
     if not availability["position_fit"]:
-        refs.append("position_fit: neutral (no ATR; need >=2 daily bars)")
+        if atr is None:
+            refs.append("position_fit: neutral (no usable ATR evidence; need >=2 daily bars)")
+        else:
+            refs.append("position_fit: neutral (ATR available but no valid stop below price)")
     if inverse:
         refs.append("inverse-etf: backdrop (market/cross/macro) scores inverted")
 
@@ -281,7 +288,11 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     cross_codes = args.cross if args.cross is not None else _default_cross_codes_for(args.code, tags)
     cross_snapshots: dict[str, MarketSnapshot] = fetcher.get_index_snapshots(cross_codes) if cross_codes else {}
 
-    refs = [f"futu:snapshot+kline+capital:{args.code}"]
+    refs = [f"futu:snapshot:{args.code}"]
+    if len(state.daily_bars) >= 2:
+        refs.append(f"futu:kline:{args.code}")
+    if state.capital is not None:
+        refs.append(f"futu:capital:{args.code}")
     cross_evidence_codes = _evidence_codes(cross_snapshots, has_cross_market_evidence)
     if cross_evidence_codes:
         refs.append(f"cross_market:{','.join(cross_evidence_codes)}")
@@ -360,7 +371,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
             origin = f"auto@{financials.period}" if financials else "manual"
             if fundamentals.pe_ttm is not None:
                 refs.append(f"fundamental:profile={profile},pe_ttm={fundamentals.pe_ttm}{peg_note}{quality_note}({origin})")
-            if financials and financials.revenue_breakdown:
+            if fundamentals.pe_ttm is not None and financials and financials.revenue_breakdown:
                 refs.append("revenue_breakdown:" + ",".join(f"{name}={pct:g}%" for name, pct in financials.revenue_breakdown))
 
     inverse = args.inverse if args.inverse is not None else is_inverse_instrument(state.snapshot.name, tags)

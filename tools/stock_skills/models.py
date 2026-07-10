@@ -221,9 +221,9 @@ class Recommendation:
     invalidation_level: float | None
     confidence: float
     source_refs: list[str]
-    data_quality: DataQuality | None = None
     entry_price: float = 0.0
     user_context: dict[str, Any] = field(default_factory=dict)
+    data_quality: DataQuality | None = None
 
     def to_record(self) -> dict[str, Any]:
         payload = asdict(self)

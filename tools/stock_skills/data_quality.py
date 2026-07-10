@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Mapping, Set
+from collections.abc import Mapping, Set
 
 from .models import DataQuality
 
@@ -15,7 +15,7 @@ COMPONENTS = (
     "fundamental",
     "position_fit",
 )
-CRITICAL_COMPONENTS = {"trend", "position_fit"}
+CRITICAL_COMPONENTS = frozenset({"trend", "position_fit"})
 ENTRY_CONFIDENCE_THRESHOLD = 0.80
 
 

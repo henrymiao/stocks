@@ -52,7 +52,7 @@ class ModelTests(unittest.TestCase):
                 ),
                 missing_components=("position_fit",),
                 stale_components=(),
-                session_phase="regular",
+                session_phase="intraday",
                 entry_eligible=False,
             ),
         )
@@ -72,6 +72,29 @@ class ModelTests(unittest.TestCase):
 
         compatibility_payload = Recommendation(**recommendation_fields).to_record()
         self.assertIsNone(compatibility_payload["data_quality"])
+
+    def test_recommendation_preserves_pre_data_quality_positional_order(self):
+        recommendation = Recommendation(
+            "SZ.002463",
+            "沪电股份",
+            "2026-06-18T15:00:00+08:00",
+            "hold",
+            67.4,
+            ComponentScores(70, 58, 65, 60, 55, 75),
+            "AI PCB demand remains the core thesis.",
+            "Hold above 145; trim failed pushes near 150.",
+            [145.0, 142.8],
+            [149.9, 150.0],
+            142.8,
+            0.62,
+            ["data/snapshots/SZ.002463.json"],
+            147.9,
+            {"last_trim_price": 149.5},
+        )
+
+        self.assertEqual(recommendation.entry_price, 147.9)
+        self.assertEqual(recommendation.user_context, {"last_trim_price": 149.5})
+        self.assertIsNone(recommendation.data_quality)
 
     def test_instrument_state_accepts_snapshot_bars_and_capital(self):
         state = InstrumentState(

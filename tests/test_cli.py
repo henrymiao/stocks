@@ -60,6 +60,7 @@ class FakeFetcher:
         return [
             KLineBar("2026-06-19", 147.0, 147.5, 140.0, 141.0, 90_000_000, 13_000_000_000.0),
             KLineBar("2026-06-22", 141.0, 142.0, 138.0, 139.0, 90_000_000, 13_000_000_000.0),
+            KLineBar("2026-06-23", 139.0, 140.0, 137.0, 138.0, 90_000_000, 13_000_000_000.0),
         ]
 
     def get_fundamentals(self, code, eps_growth=None, revenue_growth=None, gross_margin=None, net_margin=None, roe=None):
@@ -127,6 +128,11 @@ class NoValidStopFetcher(FakeFetcher):
             capital=capital,
             user_context=user_context or {},
         )
+
+
+class PartialHistoryFetcher(FakeFetcher):
+    def get_history_bars(self, code, start, end):
+        return super().get_history_bars(code, start, end)[:2]
 
 
 class CliTests(unittest.TestCase):
@@ -581,7 +587,10 @@ class CliTests(unittest.TestCase):
                 },
             )
 
-            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+            with mock.patch(
+                "tools.stock_skills.futu_fetcher.FutuFetcher",
+                side_effect=AssertionError("no fetcher should be created for static non-candidates"),
+            ):
                 exit_code = main([
                     "review",
                     "--recommendations", str(recommendations),
@@ -592,6 +601,73 @@ class CliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(reviews.exists())
             self.assertEqual(read_records(reviews), [])
+
+    def test_review_skips_partial_ten_day_window(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            recommendations = Path(tmpdir) / "recommendations.jsonl"
+            reviews = Path(tmpdir) / "reviews.jsonl"
+            weights = Path(tmpdir) / "signal_weights.json"
+            weights.write_text(json.dumps(DEFAULT_WEIGHTS), encoding="utf-8")
+            append_record(
+                recommendations,
+                {
+                    "code": "SZ.002463",
+                    "label": "hold",
+                    "timestamp": "2026-06-18T15:00:00+08:00",
+                    "entry_price": 147.9,
+                },
+            )
+
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", PartialHistoryFetcher):
+                exit_code = main([
+                    "review",
+                    "--window", "10d",
+                    "--recommendations", str(recommendations),
+                    "--reviews", str(reviews),
+                    "--weights", str(weights),
+                ])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(read_records(reviews), [])
+            self.assertFalse(weights.with_suffix(".json.bak").exists())
+
+    def test_review_apply_writes_weights_after_sixty_completed_rows(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            recommendations = Path(tmpdir) / "recommendations.jsonl"
+            reviews = Path(tmpdir) / "reviews.jsonl"
+            weights = Path(tmpdir) / "signal_weights.json"
+            weights.write_text(json.dumps(DEFAULT_WEIGHTS), encoding="utf-8")
+            recommendation = {
+                "code": "SZ.002463",
+                "label": "hold",
+                "timestamp": "2026-06-18T15:00:00+08:00",
+                "entry_price": 147.9,
+                "invalidation_level": 142.0,
+                "component_scores": {"trend": 70, "capital_flow": 65, "sector": 60, "cross_market": 38, "macro_risk": 55, "market_regime": 50, "fundamental": 48, "position_fit": 75},
+            }
+            for _ in range(60):
+                append_record(recommendations, recommendation)
+
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main([
+                    "review",
+                    "--window", "1d",
+                    "--recommendations", str(recommendations),
+                    "--reviews", str(reviews),
+                    "--weights", str(weights),
+                    "--apply",
+                ])
+
+            review_rows = read_records(reviews)
+            updated_weights = json.loads(weights.read_text(encoding="utf-8"))
+            history_rows = read_records(weights.parent / "weight_history.jsonl")
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(len(review_rows), 60)
+            self.assertTrue(all(row["review_complete"] for row in review_rows))
+            self.assertGreater(updated_weights["cross_market"], DEFAULT_WEIGHTS["cross_market"])
+            self.assertTrue(weights.with_suffix(".json.bak").exists())
+            self.assertEqual(len(history_rows), 1)
 
 
 if __name__ == "__main__":

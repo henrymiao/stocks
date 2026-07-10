@@ -47,9 +47,9 @@ class ReviewTests(unittest.TestCase):
     def test_suggest_weight_adjustments_refuses_small_sample(self):
         current = {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1}
         reviews = [
-            {"directional_success": False, "dominant_failure": "macro_risk"},
-            {"directional_success": False, "dominant_failure": "macro_risk"},
-            {"directional_success": True, "dominant_failure": "none"},
+            {"directional_success": False, "dominant_failure": "macro_risk", "review_complete": True},
+            {"directional_success": False, "dominant_failure": "macro_risk", "review_complete": True},
+            {"directional_success": True, "dominant_failure": "none", "review_complete": True},
         ]
 
         suggestion = suggest_weight_adjustments(current, reviews)
@@ -62,10 +62,10 @@ class ReviewTests(unittest.TestCase):
     def test_suggest_weight_adjustments_allows_sufficient_sample(self):
         current = {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1}
         reviews = [
-            {"directional_success": False, "dominant_failure": "macro_risk"}
+            {"directional_success": False, "dominant_failure": "macro_risk", "review_complete": True}
             for _ in range(40)
         ] + [
-            {"directional_success": True, "dominant_failure": "none"}
+            {"directional_success": True, "dominant_failure": "none", "review_complete": True}
             for _ in range(20)
         ]
 
@@ -74,6 +74,18 @@ class ReviewTests(unittest.TestCase):
         self.assertTrue(suggestion["eligible"])
         self.assertGreater(suggestion["weights"]["macro_risk"], current["macro_risk"])
         self.assertAlmostEqual(sum(suggestion["weights"].values()), 1.0)
+
+    def test_suggest_weight_adjustments_excludes_incomplete_reviews(self):
+        current = {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1}
+        reviews = [
+            {"directional_success": False, "dominant_failure": "macro_risk", "review_complete": True}
+            for _ in range(59)
+        ] + [{"directional_success": False, "dominant_failure": "macro_risk", "review_complete": False}]
+
+        suggestion = suggest_weight_adjustments(current, reviews)
+
+        self.assertFalse(suggestion["eligible"])
+        self.assertEqual(suggestion["sample_size"], 59)
 
 
     def test_failed_bullish_call_is_attributed_to_weakest_component(self):

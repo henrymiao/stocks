@@ -77,6 +77,8 @@ def evaluate_recommendation(
         "maximum_favorable_pct": maximum_favorable_pct,
         "maximum_adverse_pct": maximum_adverse_pct,
         "final_return_pct": final_return_pct,
+        "observed_bar_count": len(future_bars),
+        "review_complete": True,
         "invalidated": invalidated,
         "directional_success": directional_success,
         "dominant_failure": dominant_failure,
@@ -85,7 +87,12 @@ def evaluate_recommendation(
 
 
 def suggest_weight_adjustments(current_weights: dict[str, float], reviews: list[dict[str, Any]]) -> dict[str, Any]:
-    usable = [review for review in reviews if isinstance(review.get("directional_success"), bool)]
+    usable = [
+        review
+        for review in reviews
+        if review.get("review_complete") is True
+        and isinstance(review.get("directional_success"), bool)
+    ]
     if len(usable) < MIN_WEIGHT_REVIEW_SAMPLE:
         return {
             "weights": dict(current_weights),

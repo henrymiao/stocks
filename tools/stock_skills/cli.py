@@ -402,29 +402,42 @@ def _entry_date(timestamp: str) -> date:
     return datetime.fromisoformat(timestamp).date()
 
 
+def _has_static_review_inputs(recommendation: dict) -> bool:
+    entry_price = recommendation.get("entry_price")
+    return (
+        bool(recommendation.get("timestamp"))
+        and not isinstance(entry_price, bool)
+        and isinstance(entry_price, (int, float))
+        and entry_price > 0
+    )
+
+
 def _cmd_review(args: argparse.Namespace) -> int:
     from .futu_fetcher import FutuFetcher
 
     ensure_journal(args.reviews)
-    fetcher = FutuFetcher()
     recommendations = read_records(args.recommendations)
     if args.code:
         recommendations = [rec for rec in recommendations if rec.get("code") == args.code]
+    candidates = [rec for rec in recommendations if _has_static_review_inputs(rec)]
+    if not candidates:
+        print("No reviewable recommendations (need a timestamp, positive entry_price, and available future bars).")
+        return 0
 
+    fetcher = FutuFetcher()
     window_days = REVIEW_WINDOW_DAYS[args.window]
     reviews: list[dict] = []
-    for rec in recommendations:
-        timestamp = rec.get("timestamp")
-        entry_price = rec.get("entry_price") or 0.0
-        if not timestamp or entry_price <= 0:
-            continue
+    for rec in candidates:
+        timestamp = rec["timestamp"]
+        entry_price = rec["entry_price"]
         entry = _entry_date(str(timestamp))
         # Pull a generous calendar span so weekends/holidays still yield enough trading bars.
         start = (entry + timedelta(days=1)).isoformat()
         end = (entry + timedelta(days=window_days * 2 + 7)).isoformat()
-        future_bars = fetcher.get_history_bars(rec["code"], start=start, end=end)[:window_days]
-        if not future_bars:
+        future_bars = fetcher.get_history_bars(rec["code"], start=start, end=end)
+        if len(future_bars) < window_days:
             continue
+        future_bars = future_bars[:window_days]
         outcome = evaluate_recommendation(rec, entry_price=float(entry_price), future_bars=future_bars, review_window=args.window)
         reviews.append(outcome)
         append_record(args.reviews, outcome)

@@ -1,10 +1,12 @@
 import json
 import subprocess
+import tempfile
 import unittest
 from datetime import datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from tools.stock_skills.futu_fetcher import FutuFetcher
+from tools.stock_skills.futu_fetcher import FutuFetcher, _default_skill_dir
 
 
 class FakeRunner:
@@ -112,6 +114,50 @@ def _fetcher(runner):
         skill_dir="/fake/futuapi",
         runner=runner,
     )
+
+
+class FutuSkillPathTests(unittest.TestCase):
+    @staticmethod
+    def _install_snapshot_script(skill_dir):
+        script = skill_dir / "scripts" / "quote" / "get_snapshot.py"
+        script.parent.mkdir(parents=True, exist_ok=True)
+        script.touch()
+        return script
+
+    def test_default_skill_dir_uses_installed_candidate_precedence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            codex = home / ".codex" / "skills" / "futuapi"
+            agents = home / ".agents" / "skills" / "futuapi"
+            claude = home / ".claude" / "skills" / "futuapi"
+
+            claude_script = self._install_snapshot_script(claude)
+            agents_script = self._install_snapshot_script(agents)
+            codex.mkdir(parents=True)
+            self.assertEqual(_default_skill_dir(home), agents)
+
+            codex_script = self._install_snapshot_script(codex)
+            self.assertEqual(_default_skill_dir(home), codex)
+
+            codex_script.unlink()
+            agents_script.unlink()
+            self.assertEqual(_default_skill_dir(home), claude)
+            self.assertTrue(claude_script.exists())
+
+    def test_default_skill_dir_missing_installation_lists_attempted_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            attempted = [
+                home / ".codex" / "skills" / "futuapi",
+                home / ".agents" / "skills" / "futuapi",
+                home / ".claude" / "skills" / "futuapi",
+            ]
+
+            with self.assertRaises(FileNotFoundError) as ctx:
+                _default_skill_dir(home)
+
+            for path in attempted:
+                self.assertIn(str(path), str(ctx.exception))
 
 
 class FutuFetcherTests(unittest.TestCase):

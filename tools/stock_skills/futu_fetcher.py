@@ -26,13 +26,17 @@ Runner = Callable[[list[str]], str]
 _STALE_INTRADAY_GAP = timedelta(minutes=30)
 
 
-def _default_skill_dir() -> str:
-    """Default futuapi skill dir: Claude Code's install location.
+def _skill_dir_candidates(home: Path) -> tuple[Path, ...]:
+    return tuple(home / root / "skills" / "futuapi" for root in (".codex", ".agents", ".claude"))
 
-    Overridable via the ``skill_dir`` argument or the ``FUTUAPI_SKILL_DIR`` env var (both
-    handled by ``FutuFetcher.__init__``). Uses ``Path.home()`` so it is not tied to a username.
-    """
-    return str(Path.home() / ".claude" / "skills" / "futuapi")
+
+def _default_skill_dir(home: Path | None = None) -> Path:
+    candidates = _skill_dir_candidates(home or Path.home())
+    for candidate in candidates:
+        if (candidate / "scripts" / "quote" / "get_snapshot.py").exists():
+            return candidate
+    attempted = "\n".join(f"- {candidate}" for candidate in candidates)
+    raise FileNotFoundError(f"Futu skill installation not found. Tried:\n{attempted}")
 
 
 def _market_close_hour(code: str) -> int:

@@ -33,7 +33,7 @@ def _skill_dir_candidates(home: Path) -> tuple[Path, ...]:
 def _default_skill_dir(home: Path | None = None) -> Path:
     candidates = _skill_dir_candidates(home or Path.home())
     for candidate in candidates:
-        if (candidate / "scripts" / "quote" / "get_snapshot.py").exists():
+        if (candidate / "scripts" / "quote" / "get_snapshot.py").is_file():
             return candidate
     attempted = "\n".join(f"- {candidate}" for candidate in candidates)
     raise FileNotFoundError(f"Futu skill installation not found. Tried:\n{attempted}")

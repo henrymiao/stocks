@@ -1,9 +1,11 @@
 import json
+import os
 import subprocess
 import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 from tools.stock_skills.futu_fetcher import FutuFetcher, _default_skill_dir
@@ -158,6 +160,33 @@ class FutuSkillPathTests(unittest.TestCase):
 
             for path in attempted:
                 self.assertIn(str(path), str(ctx.exception))
+
+    def test_default_skill_dir_skips_directory_at_script_marker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            codex = home / ".codex" / "skills" / "futuapi"
+            agents = home / ".agents" / "skills" / "futuapi"
+            malformed_marker = codex / "scripts" / "quote" / "get_snapshot.py"
+            malformed_marker.mkdir(parents=True)
+            self._install_snapshot_script(agents)
+
+            self.assertEqual(_default_skill_dir(home), agents)
+
+    def test_explicit_skill_dir_beats_environment_override(self):
+        with patch.dict(os.environ, {"FUTUAPI_SKILL_DIR": "/environment/futuapi"}):
+            fetcher = FutuFetcher(skill_dir="/explicit/futuapi", runner=FakeRunner())
+
+        self.assertEqual(fetcher.skill_dir, Path("/explicit/futuapi"))
+
+    def test_environment_override_beats_default_discovery(self):
+        with (
+            patch.dict(os.environ, {"FUTUAPI_SKILL_DIR": "/environment/futuapi"}),
+            patch("tools.stock_skills.futu_fetcher._default_skill_dir") as default_discovery,
+        ):
+            fetcher = FutuFetcher(runner=FakeRunner())
+
+        self.assertEqual(fetcher.skill_dir, Path("/environment/futuapi"))
+        default_discovery.assert_not_called()
 
 
 class FutuFetcherTests(unittest.TestCase):

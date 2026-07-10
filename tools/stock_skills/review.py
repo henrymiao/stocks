@@ -8,6 +8,7 @@ from .models import KLineBar
 
 POSITIVE_LABELS = {"strong-watch", "low-buy-zone", "hold"}
 NEGATIVE_LABELS = {"trim-on-strength", "risk-reduce", "avoid"}
+MIN_WEIGHT_REVIEW_SAMPLE = 60
 
 # Components ranked by score; the lowest is the strongest warning that was overridden.
 _ATTRIBUTABLE_COMPONENTS = ("trend", "capital_flow", "sector", "cross_market", "macro_risk", "market_regime", "fundamental", "position_fit")
@@ -84,10 +85,19 @@ def evaluate_recommendation(
 
 
 def suggest_weight_adjustments(current_weights: dict[str, float], reviews: list[dict[str, Any]]) -> dict[str, Any]:
-    if not reviews:
-        return {"weights": dict(current_weights), "notes": ["No reviews supplied; weights unchanged."]}
+    usable = [review for review in reviews if isinstance(review.get("directional_success"), bool)]
+    if len(usable) < MIN_WEIGHT_REVIEW_SAMPLE:
+        return {
+            "weights": dict(current_weights),
+            "eligible": False,
+            "sample_size": len(usable),
+            "notes": [
+                f"Need at least {MIN_WEIGHT_REVIEW_SAMPLE} realised reviews before changing weights; "
+                f"received {len(usable)}."
+            ],
+        }
 
-    failures = [review.get("dominant_failure") for review in reviews if review.get("directional_success") is False]
+    failures = [review.get("dominant_failure") for review in usable if review.get("directional_success") is False]
     counter = Counter(str(failure) for failure in failures if failure and failure != "none")
     weights = dict(current_weights)
     notes: list[str] = []
@@ -111,4 +121,9 @@ def suggest_weight_adjustments(current_weights: dict[str, float], reviews: list[
     first_key = next(iter(normalized))
     normalized[first_key] = round(normalized[first_key] + drift, 6)
 
-    return {"weights": normalized, "notes": notes}
+    return {
+        "weights": normalized,
+        "eligible": True,
+        "sample_size": len(usable),
+        "notes": notes,
+    }

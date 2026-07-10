@@ -44,7 +44,7 @@ class ReviewTests(unittest.TestCase):
         self.assertFalse(outcome["directional_success"])
         self.assertTrue(outcome["invalidated"])
 
-    def test_suggest_weight_adjustments_returns_small_explainable_changes(self):
+    def test_suggest_weight_adjustments_refuses_small_sample(self):
         current = {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1}
         reviews = [
             {"directional_success": False, "dominant_failure": "macro_risk"},
@@ -54,9 +54,26 @@ class ReviewTests(unittest.TestCase):
 
         suggestion = suggest_weight_adjustments(current, reviews)
 
+        self.assertEqual(suggestion["weights"], current)
+        self.assertFalse(suggestion["eligible"])
+        self.assertEqual(suggestion["sample_size"], 3)
+        self.assertIn("60", suggestion["notes"][0])
+
+    def test_suggest_weight_adjustments_allows_sufficient_sample(self):
+        current = {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1}
+        reviews = [
+            {"directional_success": False, "dominant_failure": "macro_risk"}
+            for _ in range(40)
+        ] + [
+            {"directional_success": True, "dominant_failure": "none"}
+            for _ in range(20)
+        ]
+
+        suggestion = suggest_weight_adjustments(current, reviews)
+
+        self.assertTrue(suggestion["eligible"])
         self.assertGreater(suggestion["weights"]["macro_risk"], current["macro_risk"])
         self.assertAlmostEqual(sum(suggestion["weights"].values()), 1.0)
-        self.assertTrue(suggestion["notes"])
 
 
     def test_failed_bullish_call_is_attributed_to_weakest_component(self):

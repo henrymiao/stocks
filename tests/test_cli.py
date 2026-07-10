@@ -539,7 +539,7 @@ class CliTests(unittest.TestCase):
             weights_after_suggest = json.loads(weights.read_text(encoding="utf-8"))
             review_rows = read_records(reviews)
 
-            # With --apply: weights change, backup created.
+            # With --apply below the evidence threshold: weights remain unchanged.
             with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
                 code2 = main(["review", "--window", "3d", "--recommendations", str(recommendations), "--reviews", str(reviews), "--weights", str(weights), "--apply"])
             weights_after_apply = json.loads(weights.read_text(encoding="utf-8"))
@@ -550,9 +550,48 @@ class CliTests(unittest.TestCase):
         self.assertEqual(len(review_rows), 1)
         self.assertFalse(review_rows[0]["directional_success"])
         self.assertEqual(review_rows[0]["dominant_failure"], "cross_market")
-        self.assertEqual(weights_after_suggest["cross_market"], 0.11)  # unchanged before --apply
-        self.assertGreater(weights_after_apply["cross_market"], 0.11)  # bumped after --apply
-        self.assertTrue(backup_exists)
+        self.assertEqual(weights_after_apply, weights_after_suggest)
+        self.assertFalse(backup_exists)
+
+    def test_review_creates_empty_file_when_no_row_is_reviewable(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            recommendations = Path(tmpdir) / "recommendations.jsonl"
+            reviews = Path(tmpdir) / "reviews.jsonl"
+            weights = Path(tmpdir) / "signal_weights.json"
+            weights.write_text(
+                json.dumps({
+                    "trend": 0.20,
+                    "capital_flow": 0.13,
+                    "sector": 0.14,
+                    "cross_market": 0.11,
+                    "macro_risk": 0.11,
+                    "market_regime": 0.12,
+                    "fundamental": 0.10,
+                    "position_fit": 0.09,
+                }),
+                encoding="utf-8",
+            )
+            append_record(
+                recommendations,
+                {
+                    "code": "SZ.002463",
+                    "label": "hold",
+                    "timestamp": "2026-06-18T15:00:00+08:00",
+                    "entry_price": 0.0,
+                },
+            )
+
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main([
+                    "review",
+                    "--recommendations", str(recommendations),
+                    "--reviews", str(reviews),
+                    "--weights", str(weights),
+                ])
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(reviews.exists())
+            self.assertEqual(read_records(reviews), [])
 
 
 if __name__ == "__main__":

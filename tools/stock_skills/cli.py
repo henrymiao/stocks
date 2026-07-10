@@ -13,7 +13,7 @@ from .config import load_watchlist, load_weights, save_weights
 from .data_quality import assess_data_quality
 from .engine import build_recommendation, is_inverse_instrument
 from .fundamental import analyze_fundamental, infer_profile
-from .journal import append_record, read_records
+from .journal import append_record, ensure_journal, read_records
 from .macro import (
     analyze_cross_market,
     analyze_macro_from_proxies,
@@ -405,6 +405,7 @@ def _entry_date(timestamp: str) -> date:
 def _cmd_review(args: argparse.Namespace) -> int:
     from .futu_fetcher import FutuFetcher
 
+    ensure_journal(args.reviews)
     fetcher = FutuFetcher()
     recommendations = read_records(args.recommendations)
     if args.code:
@@ -436,12 +437,14 @@ def _cmd_review(args: argparse.Namespace) -> int:
     suggestion = suggest_weight_adjustments(current, reviews)
     print(json.dumps({"reviewed": len(reviews), "suggestion": suggestion}, ensure_ascii=False, indent=2))
 
-    if args.apply:
+    if args.apply and suggestion["eligible"]:
         reason = f"Auto-adjust from {len(reviews)} review(s) over {args.window}: " + "; ".join(suggestion["notes"])
         entry = save_weights(args.weights, suggestion["weights"], reason=reason)
         print(f"Applied new weights (backup at {args.weights}.bak). History: {entry['timestamp']}")
+    elif args.apply:
+        print("Weights not applied: realised review sample is below the safety threshold.")
     else:
-        print("Suggestion only. Re-run with --apply to write weights back (a .bak backup and history entry are created).")
+        print("Suggestion only. Re-run with --apply after the sample is eligible to write weights back.")
     return 0
 
 

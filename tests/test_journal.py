@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.stock_skills.journal import append_record, read_records
+from tools.stock_skills.journal import append_record, ensure_journal, read_records
 
 
 class JournalTests(unittest.TestCase):
@@ -21,6 +21,17 @@ class JournalTests(unittest.TestCase):
             records = read_records(Path(tmpdir) / "missing.jsonl")
 
         self.assertEqual(records, [])
+
+
+class JournalEnsureTests(unittest.TestCase):
+    def test_ensure_journal_creates_empty_jsonl(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "nested" / "reviews.jsonl"
+
+            ensure_journal(path)
+
+            self.assertTrue(path.exists())
+            self.assertEqual(read_records(path), [])
 
 
 if __name__ == "__main__":

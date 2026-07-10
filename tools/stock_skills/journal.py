@@ -5,6 +5,12 @@ from pathlib import Path
 from typing import Any
 
 
+def ensure_journal(path: str | Path) -> None:
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.touch(exist_ok=True)
+
+
 def append_record(path: str | Path, record: dict[str, Any]) -> None:
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)

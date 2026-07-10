@@ -9,6 +9,7 @@ from pathlib import Path
 from .backtest import run_backtest
 from .capital import analyze_capital
 from .config import load_watchlist, load_weights, save_weights
+from .data_quality import assess_data_quality
 from .engine import build_recommendation, is_inverse_instrument
 from .fundamental import analyze_fundamental, infer_profile
 from .journal import append_record, read_records
@@ -18,6 +19,7 @@ from .models import CapitalSnapshot, FundamentalSnapshot, InstrumentState, KLine
 from .position import analyze_position, compute_atr
 from .review import evaluate_recommendation, suggest_weight_adjustments
 from .sector import analyze_sector
+from .session import classify_session_phase
 from .trend import analyze_trend
 
 FIXTURE_CODE = "SZ.002463"
@@ -158,6 +160,20 @@ def _recommend(
         last_trim_price=state.user_context.get("last_trim_price"),
         cost_basis=cost_basis,
     )
+    availability = {
+        "trend": len(state.daily_bars) >= 2,
+        "capital_flow": state.capital is not None,
+        "sector": bool(sector_changes),
+        "cross_market": bool(cross_snapshots),
+        "macro_risk": bool(macro_snapshots) or bool(macro_inputs),
+        "market_regime": bool(index_snapshots),
+        "fundamental": fundamentals is not None and fundamentals.pe_ttm is not None,
+        "position_fit": position.stop_price is not None,
+    }
+    data_quality = assess_data_quality(
+        availability,
+        classify_session_phase(state.snapshot.code, state.snapshot.timestamp),
+    )
 
     refs = list(source_refs)
     if not macro_snapshots and not macro_inputs:
@@ -185,6 +201,7 @@ def _recommend(
         position_fit_score=position.score,
         weights=weights,
         source_refs=refs,
+        data_quality=data_quality,
         market_score=market.score,
         market_regime=market.regime,
         sector_stance=sector.stance,

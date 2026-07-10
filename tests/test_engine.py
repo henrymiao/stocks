@@ -10,6 +10,7 @@ from tools.stock_skills.models import (
     CapitalAnalysis,
     ComponentScores,
     CrossMarketAnalysis,
+    DataQuality,
     InstrumentState,
     KLineBar,
     MacroAnalysis,
@@ -92,6 +93,14 @@ class EngineTests(unittest.TestCase):
             "macro_risk": 0.15,
             "position_fit": 0.10,
         }
+        data_quality = DataQuality(
+            confidence=0.875,
+            available_components=("trend", "capital_flow"),
+            missing_components=("sector",),
+            stale_components=(),
+            session_phase="after-close",
+            entry_eligible=True,
+        )
 
         recommendation = build_recommendation(
             state=state,
@@ -103,6 +112,7 @@ class EngineTests(unittest.TestCase):
             position_fit_score=70,
             weights=weights,
             source_refs=["data/snapshots/SZ.002463.json"],
+            data_quality=data_quality,
         )
 
         self.assertEqual(recommendation.code, "SZ.002463")
@@ -111,6 +121,8 @@ class EngineTests(unittest.TestCase):
         self.assertIn("invalidation", recommendation.trader_plan)
         self.assertEqual(recommendation.invalidation_level, 142.81)
         self.assertIsInstance(recommendation.component_scores, ComponentScores)
+        self.assertEqual(recommendation.confidence, 0.875)
+        self.assertEqual(recommendation.data_quality, data_quality)
 
 
     def test_is_inverse_instrument_detects_name_and_tags(self):
@@ -139,6 +151,14 @@ class EngineTests(unittest.TestCase):
             state=state, trend=trend, capital=capital, macro=macro, cross_market=cross,
             sector_score=50, position_fit_score=60, weights=weights, source_refs=["x"],
             market_score=60.0,
+            data_quality=DataQuality(
+                confidence=0.75,
+                available_components=("trend",),
+                missing_components=("cross_market",),
+                stale_components=(),
+                session_phase="intraday",
+                entry_eligible=False,
+            ),
         )
         rec_long = build_recommendation(**common, inverse=False)
         rec_inv = build_recommendation(**common, inverse=True)

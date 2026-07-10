@@ -106,6 +106,8 @@ class CliTests(unittest.TestCase):
         self.assertIn("5G concept", refs)
         self.assertIn("macro:proxies", refs)
         self.assertIn("fundamental:profile=", refs)
+        self.assertIsNotNone(payload["data_quality"])
+        self.assertEqual(payload["data_quality"]["session_phase"], "after-close")
         # Position management appears in the trader plan (stop + suggested size).
         self.assertIn("Risk plan: stop near", payload["trader_plan"])
 
@@ -119,6 +121,9 @@ class CliTests(unittest.TestCase):
 
         refs = " ".join(payload["source_refs"])
         self.assertIn("macro: neutral default", refs)
+        self.assertEqual(payload["data_quality"]["missing_components"], ["cross_market", "macro_risk"])
+        self.assertEqual(payload["data_quality"]["confidence"], 0.75)
+        self.assertFalse(payload["data_quality"]["entry_eligible"])
 
     def test_analyze_appends_to_journal_by_default(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -151,6 +156,7 @@ class CliTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         refs = " ".join(payload["source_refs"])
         self.assertNotIn("cross_market: neutral default", refs)
+        self.assertNotIn("cross_market", payload["data_quality"]["missing_components"])
 
     def test_us_analyze_uses_us_market_and_theme_cross_defaults(self):
         with tempfile.TemporaryDirectory() as tmpdir:

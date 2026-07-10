@@ -4,6 +4,7 @@ from .models import (
     CapitalAnalysis,
     ComponentScores,
     CrossMarketAnalysis,
+    DataQuality,
     InstrumentState,
     MacroAnalysis,
     Recommendation,
@@ -105,6 +106,7 @@ def build_recommendation(
     position_fit_score: float,
     weights: dict[str, float],
     source_refs: list[str],
+    data_quality: DataQuality,
     market_score: float = 50.0,
     market_regime: str = "neutral",
     sector_stance: str = "unknown",
@@ -131,7 +133,6 @@ def build_recommendation(
     total_score = _weighted_total(component_scores, weights)
     price_location = detect_price_location(state, trend)
     label = classify_total_score(total_score, price_location)
-    confidence = round(max(0.1, min(0.95, total_score / 100)), 2)
 
     support_text = ", ".join(str(level) for level in trend.support_levels) or "unavailable"
     resistance_text = ", ".join(str(level) for level in trend.resistance_levels) or "unavailable"
@@ -176,8 +177,9 @@ def build_recommendation(
         support_levels=trend.support_levels,
         resistance_levels=trend.resistance_levels,
         invalidation_level=invalidation,
-        confidence=confidence,
+        confidence=data_quality.confidence,
         source_refs=source_refs,
         entry_price=state.snapshot.last_price,
         user_context=state.user_context,
+        data_quality=data_quality,
     )

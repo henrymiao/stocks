@@ -58,10 +58,11 @@ def evaluate_recommendation(
     if not future_bars:
         raise ValueError("future_bars must not be empty")
     required_bar_count = _required_bar_count(review_window)
+    evaluation_bars = future_bars if required_bar_count is None else future_bars[:required_bar_count]
 
-    highest = max(bar.high for bar in future_bars)
-    lowest = min(bar.low for bar in future_bars)
-    final_close = future_bars[-1].close
+    highest = max(bar.high for bar in evaluation_bars)
+    lowest = min(bar.low for bar in evaluation_bars)
+    final_close = evaluation_bars[-1].close
     maximum_favorable_pct = round((highest - entry_price) / entry_price * 100, 4)
     maximum_adverse_pct = round((lowest - entry_price) / entry_price * 100, 4)
     final_return_pct = round((final_close - entry_price) / entry_price * 100, 4)

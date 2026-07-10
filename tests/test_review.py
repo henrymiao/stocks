@@ -66,6 +66,25 @@ class ReviewTests(unittest.TestCase):
         self.assertFalse(suggestion["eligible"])
         self.assertEqual(suggestion["sample_size"], 0)
 
+    def test_evaluate_recommendation_uses_only_declared_window_bars(self):
+        recommendation = {
+            "code": "SZ.002463",
+            "label": "hold",
+            "timestamp": "2026-06-18T15:00:00+08:00",
+        }
+        future_bars = [
+            KLineBar("2026-06-19", 100.0, 112.0, 99.0, 110.0, 120_000_000, 16_000_000_000.0),
+            KLineBar("2026-06-22", 110.0, 111.0, 49.0, 50.0, 120_000_000, 16_000_000_000.0),
+            KLineBar("2026-06-23", 50.0, 51.0, 48.0, 49.0, 120_000_000, 16_000_000_000.0),
+            KLineBar("2026-06-24", 49.0, 50.0, 47.0, 48.0, 120_000_000, 16_000_000_000.0),
+        ]
+
+        outcome = evaluate_recommendation(recommendation, entry_price=100.0, future_bars=future_bars, review_window="1d")
+
+        self.assertEqual(outcome["final_close"], 110.0)
+        self.assertEqual(outcome["final_return_pct"], 10.0)
+        self.assertEqual(outcome["maximum_adverse_pct"], -1.0)
+
     def test_suggest_weight_adjustments_refuses_small_sample(self):
         current = {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1}
         reviews = [

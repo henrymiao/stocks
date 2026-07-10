@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Callable
 from dataclasses import replace
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -54,6 +55,17 @@ DEFAULT_REVIEWS = "data/journal/reviews.jsonl"
 DEFAULT_WEIGHTS_PATH = "data/models/signal_weights.json"
 DEFAULT_WATCHLIST_PATH = "data/watchlists/core.json"
 REVIEW_WINDOW_DAYS = {"1d": 1, "3d": 3, "5d": 5, "10d": 10}
+
+
+def _evidence_codes(
+    snapshots: dict[str, MarketSnapshot],
+    predicate: Callable[[dict[str, MarketSnapshot]], bool],
+) -> list[str]:
+    return [
+        code
+        for code, snapshot in snapshots.items()
+        if predicate({code: snapshot})
+    ]
 
 
 def _fixture_state() -> InstrumentState:
@@ -270,31 +282,37 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     cross_snapshots: dict[str, MarketSnapshot] = fetcher.get_index_snapshots(cross_codes) if cross_codes else {}
 
     refs = [f"futu:snapshot+kline+capital:{args.code}"]
-    if cross_snapshots:
-        refs.append(f"cross_market:{','.join(cross_snapshots)}")
+    cross_evidence_codes = _evidence_codes(cross_snapshots, has_cross_market_evidence)
+    if cross_evidence_codes:
+        refs.append(f"cross_market:{','.join(cross_evidence_codes)}")
 
     sector_changes: list[float] | None = None
     if not args.no_sector:
         core_plate = fetcher.pick_core_plate(args.code)
         if core_plate:
             sector_changes = fetcher.get_plate_constituent_changes(core_plate["plate_code"], limit=args.sector_limit)
-            refs.append(f"sector:{core_plate.get('plate_name')}({core_plate['plate_code']}) x{len(sector_changes)}")
+            if sector_changes:
+                refs.append(f"sector:{core_plate.get('plate_name')}({core_plate['plate_code']}) x{len(sector_changes)}")
 
     index_snapshots: dict[str, MarketSnapshot] | None = None
     if not args.no_market:
         index_codes = args.indices or _default_index_codes_for(args.code)
         index_snapshots = fetcher.get_index_snapshots(index_codes)
-        refs.append(f"market:{','.join(index_snapshots)}")
+        market_evidence_codes = _evidence_codes(index_snapshots, has_market_evidence)
+        if market_evidence_codes:
+            refs.append(f"market:{','.join(market_evidence_codes)}")
 
     macro_snapshots: dict[str, MarketSnapshot] | None = None
     macro_inputs: dict[str, object] = {}
     if args.macro_json:
         macro_inputs = json.loads(args.macro_json)
-        refs.append("macro:manual-override")
+        if has_macro_input_evidence(macro_inputs):
+            refs.append("macro:manual-override")
     elif not args.no_macro:
         macro_snapshots = fetcher.get_index_snapshots(args.macro_codes or DEFAULT_MACRO_CODES)
-        if macro_snapshots:
-            refs.append(f"macro:proxies:{','.join(macro_snapshots)}")
+        macro_evidence_codes = _evidence_codes(macro_snapshots, has_macro_proxy_evidence)
+        if macro_evidence_codes:
+            refs.append(f"macro:proxies:{','.join(macro_evidence_codes)}")
 
     fundamentals: FundamentalSnapshot | None = None
     profile = args.profile or infer_profile(tags)
@@ -340,7 +358,8 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
             ]
             quality_note = (", quality:" + ",".join(quality_inputs)) if quality_inputs else ""
             origin = f"auto@{financials.period}" if financials else "manual"
-            refs.append(f"fundamental:profile={profile},pe_ttm={fundamentals.pe_ttm}{peg_note}{quality_note}({origin})")
+            if fundamentals.pe_ttm is not None:
+                refs.append(f"fundamental:profile={profile},pe_ttm={fundamentals.pe_ttm}{peg_note}{quality_note}({origin})")
             if financials and financials.revenue_breakdown:
                 refs.append("revenue_breakdown:" + ",".join(f"{name}={pct:g}%" for name, pct in financials.revenue_breakdown))
 

@@ -66,6 +66,17 @@ class FakeFetcher:
         return None  # no statement feed in the fake; analyze falls back to valuation-only
 
 
+class MissingSectorAndValuationFetcher(FakeFetcher):
+    def get_plate_constituent_changes(self, plate_code, limit=30):
+        return []
+
+    def get_fundamentals(self, code, **kwargs):
+        return FundamentalSnapshot(
+            code, pe_ttm=None, pb=18.0, eps=1.99,
+            dividend_ratio=0.34, market_val=2.85e11,
+        )
+
+
 class CliTests(unittest.TestCase):
     def test_dry_run_replays_fixture(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -194,6 +205,96 @@ class CliTests(unittest.TestCase):
         self.assertIn("cross_market: neutral default", refs)
         self.assertIn("macro: neutral default", refs)
         self.assertIn("market_regime: neutral default", refs)
+        self.assertNotIn("cross_market:HK.800700", refs)
+        self.assertNotIn("macro:proxies:HK.800000", refs)
+        self.assertNotIn("market:HK.800000", refs)
+
+    def test_analyze_source_refs_include_only_consumed_snapshots(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--output",
+                        str(output),
+                        "--journal",
+                        str(journal),
+                        "--cross",
+                        "US.QQQ",
+                        "HK.800700",
+                        "--indices",
+                        "US.SPY",
+                        "HK.800000",
+                        "--macro-codes",
+                        "US.VIXY",
+                        "HK.800000",
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        refs = payload["source_refs"]
+        self.assertIn("cross_market:US.QQQ", refs)
+        self.assertIn("market:US.SPY", refs)
+        self.assertIn("macro:proxies:US.VIXY", refs)
+        self.assertFalse(any("HK.800700" in ref or "HK.800000" in ref for ref in refs))
+
+    def test_analyze_unknown_manual_macro_input_records_only_fallback(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--output",
+                        str(output),
+                        "--journal",
+                        str(journal),
+                        "--macro-json",
+                        '{"weather":"sunny"}',
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        refs = payload["source_refs"]
+        self.assertNotIn("macro:manual-override", refs)
+        self.assertIn("macro: neutral default (no macro feed supplied)", refs)
+
+    def test_analyze_empty_sector_and_missing_valuation_record_only_fallbacks(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch(
+                "tools.stock_skills.futu_fetcher.FutuFetcher",
+                MissingSectorAndValuationFetcher,
+            ):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--output",
+                        str(output),
+                        "--journal",
+                        str(journal),
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        refs = payload["source_refs"]
+        self.assertFalse(any(ref.startswith("sector:5G concept") for ref in refs))
+        self.assertFalse(any(ref.startswith("fundamental:profile=") for ref in refs))
+        self.assertIn("sector: neutral default (no sector constituent data)", refs)
+        self.assertIn("fundamental: neutral default (no valuation data)", refs)
 
     def test_recommend_aligns_fallback_refs_with_effective_availability(self):
         complete_state = FakeFetcher().build_state("SZ.002463")
@@ -252,7 +353,8 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         refs = " ".join(payload["source_refs"])
-        self.assertIn("cross_market:US.QQQ,US.SPY,US.NVDA,US.SMH", refs)
+        self.assertIn("cross_market:US.QQQ,US.SPY,US.NVDA", refs)
+        self.assertNotIn("US.SMH", refs)
         self.assertIn("market:US.QQQ,US.SPY", refs)
         self.assertNotIn("market:SH.000001", refs)
         self.assertNotIn("cross_market: neutral default", refs)

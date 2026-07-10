@@ -197,6 +197,16 @@ class PositionAnalysis:
 
 
 @dataclass(frozen=True)
+class DataQuality:
+    confidence: float
+    available_components: tuple[str, ...]
+    missing_components: tuple[str, ...]
+    stale_components: tuple[str, ...]
+    session_phase: str
+    entry_eligible: bool
+
+
+@dataclass(frozen=True)
 class Recommendation:
     code: str
     name: str
@@ -211,6 +221,7 @@ class Recommendation:
     invalidation_level: float | None
     confidence: float
     source_refs: list[str]
+    data_quality: DataQuality | None = None
     entry_price: float = 0.0
     user_context: dict[str, Any] = field(default_factory=dict)
 

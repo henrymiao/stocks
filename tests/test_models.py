@@ -1,8 +1,10 @@
+import json
 import unittest
 
 from tools.stock_skills.models import (
     CapitalSnapshot,
     ComponentScores,
+    DataQuality,
     InstrumentState,
     KLineBar,
     MarketSnapshot,
@@ -12,7 +14,7 @@ from tools.stock_skills.models import (
 
 class ModelTests(unittest.TestCase):
     def test_recommendation_serializes_to_json_ready_dict(self):
-        recommendation = Recommendation(
+        recommendation_fields = dict(
             code="SZ.002463",
             name="沪电股份",
             timestamp="2026-06-18T15:00:00+08:00",
@@ -35,13 +37,41 @@ class ModelTests(unittest.TestCase):
             source_refs=["data/snapshots/SZ.002463.json"],
             user_context={"last_trim_price": 149.5},
         )
+        recommendation = Recommendation(
+            **recommendation_fields,
+            data_quality=DataQuality(
+                confidence=0.875,
+                available_components=(
+                    "trend",
+                    "capital_flow",
+                    "sector",
+                    "cross_market",
+                    "macro_risk",
+                    "market_regime",
+                    "fundamental",
+                ),
+                missing_components=("position_fit",),
+                stale_components=(),
+                session_phase="regular",
+                entry_eligible=False,
+            ),
+        )
 
         payload = recommendation.to_record()
 
         self.assertEqual(payload["code"], "SZ.002463")
         self.assertEqual(payload["component_scores"]["trend"], 70)
+        self.assertEqual(payload["data_quality"]["confidence"], 0.875)
+        self.assertEqual(
+            list(payload["data_quality"]["missing_components"]),
+            ["position_fit"],
+        )
         self.assertEqual(payload["support_levels"], [145.0, 142.8])
         self.assertEqual(payload["user_context"]["last_trim_price"], 149.5)
+        json.dumps(payload)
+
+        compatibility_payload = Recommendation(**recommendation_fields).to_record()
+        self.assertIsNone(compatibility_payload["data_quality"])
 
     def test_instrument_state_accepts_snapshot_bars_and_capital(self):
         state = InstrumentState(

@@ -44,6 +44,28 @@ class ReviewTests(unittest.TestCase):
         self.assertFalse(outcome["directional_success"])
         self.assertTrue(outcome["invalidated"])
 
+    def test_evaluate_recommendation_marks_partial_window_incomplete(self):
+        recommendation = {
+            "code": "SZ.002463",
+            "label": "hold",
+            "timestamp": "2026-06-18T15:00:00+08:00",
+        }
+        future_bars = [
+            KLineBar("2026-06-19", 147.0, 148.0, 146.0, 147.5, 120_000_000, 16_000_000_000.0),
+            KLineBar("2026-06-22", 147.5, 149.0, 147.0, 148.0, 120_000_000, 16_000_000_000.0),
+        ]
+
+        outcome = evaluate_recommendation(recommendation, entry_price=147.9, future_bars=future_bars, review_window="3d")
+        suggestion = suggest_weight_adjustments(
+            {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1},
+            [outcome] * 60,
+        )
+
+        self.assertEqual(outcome["observed_bar_count"], 2)
+        self.assertFalse(outcome["review_complete"])
+        self.assertFalse(suggestion["eligible"])
+        self.assertEqual(suggestion["sample_size"], 0)
+
     def test_suggest_weight_adjustments_refuses_small_sample(self):
         current = {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1}
         reviews = [

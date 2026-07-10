@@ -14,6 +14,20 @@ MIN_WEIGHT_REVIEW_SAMPLE = 60
 _ATTRIBUTABLE_COMPONENTS = ("trend", "capital_flow", "sector", "cross_market", "macro_risk", "market_regime", "fundamental", "position_fit")
 
 
+def _required_bar_count(review_window: str) -> int | None:
+    # Imported markdown reviews use approximate close-only note prices, not a complete
+    # daily-bar window. Preserve their reporting path while excluding them from realised
+    # evidence used to change mutable signal weights.
+    if review_window.startswith("md-") and review_window.endswith("pt"):
+        return None
+    if not review_window.endswith("d"):
+        raise ValueError("review_window must use a positive day suffix, such as '3d'")
+    day_count = review_window[:-1]
+    if not day_count.isdigit() or int(day_count) <= 0:
+        raise ValueError("review_window must use a positive day suffix, such as '3d'")
+    return int(day_count)
+
+
 def _attribute_failure(recommendation: dict[str, Any], invalidated: bool) -> tuple[str, str]:
     """Pick the component most responsible for a failed call, using the scores recorded at the time.
 
@@ -43,6 +57,7 @@ def evaluate_recommendation(
         raise ValueError("entry_price must be positive")
     if not future_bars:
         raise ValueError("future_bars must not be empty")
+    required_bar_count = _required_bar_count(review_window)
 
     highest = max(bar.high for bar in future_bars)
     lowest = min(bar.low for bar in future_bars)
@@ -78,7 +93,7 @@ def evaluate_recommendation(
         "maximum_adverse_pct": maximum_adverse_pct,
         "final_return_pct": final_return_pct,
         "observed_bar_count": len(future_bars),
-        "review_complete": True,
+        "review_complete": required_bar_count is not None and len(future_bars) >= required_bar_count,
         "invalidated": invalidated,
         "directional_success": directional_success,
         "dominant_failure": dominant_failure,

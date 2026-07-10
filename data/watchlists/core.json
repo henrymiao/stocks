@@ -28,6 +28,7 @@
     {"code": "HK.01211", "name": "比亚迪股份", "enabled": true, "tags": ["hk", "ev", "auto", "battery"]},
     {"code": "HK.00981", "name": "中芯国际", "enabled": true, "tags": ["hk", "semiconductor", "foundry", "china"]},
     {"code": "SZ.300308", "name": "中际旭创", "enabled": true, "tags": ["a-share", "optical-module", "ai-hardware", "datacenter"]},
+    {"code": "SZ.000021", "name": "深科技", "enabled": true, "tags": ["a-share", "semiconductor", "storage", "advanced-manufacturing", "high-volatility", "momentum"]},
     {"code": "US.GLD", "name": "黄金ETF", "enabled": true, "tags": ["us", "gold", "safe-haven", "cyclical", "hedge"]},
     {"code": "US.GDX", "name": "金矿股ETF", "enabled": true, "tags": ["us", "gold-miners", "cyclical", "hedge"]},
     {"code": "HK.02899", "name": "紫金矿业", "enabled": true, "tags": ["hk", "gold", "copper", "cyclical", "materials"]},

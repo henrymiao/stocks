@@ -16,6 +16,7 @@ class MarketSnapshot:
     volume: int
     turnover: float
     timestamp: str
+    captured_at: str | None = None
 
 
 @dataclass(frozen=True)
@@ -197,6 +198,96 @@ class PositionAnalysis:
 
 
 @dataclass(frozen=True)
+class ExitTarget:
+    name: str
+    r_multiple: float
+    price: float
+    fraction: float
+
+
+@dataclass(frozen=True)
+class TrailingRule:
+    method: str
+    activation_r: float
+    atr_multiple: float
+    current_stop: float | None = None
+
+
+@dataclass(frozen=True)
+class TimeStop:
+    progress_r: float
+    sessions: int
+    action: str
+
+
+@dataclass(frozen=True)
+class RiskSizing:
+    stop_distance_pct: float
+    uncapped_size_pct: float
+    allocation_cap_pct: float
+    suggested_size_pct: float
+    planned_risk_pct: float
+    capped: bool
+
+
+@dataclass(frozen=True)
+class ExitPlan:
+    strategy_id: str
+    side: str
+    entry_price: float
+    structural_invalidation: float
+    initial_stop: float
+    risk_per_share: float
+    atr: float
+    risk_budget_pct: float
+    targets: tuple[ExitTarget, ...]
+    runner_fraction: float
+    trailing_rule: TrailingRule
+    time_stop: TimeStop
+    maximum_holding_days: int
+    gap_handling: str
+    event_handling: str
+    risk_sizing: RiskSizing
+
+
+@dataclass(frozen=True)
+class PositionStateSnapshot:
+    state: str
+    remaining_fraction: float
+    trade_id: str | None = None
+    filled_targets: tuple[str, ...] = ()
+    previous_trailing_stop: float | None = None
+    last_event: str | None = None
+    exit_reason: str | None = None
+
+    def __post_init__(self) -> None:
+        allowed = {"flat", "entered", "profit-protected", "trend-runner", "exited"}
+        if self.state not in allowed:
+            raise ValueError(f"Unknown position state: {self.state}")
+        if isinstance(self.remaining_fraction, bool) or not isinstance(self.remaining_fraction, (int, float)):
+            raise ValueError("remaining_fraction must be numeric")
+        if not 0.0 <= float(self.remaining_fraction) <= 1.0:
+            raise ValueError("remaining_fraction must be between 0 and 1")
+        if self.state in {"flat", "exited"} and self.remaining_fraction != 0.0:
+            raise ValueError(f"{self.state} positions must have zero remaining fraction")
+
+
+@dataclass(frozen=True)
+class StrategyAssessment:
+    strategy_id: str
+    horizon: str
+    setup_score: float
+    entry_decision: str
+    position_decision: str | None
+    factor_scores: dict[str, float]
+    gates_passed: tuple[str, ...]
+    gates_failed: tuple[str, ...]
+    gates_missing: tuple[str, ...]
+    leveraged_overlay: bool
+    notes: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class DataQuality:
     confidence: float
     available_components: tuple[str, ...]
@@ -224,6 +315,15 @@ class Recommendation:
     entry_price: float = 0.0
     user_context: dict[str, Any] = field(default_factory=dict)
     data_quality: DataQuality | None = None
+    schema_version: str = "recommendation-v1"
+    position_state: PositionStateSnapshot | None = None
+    exit_plan: ExitPlan | None = None
+    strategy_assessment: StrategyAssessment | None = None
+    strategy_id: str | None = None
+    strategy_version: str | None = None
+    horizon: str | None = None
+    trade_id: str | None = None
+    leveraged: bool = False
 
     def to_record(self) -> dict[str, Any]:
         payload = asdict(self)

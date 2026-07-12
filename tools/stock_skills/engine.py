@@ -5,8 +5,10 @@ from .models import (
     ComponentScores,
     CrossMarketAnalysis,
     DataQuality,
+    ExitPlan,
     InstrumentState,
     MacroAnalysis,
+    PositionStateSnapshot,
     Recommendation,
     TrendAnalysis,
 )
@@ -116,6 +118,8 @@ def build_recommendation(
     position_size_pct: float | None = None,
     position_stance: str = "unknown",
     inverse: bool = False,
+    exit_plan: ExitPlan | None = None,
+    position_state: PositionStateSnapshot | None = None,
 ) -> Recommendation:
     # An inverse instrument moves opposite the broad tape, so reflect the three backdrop
     # scores around 50; its own trend/capital/position scores are left as-is.
@@ -141,7 +145,18 @@ def build_recommendation(
     trim_text = f" Prior partial trim near {last_trim} should reduce chase pressure." if last_trim else ""
 
     sizing_text = ""
-    if position_stop_price is not None:
+    if exit_plan is not None:
+        tp1, tp2 = exit_plan.targets
+        sizing = exit_plan.risk_sizing
+        cap_label = "capped" if sizing.capped else "uncapped"
+        sizing_text = (
+            f" Risk plan: stop near {exit_plan.initial_stop}, suggested size "
+            f"~{sizing.suggested_size_pct}% of account ({position_stance}, {cap_label})."
+            f" Structured exits: TP1 {tp1.price} ({tp1.fraction:.0%}) at {tp1.r_multiple}R; "
+            f"TP2 {tp2.price} ({tp2.fraction:.0%}) at {tp2.r_multiple}R; "
+            f"runner {exit_plan.runner_fraction:.0%} trails by {exit_plan.trailing_rule.method}."
+        )
+    elif position_stop_price is not None:
         sizing_text = f" Risk plan: stop near {position_stop_price}"
         if position_size_pct is not None:
             sizing_text += f", suggested size ~{position_size_pct}% of account ({position_stance})."
@@ -182,4 +197,7 @@ def build_recommendation(
         entry_price=state.snapshot.last_price,
         user_context=state.user_context,
         data_quality=data_quality,
+        schema_version="recommendation-v2",
+        position_state=position_state,
+        exit_plan=exit_plan,
     )

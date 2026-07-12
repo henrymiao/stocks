@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "watchlist": [
+    {"code": "SH.688256", "name": "寒武纪", "enabled": true, "priority": 95, "tags": ["a-share", "national-tech", "ai-compute", "chip", "growth"]},
+    {"code": "SH.688041", "name": "海光信息", "enabled": true, "priority": 95, "tags": ["a-share", "national-tech", "ai-compute", "cpu", "growth"]},
+    {"code": "SZ.000977", "name": "浪潮信息", "enabled": true, "priority": 90, "tags": ["a-share", "national-tech", "ai-compute", "server", "growth"]},
+    {"code": "SH.603019", "name": "中科曙光", "enabled": true, "priority": 90, "tags": ["a-share", "national-tech", "ai-compute", "server", "growth"]},
+    {"code": "SZ.300308", "name": "中际旭创", "enabled": true, "priority": 95, "tags": ["a-share", "national-tech", "optical-module", "ai-hardware", "growth"]},
+    {"code": "SZ.300502", "name": "新易盛", "enabled": true, "priority": 90, "tags": ["a-share", "national-tech", "optical-module", "ai-hardware", "growth"]},
+    {"code": "SZ.002463", "name": "沪电股份", "enabled": true, "priority": 90, "tags": ["a-share", "national-tech", "pcb", "ai-hardware", "growth"]},
+    {"code": "SZ.002938", "name": "鹏鼎控股", "enabled": true, "priority": 75, "tags": ["a-share", "national-tech", "pcb", "electronics", "growth"]},
+    {"code": "SH.601138", "name": "工业富联", "enabled": true, "priority": 85, "tags": ["a-share", "national-tech", "ai-infrastructure", "server", "growth"]},
+
+    {"code": "SH.688981", "name": "中芯国际", "enabled": true, "priority": 95, "tags": ["a-share", "national-tech", "semiconductor", "foundry", "growth"]},
+    {"code": "SZ.002371", "name": "北方华创", "enabled": true, "priority": 95, "tags": ["a-share", "national-tech", "semiconductor", "equipment", "growth"]},
+    {"code": "SH.688012", "name": "中微公司", "enabled": true, "priority": 95, "tags": ["a-share", "national-tech", "semiconductor", "equipment", "growth"]},
+    {"code": "SH.603501", "name": "豪威集团", "enabled": true, "priority": 80, "tags": ["a-share", "national-tech", "semiconductor", "sensor", "growth"]},
+    {"code": "SH.688008", "name": "澜起科技", "enabled": true, "priority": 90, "tags": ["a-share", "national-tech", "semiconductor", "memory-interface", "growth"]},
+    {"code": "SH.600584", "name": "长电科技", "enabled": true, "priority": 80, "tags": ["a-share", "national-tech", "semiconductor", "advanced-packaging", "cyclical"]},
+    {"code": "SH.688120", "name": "华海清科", "enabled": true, "priority": 80, "tags": ["a-share", "national-tech", "semiconductor", "equipment", "growth"]},
+    {"code": "SZ.300604", "name": "长川科技", "enabled": true, "priority": 75, "tags": ["a-share", "national-tech", "semiconductor", "testing-equipment", "growth"]},
+
+    {"code": "SZ.300124", "name": "汇川技术", "enabled": true, "priority": 90, "tags": ["a-share", "national-tech", "automation", "robotics", "growth"]},
+    {"code": "SZ.002050", "name": "三花智控", "enabled": true, "priority": 85, "tags": ["a-share", "national-tech", "robotics", "key-components", "growth"]},
+    {"code": "SH.688017", "name": "绿的谐波", "enabled": true, "priority": 80, "tags": ["a-share", "national-tech", "robotics", "reducer", "growth"]},
+    {"code": "SZ.002747", "name": "埃斯顿", "enabled": true, "priority": 75, "tags": ["a-share", "national-tech", "industrial-robot", "automation", "growth"]},
+    {"code": "SH.688777", "name": "中控技术", "enabled": true, "priority": 80, "tags": ["a-share", "national-tech", "industrial-software", "automation", "growth"]},
+    {"code": "SH.603728", "name": "鸣志电器", "enabled": true, "priority": 70, "tags": ["a-share", "national-tech", "robotics", "motor", "growth"]},
+
+    {"code": "SZ.300750", "name": "宁德时代", "enabled": true, "priority": 95, "tags": ["a-share", "national-tech", "battery", "new-energy-vehicle", "growth"]},
+    {"code": "SZ.002594", "name": "比亚迪", "enabled": true, "priority": 95, "tags": ["a-share", "national-tech", "new-energy-vehicle", "battery", "growth"]},
+    {"code": "SZ.300014", "name": "亿纬锂能", "enabled": true, "priority": 80, "tags": ["a-share", "national-tech", "battery", "new-energy", "growth"]},
+    {"code": "SH.601689", "name": "拓普集团", "enabled": true, "priority": 80, "tags": ["a-share", "national-tech", "smart-vehicle", "key-components", "growth"]},
+    {"code": "SZ.300450", "name": "先导智能", "enabled": true, "priority": 80, "tags": ["a-share", "national-tech", "battery-equipment", "automation", "growth"]},
+    {"code": "SH.688005", "name": "容百科技", "enabled": true, "priority": 65, "tags": ["a-share", "national-tech", "battery-materials", "new-energy", "cyclical"]},
+
+    {"code": "SH.601100", "name": "恒立液压", "enabled": true, "priority": 75, "tags": ["a-share", "national-tech", "high-end-equipment", "key-components", "growth"]},
+    {"code": "SH.688187", "name": "时代电气", "enabled": true, "priority": 80, "tags": ["a-share", "national-tech", "high-end-equipment", "power-semiconductor", "growth"]},
+    {"code": "SH.600660", "name": "福耀玻璃", "enabled": true, "priority": 65, "tags": ["a-share", "national-tech", "smart-vehicle", "key-components", "cyclical"]},
+
+    {"code": "SH.600276", "name": "恒瑞医药", "enabled": true, "priority": 90, "tags": ["a-share", "national-tech", "innovative-drug", "biotech", "growth"]},
+    {"code": "SH.688235", "name": "百济神州", "enabled": true, "priority": 90, "tags": ["a-share", "national-tech", "innovative-drug", "biotech", "growth"]},
+    {"code": "SH.688180", "name": "君实生物", "enabled": true, "priority": 70, "tags": ["a-share", "national-tech", "innovative-drug", "biotech", "growth"]},
+    {"code": "SH.603259", "name": "药明康德", "enabled": true, "priority": 75, "tags": ["a-share", "national-tech", "cxo", "biotech", "growth"]},
+    {"code": "SH.688046", "name": "药康生物", "enabled": true, "priority": 65, "tags": ["a-share", "national-tech", "biotech", "cro", "growth"]},
+    {"code": "SZ.300760", "name": "迈瑞医疗", "enabled": true, "priority": 90, "tags": ["a-share", "national-tech", "medical-device", "healthcare", "growth"]},
+    {"code": "SH.688271", "name": "联影医疗", "enabled": true, "priority": 85, "tags": ["a-share", "national-tech", "medical-device", "high-end-equipment", "growth"]}
+  ]
+}

@@ -9,7 +9,9 @@ from tools.stock_skills.models import (
     KLineBar,
     MarketSnapshot,
     Recommendation,
+    PositionStateSnapshot,
 )
+from tools.stock_skills.exit_engine import build_exit_plan
 
 
 class ModelTests(unittest.TestCase):
@@ -55,6 +57,9 @@ class ModelTests(unittest.TestCase):
                 session_phase="intraday",
                 entry_eligible=False,
             ),
+            position_state=PositionStateSnapshot(state="flat", remaining_fraction=0.0),
+            exit_plan=build_exit_plan(147.9, 142.8, 4.0),
+            schema_version="recommendation-v2",
         )
 
         payload = recommendation.to_record()
@@ -68,10 +73,20 @@ class ModelTests(unittest.TestCase):
         )
         self.assertEqual(payload["support_levels"], [145.0, 142.8])
         self.assertEqual(payload["user_context"]["last_trim_price"], 149.5)
+        self.assertEqual(payload["schema_version"], "recommendation-v2")
+        self.assertEqual(payload["position_state"]["state"], "flat")
+        self.assertLess(payload["exit_plan"]["initial_stop"], payload["invalidation_level"])
+        self.assertEqual(payload["exit_plan"]["targets"][0]["name"], "tp1")
         json.dumps(payload)
 
         compatibility_payload = Recommendation(**recommendation_fields).to_record()
         self.assertIsNone(compatibility_payload["data_quality"])
+        self.assertIsNone(compatibility_payload["position_state"])
+        self.assertIsNone(compatibility_payload["exit_plan"])
+        self.assertIsNone(compatibility_payload["strategy_assessment"])
+        self.assertIsNone(compatibility_payload["strategy_id"])
+        self.assertIsNone(compatibility_payload["trade_id"])
+        self.assertFalse(compatibility_payload["leveraged"])
 
     def test_recommendation_preserves_pre_data_quality_positional_order(self):
         recommendation = Recommendation(
@@ -95,6 +110,12 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(recommendation.entry_price, 147.9)
         self.assertEqual(recommendation.user_context, {"last_trim_price": 149.5})
         self.assertIsNone(recommendation.data_quality)
+        self.assertEqual(recommendation.schema_version, "recommendation-v1")
+        self.assertIsNone(recommendation.position_state)
+        self.assertIsNone(recommendation.exit_plan)
+        self.assertIsNone(recommendation.strategy_assessment)
+        self.assertIsNone(recommendation.strategy_id)
+        self.assertIsNone(recommendation.trade_id)
 
     def test_instrument_state_accepts_snapshot_bars_and_capital(self):
         state = InstrumentState(

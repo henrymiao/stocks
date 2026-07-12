@@ -10,6 +10,11 @@ class ReviewTests(unittest.TestCase):
             "code": "SZ.002463",
             "label": "hold",
             "timestamp": "2026-06-18T15:00:00+08:00",
+            "trade_id": "trade-123",
+            "strategy_id": "short-balanced-v1",
+            "strategy_version": "v1",
+            "horizon": "short",
+            "leveraged": False,
             "invalidation_level": 142.8,
             "support_levels": [145.0, 142.8],
             "resistance_levels": [149.9, 150.0],
@@ -25,6 +30,9 @@ class ReviewTests(unittest.TestCase):
         self.assertTrue(outcome["directional_success"])
         self.assertFalse(outcome["invalidated"])
         self.assertGreater(outcome["maximum_favorable_pct"], 0)
+        self.assertEqual(outcome["trade_id"], "trade-123")
+        self.assertEqual(outcome["strategy_id"], "short-balanced-v1")
+        self.assertEqual(outcome["evidence_kind"], "realized-ohlc")
 
     def test_evaluate_recommendation_detects_invalidation(self):
         recommendation = {
@@ -100,7 +108,7 @@ class ReviewTests(unittest.TestCase):
         self.assertEqual(suggestion["sample_size"], 3)
         self.assertIn("60", suggestion["notes"][0])
 
-    def test_suggest_weight_adjustments_allows_sufficient_sample(self):
+    def test_suggest_weight_adjustments_freezes_legacy_failure_count_changes(self):
         current = {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1}
         reviews = [
             {"directional_success": False, "dominant_failure": "macro_risk", "review_complete": True}
@@ -112,9 +120,9 @@ class ReviewTests(unittest.TestCase):
 
         suggestion = suggest_weight_adjustments(current, reviews)
 
-        self.assertTrue(suggestion["eligible"])
-        self.assertGreater(suggestion["weights"]["macro_risk"], current["macro_risk"])
-        self.assertAlmostEqual(sum(suggestion["weights"].values()), 1.0)
+        self.assertFalse(suggestion["eligible"])
+        self.assertEqual(suggestion["weights"], current)
+        self.assertIn("evidence-optimize", suggestion["notes"][0])
 
     def test_suggest_weight_adjustments_excludes_incomplete_reviews(self):
         current = {"trend": 0.25, "capital_flow": 0.2, "sector": 0.15, "cross_market": 0.15, "macro_risk": 0.15, "position_fit": 0.1}

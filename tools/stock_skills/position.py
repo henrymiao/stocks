@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .models import KLineBar, PositionAnalysis
+from .models import ExitPlan, KLineBar, PositionAnalysis
 
 
 def compute_atr(bars: list[KLineBar], n: int = 14) -> float | None:
@@ -105,5 +105,63 @@ def analyze_position(
         stop_distance_pct=stop_distance_pct,
         atr=atr,
         suggested_size_pct=suggested_size_pct,
+        notes=notes,
+    )
+
+
+def analyze_structured_position(
+    exit_plan: ExitPlan | None,
+    atr: float | None,
+    error: str | None = None,
+    last_trim_price: float | None = None,
+    cost_basis: float | None = None,
+) -> PositionAnalysis:
+    """Describe position fit from the authoritative structured exit plan.
+
+    `analyze_position` remains the frozen baseline for legacy comparisons. New live and
+    offline recommendations use this function so sizing is based on the structural stop
+    and explicit allocation cap from `ExitPlan`.
+    """
+    if exit_plan is None:
+        note = error or "No valid structured exit plan; new entry is not executable."
+        return PositionAnalysis(45.0, "wait", None, None, atr, None, [note])
+
+    sizing = exit_plan.risk_sizing
+    distance = sizing.stop_distance_pct
+    if distance <= 4:
+        score = 68.0 if sizing.capped else 72.0
+        stance = "core-hold"
+    elif distance <= 8:
+        score = 60.0
+        stance = "trading-position"
+    elif distance <= 14:
+        score = 48.0
+        stance = "partial-trim"
+    else:
+        score = 38.0
+        stance = "risk-reduce"
+
+    notes = [
+        f"Structural stop at {exit_plan.initial_stop}; distance {distance}%.",
+        f"Risk-sized allocation {sizing.suggested_size_pct}% of account.",
+    ]
+    if sizing.capped:
+        notes.append(
+            f"Raw allocation {sizing.uncapped_size_pct}% exceeded the "
+            f"{sizing.allocation_cap_pct}% cap; capped explicitly."
+        )
+    if last_trim_price is not None and exit_plan.entry_price >= last_trim_price:
+        score -= 4.0
+        notes.append(f"Already trimmed near {last_trim_price}; avoid rebuilding into strength.")
+    if cost_basis is not None and cost_basis > 0:
+        pnl_pct = round((exit_plan.entry_price - cost_basis) / cost_basis * 100.0, 2)
+        notes.append(f"Open P&L vs cost {cost_basis}: {pnl_pct}%.")
+    return PositionAnalysis(
+        score=round(max(0.0, min(100.0, score)), 2),
+        stance=stance,
+        stop_price=exit_plan.initial_stop,
+        stop_distance_pct=distance,
+        atr=atr,
+        suggested_size_pct=sizing.suggested_size_pct,
         notes=notes,
     )

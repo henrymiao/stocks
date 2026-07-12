@@ -52,6 +52,12 @@ class MacroTests(unittest.TestCase):
             {"oil_shock": False},
             {"dollar_pressure": "high"},
             {"dollar_pressure": "normal"},
+            {"jgb_stress": "elevated"},
+            {"jgb_stress": "normal"},
+            {"yen_carry_stress": "elevated"},
+            {"yen_carry_stress": "normal"},
+            {"credit_stress": "elevated"},
+            {"credit_stress": "normal"},
         )
 
         for inputs in supported_inputs:
@@ -89,6 +95,20 @@ class MacroTests(unittest.TestCase):
 
         self.assertEqual(result.score, 50)
         self.assertEqual(result.regime, "neutral")
+
+    def test_jgb_yen_carry_and_credit_stress_create_risk_off_macro(self):
+        result = analyze_macro_risk(
+            {
+                "jgb_stress": "elevated",
+                "yen_carry_stress": "elevated",
+                "credit_stress": "elevated",
+            }
+        )
+
+        self.assertLessEqual(result.score, 20)
+        self.assertEqual(result.regime, "risk-off")
+        self.assertTrue(any("JGB" in note for note in result.notes))
+        self.assertTrue(any("carry" in note for note in result.notes))
 
     def test_cross_market_penalizes_weak_us_ai_tape(self):
         result = analyze_cross_market(
@@ -149,6 +169,21 @@ class MacroTests(unittest.TestCase):
 
         self.assertEqual(result.score, 50.0)
         self.assertEqual(result.regime, "neutral")
+
+    def test_yen_carry_unwind_and_credit_deterioration_are_risk_off(self):
+        result = analyze_macro_from_proxies(
+            {
+                "US.FXY": snapshot("US.FXY", 57.2, 56.4),
+                "US.HYG": snapshot("US.HYG", 79.0, 80.0),
+                "US.LQD": snapshot("US.LQD", 107.7, 107.7),
+                "US.VIXY": snapshot("US.VIXY", 23.5, 22.0),
+            }
+        )
+
+        self.assertLess(result.score, 30)
+        self.assertEqual(result.regime, "risk-off")
+        self.assertTrue(any("套息" in note for note in result.notes))
+        self.assertTrue(any("信用" in note for note in result.notes))
 
 
 if __name__ == "__main__":

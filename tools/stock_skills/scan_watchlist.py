@@ -1,22 +1,5 @@
 #!/usr/bin/env python3
-"""Batch-score the watchlist into one compact table — token-cheap daily 复盘.
-
-The heavy data-gathering (per-code `analyze` via OpenD) happens inside this one
-command; only a small summary table comes back, so a full-pool review costs far
-fewer tokens than fetching each name in prose.
-
-The score (`tot`) measures momentum + quality; it is NOT a cheap/expensive read.
-Pass --valuation to add the historical valuation percentile (`val%`) so you can
-tell a "cheap high" from an "expensive high" — a high score at a 99th-percentile
-valuation is chasing, a high score at a low percentile is a real value entry.
-
-Usage:
-    python3 tools/stock_skills/scan_watchlist.py                       # whole watchlist
-    python3 tools/stock_skills/scan_watchlist.py --tag defensive       # one bucket
-    python3 tools/stock_skills/scan_watchlist.py --market HK           # one market
-    python3 tools/stock_skills/scan_watchlist.py --codes HK.09868,...  # explicit list
-    python3 tools/stock_skills/scan_watchlist.py --tag bank --valuation  # add val percentile
-"""
+"""Tiered watchlist promotion scan with one shared batch snapshot."""
 from __future__ import annotations
 
 import argparse
@@ -24,117 +7,220 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
+from dataclasses import asdict
+from pathlib import Path
+from typing import Any
 
-_VAL_SCRIPT_CANDIDATES = [
-    "skills/futuapi/scripts/quote/get_valuation_detail.py",
-    os.path.expanduser("~/.claude/skills/futuapi/scripts/quote/get_valuation_detail.py"),
-    os.path.expanduser("~/.cursor/skills/futuapi/scripts/quote/get_valuation_detail.py"),
-]
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from tools.stock_skills.config import load_watchlist, normalize_watchlist_entry
+from tools.stock_skills.cli import DEFAULT_MACRO_CODES
+from tools.stock_skills.futu_fetcher import FutuFetcher, _default_skill_dir
+from tools.stock_skills.watchlist_scan import run_watchlist_scan
+
 _VAL_TYPE = {1: "PE", 2: "PB", 3: "PS"}
 
 
 def _find_valuation_script() -> str | None:
-    for c in _VAL_SCRIPT_CANDIDATES:
-        if os.path.exists(c):
-            return c
-    return None
+    override = os.environ.get("FUTUAPI_SKILL_DIR")
+    try:
+        skill_dir = Path(override) if override else _default_skill_dir()
+    except FileNotFoundError:
+        return None
+    candidate = skill_dir / "scripts" / "quote" / "get_valuation_detail.py"
+    return str(candidate) if candidate.is_file() else None
 
 
-def _valuation(code: str, script: str | None) -> tuple[str, float] | None:
-    """Return (metric, percentile 0-100) from the server-recommended valuation, or None."""
+def _valuation(code: str, script: str | None) -> dict[str, Any] | None:
     if not script:
         return None
     try:
-        out = subprocess.run(
+        completed = subprocess.run(
             [sys.executable, script, code, "--interval-type", "7", "--json"],
-            capture_output=True, text=True, timeout=45,
+            capture_output=True,
+            text=True,
+            timeout=45,
+            check=True,
         )
-        for line in out.stdout.splitlines():
-            line = line.strip()
-            if not line.startswith("{"):
+        for line in completed.stdout.splitlines():
+            if not line.strip().startswith("{"):
                 continue
             data = json.loads(line).get("data", {})
-            trend = data.get("trend") or {}
-            pct = trend.get("valuation_percentile")
-            if pct is None:
+            percentile = (data.get("trend") or {}).get("valuation_percentile")
+            if percentile is None:
                 return None
-            pct = pct * 100 if pct <= 1.0 else pct  # feed mixes 0-1 and 0-100 scales
-            return (_VAL_TYPE.get(data.get("valuation_type"), "?"), round(pct))
-    except Exception:
+            percentile = percentile * 100 if percentile <= 1.0 else percentile
+            return {
+                "metric": _VAL_TYPE.get(data.get("valuation_type"), "?"),
+                "percentile": round(percentile),
+            }
+    except (subprocess.SubprocessError, OSError, ValueError, json.JSONDecodeError):
         return None
     return None
 
 
-def _val_flag(pct: float | None) -> str:
-    if pct is None:
-        return "  -"
-    if pct <= 30:
-        return "便宜"
-    if pct >= 70:
-        return " 贵 "
-    return " 中 "
-
-
-def main() -> None:
-    ap = argparse.ArgumentParser(description="Batch-score the watchlist into one compact table")
-    ap.add_argument("--watchlist", default="data/watchlists/core.json")
-    ap.add_argument("--tag", help="only codes carrying this tag (e.g. defensive, robotics, index)")
-    ap.add_argument("--market", help="only codes with this prefix: HK / US / SH / SZ / CC")
-    ap.add_argument("--codes", help="comma-separated codes overriding the watchlist")
-    ap.add_argument("--bars", default="60")
-    ap.add_argument("--valuation", action="store_true",
-                    help="also fetch each name's historical valuation percentile (slower)")
-    args = ap.parse_args()
-
-    if args.codes:
-        entries = [{"code": c.strip(), "name": c.strip()} for c in args.codes.split(",") if c.strip()]
-    else:
-        entries = [e for e in json.load(open(args.watchlist))["watchlist"] if e.get("enabled", True)]
-        if args.tag:
-            entries = [e for e in entries if args.tag in e.get("tags", [])]
-        if args.market:
-            entries = [e for e in entries if e["code"].split(".")[0] == args.market]
-
-    val_script = _find_valuation_script() if args.valuation else None
-
-    rows = []
-    for e in entries:
-        code = e["code"]
-        out = f"/tmp/scan_{code.replace('.', '_')}.json"
-        subprocess.run(
-            [sys.executable, "-m", "tools.stock_skills.cli", "analyze",
-             "--code", code, "--bars", args.bars, "--no-journal", "--output", out],
-            capture_output=True,
+def _explicit_entries(codes: str) -> list[dict[str, Any]]:
+    entries = [
+        normalize_watchlist_entry(
+            {"code": code.strip(), "name": code.strip(), "tags": [], "tier": "thematic"}
         )
-        val = _valuation(code, val_script) if args.valuation else None
-        try:
-            p = json.load(open(out))
-            cs = p["component_scores"]
-            rows.append([round(p["total_score"], 1), code, p.get("name", ""), p["label"],
-                         cs.get("trend", 0), cs.get("capital_flow", 0), cs.get("fundamental", 0),
-                         p.get("entry_price"), p.get("invalidation_level"), val])
-        except Exception:
-            rows.append([-1.0, code, e.get("name", ""), "ERR", 0, 0, 0, None, None, val])
+        for code in codes.split(",")
+        if code.strip()
+    ]
+    seen: set[str] = set()
+    for entry in entries:
+        if entry["code"] in seen:
+            raise ValueError(f"Duplicate watchlist code: {entry['code']}")
+        seen.add(entry["code"])
+    return entries
 
-    rows.sort(reverse=True, key=lambda r: r[0])
-    header = f"{'code':<10} {'name':<14} {'label':<16} {'tot':>5} | {'trn':>3} {'cap':>3} {'fun':>3} | {'price':>7} {'stop':>7}"
-    if args.valuation:
-        header += f" | {'val':>4} {'val%':>4} {'读':>4}"
-    print(header)
-    print("-" * (len(header) + 2))
-    for r in rows:
-        t, code, name, label, tr, cap, fu, px, inv, val = r
-        line = (f"{code:<10} {str(name)[:14]:<14} {label:<16} {t:>5} | "
-                f"{tr:>3.0f} {cap:>3.0f} {fu:>3.0f} | {str(px):>7} {str(inv):>7}")
-        if args.valuation:
-            metric = val[0] if val else "-"
-            pct = val[1] if val else None
-            line += f" | {metric:>4} {('' if pct is None else str(pct)):>4} {_val_flag(pct):>4}"
-        print(line)
-    print(f"\n{len(rows)} names scored. Score = momentum+quality; "
-          f"{'val% = historical valuation percentile (低=便宜). ' if args.valuation else 'add --valuation for cheap/expensive. '}"
-          f"Report only deltas/triggers vs the stored plan; do not re-derive per stock.")
+
+def _print_table(result: dict[str, Any], horizon: str) -> None:
+    rows = result["candidates"]
+    print(f"{'code':<11} {'tier':<10} {'status':<9} {'phase':<12} {'chg%':>7} {'RS%':>7} {'rank':>5} {'treatment':<14}")
+    print("-" * 88)
+    rank_by_code = {item["code"]: item["rank"] for item in result["rankings"][horizon]}
+    rows = sorted(
+        rows,
+        key=lambda row: (
+            0 if row["tier"] == "core" else 1,
+            rank_by_code.get(row["code"], 9999),
+            row["code"],
+        ),
+    )
+    for row in rows:
+        change = "-" if row.get("change_pct") is None else f"{row['change_pct']:.2f}"
+        relative = "-" if row.get("relative_strength_pct") is None else f"{row['relative_strength_pct']:.2f}"
+        rank = rank_by_code.get(row["code"], "-")
+        print(
+            f"{row['code']:<11} {row['tier']:<10} {row['filter_status']:<9} "
+            f"{row['session_phase']:<12} {change:>7} {relative:>7} {str(rank):>5} {row['treatment']:<14}"
+        )
+    print(
+        f"\nBatch snapshots {result['snapshot_received_count']}/{result['snapshot_request_count']}; "
+        f"deep analyses {len(result['deep_analysis'])}. Rankings only promote candidates; "
+        "rejected rows do not receive trade recommendations."
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Tiered batch watchlist scanner")
+    parser.add_argument("--watchlist", default="data/watchlists/core.json")
+    parser.add_argument("--tag")
+    parser.add_argument("--market", choices=["HK", "US", "SH", "SZ", "CC"])
+    parser.add_argument("--tier", choices=["core", "thematic", "proxy", "discovery"])
+    parser.add_argument("--codes", help="Comma-separated codes overriding the watchlist")
+    parser.add_argument("--bars", type=int, default=60)
+    parser.add_argument("--deep-top", type=int, default=10, help="Top thematic names per requested horizon")
+    parser.add_argument("--horizon", choices=["short", "swing", "both"], default="short")
+    parser.add_argument("--snapshot-only", action="store_true")
+    parser.add_argument("--event-days", type=int, default=None)
+    parser.add_argument("--portfolio-open-risk-pct", type=float, default=None)
+    parser.add_argument("--theme-open-risk-pct", type=float, default=None)
+    parser.add_argument("--valuation", action="store_true", help="Fetch valuation percentile for deep-analysis names")
+    parser.add_argument("--output", default=None, help="Optional JSON scan result")
+    args = parser.parse_args(argv)
+
+    entries = _explicit_entries(args.codes) if args.codes else load_watchlist(args.watchlist)
+    if args.tag:
+        entries = [entry for entry in entries if args.tag in entry["tags"]]
+    if args.market:
+        entries = [entry for entry in entries if entry["code"].split(".", 1)[0] == args.market]
+    if args.tier:
+        entries = [entry for entry in entries if entry["tier"] == args.tier]
+    if not entries:
+        parser.error("No enabled watchlist entries matched the filters")
+
+    horizons = () if args.snapshot_only else (("short", "swing") if args.horizon == "both" else (args.horizon,))
+    display_horizon = "short" if args.horizon == "both" else args.horizon
+    valuation_script = _find_valuation_script() if args.valuation else None
+    fetcher = FutuFetcher()
+
+    with tempfile.TemporaryDirectory(prefix="stock-watchlist-scan-") as tmpdir:
+        temp_dir = Path(tmpdir)
+        shared_path = temp_dir / "shared-context.json"
+        shared_written = False
+
+        def analyze(entry: dict[str, Any], horizon: str, shared) -> dict[str, Any]:
+            nonlocal shared_written
+            if not shared_written:
+                shared_path.write_text(
+                    json.dumps({"snapshots": {code: asdict(snapshot) for code, snapshot in shared.items()}}, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                shared_written = True
+            output = temp_dir / f"{entry['code'].replace('.', '_')}-{horizon}.json"
+            command = [
+                sys.executable,
+                "-m",
+                "tools.stock_skills.cli",
+                "analyze",
+                "--code",
+                entry["code"],
+                "--bars",
+                str(args.bars),
+                "--horizon",
+                horizon,
+                "--profile",
+                entry["valuation_profile"],
+                "--watchlist",
+                args.watchlist,
+                "--shared-context",
+                str(shared_path),
+                "--no-journal",
+                "--output",
+                str(output),
+            ]
+            if args.event_days is not None:
+                command.extend(["--event-days", str(args.event_days)])
+            if args.portfolio_open_risk_pct is not None:
+                command.extend(["--portfolio-open-risk-pct", str(args.portfolio_open_risk_pct)])
+            if args.theme_open_risk_pct is not None:
+                command.extend(["--theme-open-risk-pct", str(args.theme_open_risk_pct)])
+            underlying = entry.get("underlying_proxy")
+            if underlying:
+                instrument = shared.get(entry["code"])
+                proxy = shared.get(underlying)
+                confirmed = (
+                    instrument is not None
+                    and proxy is not None
+                    and instrument.prev_close > 0
+                    and proxy.prev_close > 0
+                    and (instrument.last_price - instrument.prev_close) * (proxy.last_price - proxy.prev_close) > 0
+                )
+                command.append("--underlying-confirmed" if confirmed else "--no-underlying-confirmed")
+            try:
+                completed = subprocess.run(command, capture_output=True, text=True, timeout=180, check=True)
+                recommendation = json.loads(output.read_text(encoding="utf-8"))
+                if completed.stderr.strip():
+                    recommendation["scan_stderr"] = completed.stderr.strip()
+            except subprocess.CalledProcessError as exc:
+                detail = (exc.stderr or exc.stdout or str(exc)).strip()
+                return {"error": detail, "entry_decision": "defer"}
+            except (subprocess.SubprocessError, OSError, ValueError, json.JSONDecodeError) as exc:
+                return {"error": str(exc), "entry_decision": "defer"}
+            if args.valuation:
+                recommendation["valuation_percentile"] = _valuation(entry["code"], valuation_script)
+            return recommendation
+
+        result = run_watchlist_scan(
+            entries,
+            fetcher,
+            analyzer=None if args.snapshot_only else analyze,
+            deep_top=args.deep_top,
+            deep_horizons=horizons,
+            context_codes=tuple(DEFAULT_MACRO_CODES),
+        )
+
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    _print_table(result, display_horizon)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

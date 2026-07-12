@@ -1,0 +1,32 @@
+{
+  "filters": [
+    {"type": "simple_field", "field": "MARKET", "values": ["CN"]},
+    {"type": "simple_property", "name": "PRICE", "lower": 3.0, "upper": 200.0},
+    {"type": "simple_property", "name": "MARKET_CAP", "lower": 10000000000.0},
+    {"type": "cumulative_property", "name": "TURNOVER_RATIO", "days": 5, "lower": 0.01, "upper": 0.25},
+    {"type": "cumulative_property", "name": "PRICE_CHANGE_PCT", "days": 5, "lower": -0.03, "upper": 0.20},
+    {"type": "financial_property", "name": "NET_PROFIT", "term": "LATEST", "lower": 0.0}
+  ],
+  "retrieves": [
+    {"type": "basic", "name": "CODE"},
+    {"type": "basic", "name": "NAME"},
+    {"type": "basic", "name": "INDUSTRY"},
+    {"type": "simple", "name": "PRICE"},
+    {"type": "simple", "name": "MARKET_CAP"},
+    {"type": "simple", "name": "PE_TTM"},
+    {"type": "simple", "name": "PB"},
+    {"type": "cumulative", "name": "PRICE_CHANGE_PCT", "days": 1},
+    {"type": "cumulative", "name": "PRICE_CHANGE_PCT", "days": 5},
+    {"type": "cumulative", "name": "PRICE_CHANGE_PCT", "days": 20},
+    {"type": "cumulative", "name": "AVG_TURNOVER", "days": 5},
+    {"type": "cumulative", "name": "TURNOVER_RATIO", "days": 5},
+    {"type": "financial", "name": "REVENUE_GROWTH", "term": "LATEST"},
+    {"type": "financial", "name": "NET_PROFIT_GROWTH", "term": "LATEST"},
+    {"type": "financial", "name": "ROE", "term": "LATEST"}
+  ],
+  "sort": {
+    "direction": "DESC",
+    "property_type": "cumulative",
+    "property_params": {"name": "AVG_TURNOVER", "days": 5}
+  }
+}

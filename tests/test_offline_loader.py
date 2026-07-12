@@ -31,6 +31,36 @@ class OfflineLoaderTests(unittest.TestCase):
         self.assertEqual(len(bars), 2)
         self.assertEqual(bars[-1].close, 300.77)
 
+    def test_load_snapshot_preserves_market_update_time(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "snapshot.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "data": [
+                            {
+                                "code": "US.TEST",
+                                "name": "Test",
+                                "last_price": 100,
+                                "open": 99,
+                                "high": 101,
+                                "low": 98,
+                                "prev_close": 99,
+                                "volume": 1000,
+                                "turnover": 100000,
+                                "update_time": "2026-07-10 15:59:00",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            snapshot = load_snapshot(path)
+
+        self.assertEqual(snapshot.timestamp, "2026-07-10 15:59:00")
+        self.assertIsNotNone(snapshot.captured_at)
+
     def test_load_capital_detects_intraday_acceleration(self):
         with tempfile.TemporaryDirectory() as tmp:
             cap = Path(tmp) / "cap.json"

@@ -44,6 +44,7 @@ def load_snapshot(path: str | Path, code: str | None = None) -> MarketSnapshot:
     row = rows[0]
     if code is not None:
         row = next((r for r in rows if r.get("code") == code), row)
+    captured_at = _now_iso()
     return MarketSnapshot(
         code=row.get("code", code or "N/A"),
         name=row.get("name", row.get("code", code or "")),
@@ -54,7 +55,8 @@ def load_snapshot(path: str | Path, code: str | None = None) -> MarketSnapshot:
         prev_close=float(row.get("prev_close", 0) or 0),
         volume=int(row.get("volume", 0) or 0),
         turnover=float(row.get("turnover", 0) or 0),
-        timestamp=_now_iso(),
+        timestamp=str(row.get("update_time") or captured_at),
+        captured_at=captured_at,
     )
 
 

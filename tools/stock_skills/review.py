@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
 from typing import Any
 
 from .models import KLineBar
@@ -86,6 +85,11 @@ def evaluate_recommendation(
     return {
         "code": recommendation.get("code"),
         "source_timestamp": recommendation.get("timestamp"),
+        "trade_id": recommendation.get("trade_id"),
+        "strategy_id": recommendation.get("strategy_id") or (recommendation.get("strategy_assessment") or {}).get("strategy_id"),
+        "strategy_version": recommendation.get("strategy_version"),
+        "horizon": recommendation.get("horizon") or (recommendation.get("strategy_assessment") or {}).get("horizon"),
+        "leveraged": recommendation.get("leveraged", False),
         "review_window": review_window,
         "label": label,
         "entry_price": entry_price,
@@ -95,6 +99,7 @@ def evaluate_recommendation(
         "final_return_pct": final_return_pct,
         "observed_bar_count": len(future_bars),
         "review_complete": required_bar_count is not None and len(future_bars) >= required_bar_count,
+        "evidence_kind": "synthetic" if required_bar_count is None else "realized-ohlc",
         "invalidated": invalidated,
         "directional_success": directional_success,
         "dominant_failure": dominant_failure,
@@ -119,34 +124,12 @@ def suggest_weight_adjustments(current_weights: dict[str, float], reviews: list[
                 f"received {len(usable)}."
             ],
         }
-
-    failures = [review.get("dominant_failure") for review in usable if review.get("directional_success") is False]
-    counter = Counter(str(failure) for failure in failures if failure and failure != "none")
-    weights = dict(current_weights)
-    notes: list[str] = []
-
-    if counter:
-        top_failure, count = counter.most_common(1)[0]
-        if top_failure in weights:
-            weights[top_failure] += 0.02
-            notes.append(f"Increased {top_failure} by 0.02 after {count} failed review(s).")
-            reducible = [key for key in weights if key != top_failure and weights[key] > 0.05]
-            if reducible:
-                reduction = 0.02 / len(reducible)
-                for key in reducible:
-                    weights[key] -= reduction
-    else:
-        notes.append("No recurring failure factor found; weights unchanged.")
-
-    total = sum(weights.values())
-    normalized = {key: round(value / total, 6) for key, value in weights.items()}
-    drift = round(1.0 - sum(normalized.values()), 6)
-    first_key = next(iter(normalized))
-    normalized[first_key] = round(normalized[first_key] + drift, 6)
-
     return {
-        "weights": normalized,
-        "eligible": True,
+        "weights": dict(current_weights),
+        "eligible": False,
         "sample_size": len(usable),
-        "notes": notes,
+        "notes": [
+            "Legacy failure-count weight bumps are frozen. Use evidence-optimize for "
+            "strategy-versioned chronological walk-forward evaluation; it is advisory only."
+        ],
     }

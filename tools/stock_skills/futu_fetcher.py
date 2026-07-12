@@ -147,6 +147,7 @@ class FutuFetcher:
         if not rows:
             raise ValueError(f"No snapshot returned for {code}")
         row = rows[0]
+        captured_at = _now_iso()
         return MarketSnapshot(
             code=row["code"],
             name=row.get("name", code),
@@ -157,7 +158,8 @@ class FutuFetcher:
             prev_close=float(row["prev_close"]),
             volume=int(row["volume"]),
             turnover=float(row["turnover"]),
-            timestamp=_now_iso(),
+            timestamp=str(row.get("update_time") or captured_at),
+            captured_at=captured_at,
         )
 
     def get_snapshots(self, codes: list[str]) -> list[MarketSnapshot]:
@@ -198,6 +200,7 @@ class FutuFetcher:
     @staticmethod
     def _row_to_snapshot(row: dict) -> MarketSnapshot | None:
         try:
+            captured_at = _now_iso()
             return MarketSnapshot(
                 code=row["code"],
                 name=row.get("name", row["code"]),
@@ -208,7 +211,8 @@ class FutuFetcher:
                 prev_close=float(row["prev_close"]),
                 volume=int(row["volume"]),
                 turnover=float(row["turnover"]),
-                timestamp=_now_iso(),
+                timestamp=str(row.get("update_time") or captured_at),
+                captured_at=captured_at,
             )
         except (KeyError, ValueError, TypeError):
             return None

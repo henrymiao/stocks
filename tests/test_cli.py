@@ -4,7 +4,13 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from tools.stock_skills.cli import DEFAULT_WEIGHTS, _recommend, main
+from tools.stock_skills.cli import (
+    DEFAULT_MACRO_CODES,
+    DEFAULT_WEIGHTS,
+    _recommend,
+    _snapshots_for_codes,
+    main,
+)
 from tools.stock_skills.journal import append_record, read_records
 from tools.stock_skills.models import (
     CapitalSnapshot,
@@ -130,12 +136,107 @@ class NoValidStopFetcher(FakeFetcher):
         )
 
 
+class StaleLiveFetcher(FakeFetcher):
+    def build_state(self, code, num_bars=30, user_context=None):
+        state = super().build_state(code, num_bars=num_bars, user_context=user_context)
+        snapshot = MarketSnapshot(
+            code=state.snapshot.code,
+            name=state.snapshot.name,
+            last_price=state.snapshot.last_price,
+            open=state.snapshot.open,
+            high=state.snapshot.high,
+            low=state.snapshot.low,
+            prev_close=state.snapshot.prev_close,
+            volume=state.snapshot.volume,
+            turnover=state.snapshot.turnover,
+            timestamp="2026-06-18T10:00:00+08:00",
+            captured_at="2026-06-18T10:20:00+08:00",
+        )
+        capital = CapitalSnapshot(0, 0, 0, 0, 0, "2026-06-18T09:40:00+08:00")
+        return InstrumentState(
+            snapshot=snapshot,
+            daily_bars=state.daily_bars,
+            intraday_bars=[],
+            capital=capital,
+            user_context=state.user_context,
+        )
+
+
 class PartialHistoryFetcher(FakeFetcher):
     def get_history_bars(self, code, start, end):
         return super().get_history_bars(code, start, end)[:2]
 
 
 class CliTests(unittest.TestCase):
+    def test_default_macro_context_includes_yen_and_credit_transmission(self):
+        self.assertIn("US.FXY", DEFAULT_MACRO_CODES)
+        self.assertIn("US.HYG", DEFAULT_MACRO_CODES)
+        self.assertIn("US.LQD", DEFAULT_MACRO_CODES)
+        self.assertNotIn("US.MOVE", DEFAULT_MACRO_CODES)
+
+    def test_live_stale_trend_is_recorded_and_blocks_entry(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "recommendation.json"
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", StaleLiveFetcher):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--no-journal",
+                        "--output",
+                        str(output),
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("trend", payload["data_quality"]["stale_components"])
+        self.assertIn("capital_flow", payload["data_quality"]["stale_components"])
+        self.assertFalse(payload["data_quality"]["entry_eligible"])
+        self.assertNotEqual(payload["strategy_assessment"]["entry_decision"], "enter")
+
+    def test_shared_snapshots_avoid_repeated_backdrop_fetches(self):
+        cached = {
+            "US.SPY": MarketSnapshot("US.SPY", "SPY", 101.0, 100.0, 101.0, 100.0, 100.0, 1, 100.0, "2026-07-10T16:10:00-04:00"),
+            "US.VIXY": MarketSnapshot("US.VIXY", "VIXY", 20.0, 20.0, 20.0, 20.0, 21.0, 1, 100.0, "2026-07-10T16:10:00-04:00"),
+        }
+        fetcher = mock.Mock()
+
+        selected = _snapshots_for_codes(fetcher, ["US.SPY", "US.VIXY"], cached)
+
+        self.assertEqual(set(selected), {"US.SPY", "US.VIXY"})
+        fetcher.get_index_snapshots.assert_not_called()
+
+    def test_evidence_optimize_writes_advisory_report_without_apply(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            recommendations = Path(tmpdir) / "recommendations.jsonl"
+            reviews = Path(tmpdir) / "reviews.jsonl"
+            weights = Path(tmpdir) / "weights.json"
+            output = Path(tmpdir) / "evidence.json"
+            recommendations.write_text("", encoding="utf-8")
+            reviews.write_text("", encoding="utf-8")
+            weights.write_text(json.dumps(DEFAULT_WEIGHTS), encoding="utf-8")
+
+            exit_code = main(
+                [
+                    "evidence-optimize",
+                    "--recommendations",
+                    str(recommendations),
+                    "--reviews",
+                    str(reviews),
+                    "--weights",
+                    str(weights),
+                    "--output",
+                    str(output),
+                ]
+            )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertFalse(payload["automatic_apply_allowed"])
+        self.assertEqual(payload["eligible_closed_trades"], 0)
+
     def test_dry_run_replays_fixture(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             output = Path(tmpdir) / "recommendation.json"
@@ -146,6 +247,67 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["code"], "SZ.002463")
         self.assertIn(payload["label"], {"hold", "trim-on-strength", "risk-reduce", "strong-watch", "low-buy-zone", "avoid"})
         self.assertIn("investment hypothesis", payload["analyst_hypothesis"])
+        self.assertEqual(payload["strategy_assessment"]["horizon"], "short")
+        self.assertEqual(payload["exit_plan"]["strategy_id"], "short-balanced-v1")
+        self.assertEqual(payload["total_score"], 54.74)
+        self.assertEqual(payload["trade_id"], "fixture-trade")
+        self.assertEqual(payload["position_state"]["trade_id"], "fixture-trade")
+        self.assertEqual(payload["position_state"]["state"], "entered")
+
+    def test_existing_position_requires_and_preserves_trade_id(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "recommendation.json"
+            with self.assertRaises(SystemExit):
+                main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--cost-basis",
+                        "140",
+                        "--output",
+                        str(output),
+                    ]
+                )
+
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--cost-basis",
+                        "140",
+                        "--trade-id",
+                        "original-trade-42",
+                        "--no-journal",
+                        "--output",
+                        str(output),
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["trade_id"], "original-trade-42")
+        self.assertEqual(payload["position_state"]["trade_id"], "original-trade-42")
+        self.assertEqual(payload["position_state"]["state"], "entered")
+
+    def test_dry_run_swing_uses_distinct_profile_and_missing_weekly_gate(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "recommendation.json"
+            exit_code = main([
+                "dry-run", "--code", "SZ.002463", "--output", str(output),
+                "--horizon", "swing", "--event-days", "10",
+            ])
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["strategy_assessment"]["horizon"], "swing")
+        self.assertEqual(payload["exit_plan"]["strategy_id"], "swing-balanced-v1")
+        self.assertEqual(payload["exit_plan"]["targets"][0]["r_multiple"], 1.5)
+        self.assertEqual(payload["exit_plan"]["runner_fraction"], 0.6)
+        self.assertIn("weekly-alignment", payload["strategy_assessment"]["gates_missing"])
+        self.assertEqual(payload["total_score"], 54.74)
 
     def test_dry_run_rejects_non_fixture_code(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -182,8 +344,22 @@ class CliTests(unittest.TestCase):
         self.assertIn("fundamental:profile=", refs)
         self.assertIsNotNone(payload["data_quality"])
         self.assertEqual(payload["data_quality"]["session_phase"], "after-close")
+        self.assertEqual(payload["schema_version"], "recommendation-v4")
+        self.assertEqual(payload["strategy_id"], "short-balanced-v1")
+        self.assertEqual(payload["strategy_version"], "v1")
+        self.assertEqual(payload["horizon"], "short")
+        self.assertTrue(payload["trade_id"].startswith("short-balanced-v1:"))
+        self.assertEqual(payload["position_state"]["state"], "flat")
+        self.assertIsNotNone(payload["exit_plan"])
+        self.assertLess(payload["exit_plan"]["initial_stop"], payload["invalidation_level"])
+        self.assertLessEqual(payload["exit_plan"]["risk_sizing"]["suggested_size_pct"], 25.0)
+        self.assertEqual(len(payload["exit_plan"]["targets"]), 2)
+        self.assertIsNotNone(payload["strategy_assessment"])
+        self.assertIn(payload["strategy_assessment"]["entry_decision"], {"enter", "watch", "reject"})
         # Position management appears in the trader plan (stop + suggested size).
         self.assertIn("Risk plan: stop near", payload["trader_plan"])
+        self.assertIn("TP1", payload["trader_plan"])
+        self.assertIn("TP2", payload["trader_plan"])
 
     def test_analyze_no_macro_flags_neutral(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -422,11 +598,10 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         refs = payload["source_refs"]
-        self.assertIn(
-            "position_fit: neutral (ATR available but no valid stop below price)",
-            refs,
-        )
+        self.assertTrue(any("no valid structured exit plan" in ref for ref in refs))
         self.assertFalse(any("no usable ATR evidence" in ref for ref in refs))
+        self.assertIsNone(payload["exit_plan"])
+        self.assertFalse(payload["data_quality"]["entry_eligible"])
 
     def test_analyze_usable_valuation_emits_revenue_breakdown(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -517,6 +692,42 @@ class CliTests(unittest.TestCase):
         self.assertIn("market:US.QQQ,US.SPY", refs)
         self.assertNotIn("market:SH.000001", refs)
         self.assertNotIn("cross_market: neutral default", refs)
+
+    def test_leveraged_cli_applies_overlay_and_allocation_cap(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main([
+                    "analyze", "--code", "US.SOXL", "--output", str(output),
+                    "--journal", str(journal), "--underlying-confirmed",
+                ])
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(payload["strategy_assessment"]["leveraged_overlay"])
+        self.assertIn("leveraged-overlay-v1", payload["strategy_assessment"]["strategy_id"])
+        self.assertEqual(payload["exit_plan"]["risk_sizing"]["allocation_cap_pct"], 15.0)
+        self.assertEqual(payload["exit_plan"]["targets"][1]["r_multiple"], 1.5)
+
+    def test_cli_scales_structured_size_to_portfolio_heat_headroom(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "rec.json"
+            journal = Path(tmpdir) / "recommendations.jsonl"
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main([
+                    "analyze", "--code", "SZ.002463", "--output", str(output),
+                    "--journal", str(journal), "--risk-budget-pct", "2.0",
+                    "--portfolio-open-risk-pct", "5.5", "--theme-open-risk-pct", "2.5",
+                ])
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        sizing = payload["exit_plan"]["risk_sizing"]
+        self.assertEqual(sizing["planned_risk_pct"], 0.5)
+        self.assertTrue(sizing["capped"])
+        self.assertIn("portfolio-heat", payload["strategy_assessment"]["gates_passed"])
+        self.assertTrue(any(ref.startswith("portfolio_heat:") for ref in payload["source_refs"]))
 
     def test_review_evaluates_journal_and_only_applies_with_flag(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -631,7 +842,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(read_records(reviews), [])
             self.assertFalse(weights.with_suffix(".json.bak").exists())
 
-    def test_review_apply_writes_weights_after_sixty_completed_rows(self):
+    def test_review_apply_cannot_use_legacy_failure_count_even_after_sixty_rows(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             recommendations = Path(tmpdir) / "recommendations.jsonl"
             reviews = Path(tmpdir) / "reviews.jsonl"
@@ -660,14 +871,14 @@ class CliTests(unittest.TestCase):
 
             review_rows = read_records(reviews)
             updated_weights = json.loads(weights.read_text(encoding="utf-8"))
-            history_rows = read_records(weights.parent / "weight_history.jsonl")
+            history_path = weights.parent / "weight_history.jsonl"
 
             self.assertEqual(exit_code, 0)
             self.assertEqual(len(review_rows), 60)
             self.assertTrue(all(row["review_complete"] for row in review_rows))
-            self.assertGreater(updated_weights["cross_market"], DEFAULT_WEIGHTS["cross_market"])
-            self.assertTrue(weights.with_suffix(".json.bak").exists())
-            self.assertEqual(len(history_rows), 1)
+            self.assertEqual(updated_weights, DEFAULT_WEIGHTS)
+            self.assertFalse(weights.with_suffix(".json.bak").exists())
+            self.assertFalse(history_path.exists())
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from pathlib import Path
 from .backtest import run_backtest
 from .capital import analyze_capital
 from .config import load_watchlist, load_weights, save_weights
-from .data_quality import assess_data_quality
+from .data_quality import assess_data_quality, detect_stale_components
 from .engine import build_recommendation, is_inverse_instrument
 from .fundamental import analyze_fundamental, infer_profile
 from .journal import append_record, ensure_journal, read_records
@@ -23,11 +23,26 @@ from .macro import (
     has_macro_proxy_evidence,
 )
 from .market import analyze_market, has_market_evidence
-from .models import CapitalSnapshot, FundamentalSnapshot, InstrumentState, KLineBar, MarketSnapshot, Recommendation
-from .position import analyze_position, compute_atr
+from .models import (
+    CapitalSnapshot,
+    FundamentalSnapshot,
+    InstrumentState,
+    KLineBar,
+    MarketSnapshot,
+    PositionStateSnapshot,
+    Recommendation,
+)
+from .position import analyze_position, analyze_structured_position, compute_atr
+from .path_backtest import assess_portfolio_heat
 from .review import evaluate_recommendation, suggest_weight_adjustments
 from .sector import analyze_sector
 from .session import classify_session_phase
+from .strategy import (
+    StrategyEvidence,
+    build_profile_exit_plan,
+    evaluate_strategy,
+    get_strategy_profile,
+)
 from .trend import analyze_trend
 
 FIXTURE_CODE = "SZ.002463"
@@ -49,7 +64,20 @@ A_SHARE_INDEX_CODES = ["SH.000001", "SZ.399006"]
 US_INDEX_CODES = ["US.QQQ", "US.SPY"]
 HK_INDEX_CODES = ["HK.800000", "HK.800700"]  # 恒生指数 / 恒生科技指数 (Futu codes; HSI/HSTECH aliases are not recognized)
 # Live macro proxies (ETFs) fetched by default for the macro-risk component.
-DEFAULT_MACRO_CODES = ["US.VIXY", "US.TLT", "US.UUP", "US.USO", "US.GLD"]
+# FXY captures yen appreciation/carry unwind, while HYG versus LQD detects
+# whether a rates/FX shock is spreading into credit risk. Raw JP10Y/JP30Y and
+# MOVE are external confirmation series because Futu does not expose reliable
+# symbols for those indices (US.MOVE is an unrelated listed equity).
+DEFAULT_MACRO_CODES = [
+    "US.VIXY",
+    "US.TLT",
+    "US.UUP",
+    "US.USO",
+    "US.GLD",
+    "US.FXY",
+    "US.HYG",
+    "US.LQD",
+]
 DEFAULT_RECOMMENDATIONS = "data/journal/recommendations.jsonl"
 DEFAULT_REVIEWS = "data/journal/reviews.jsonl"
 DEFAULT_WEIGHTS_PATH = "data/models/signal_weights.json"
@@ -66,6 +94,33 @@ def _evidence_codes(
         for code, snapshot in snapshots.items()
         if predicate({code: snapshot})
     ]
+
+
+def _load_shared_snapshots(path: str | None) -> dict[str, MarketSnapshot]:
+    if not path:
+        return {}
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    records = payload.get("snapshots", payload) if isinstance(payload, dict) else {}
+    if not isinstance(records, dict):
+        raise ValueError("shared context must contain a snapshots object")
+    snapshots: dict[str, MarketSnapshot] = {}
+    for code, record in records.items():
+        if not isinstance(record, dict):
+            continue
+        try:
+            snapshot = MarketSnapshot(**record)
+        except (TypeError, ValueError):
+            continue
+        snapshots[code] = snapshot
+    return snapshots
+
+
+def _snapshots_for_codes(fetcher, codes: list[str], shared: dict[str, MarketSnapshot]) -> dict[str, MarketSnapshot]:
+    selected = {code: shared[code] for code in codes if code in shared}
+    missing = [code for code in codes if code not in selected]
+    if missing:
+        selected.update(fetcher.get_index_snapshots(missing))
+    return selected
 
 
 def _fixture_state() -> InstrumentState:
@@ -102,6 +157,51 @@ def _tags_for_code(code: str, watchlist_path: str) -> list[str]:
             tags = entry.get("tags")
             return tags if isinstance(tags, list) else []
     return []
+
+
+def _is_leveraged(name: str, tags: list[str]) -> bool:
+    lowered = name.lower()
+    return "leveraged" in {str(tag).lower() for tag in tags} or any(
+        marker in lowered for marker in ("2x", "3x", "ultra", "daily bull", "daily bear")
+    )
+
+
+def _volume_ratio(bars: list[KLineBar]) -> float | None:
+    if len(bars) < 2:
+        return None
+    previous = bars[-21:-1]
+    if not previous:
+        return None
+    average = sum(bar.volume for bar in previous) / len(previous)
+    if average <= 0:
+        return None
+    return round(bars[-1].volume / average, 4)
+
+
+def _weekly_alignment(bars: list[KLineBar]) -> bool | None:
+    if len(bars) < 30:
+        return None
+    weekly_closes = [
+        bars[index : index + 5][-1].close
+        for index in range(0, len(bars), 5)
+        if bars[index : index + 5]
+    ]
+    if len(weekly_closes) < 6:
+        return None
+    fast = sum(weekly_closes[-3:]) / 3.0
+    slow = sum(weekly_closes[-6:]) / 6.0
+    return fast > slow and weekly_closes[-1] >= weekly_closes[-2]
+
+
+def _resistance_room_r(entry_price: float, resistance_levels: list[float], risk_per_share: float, breakout: bool) -> float | None:
+    if risk_per_share <= 0:
+        return None
+    overhead = sorted(level for level in resistance_levels if level > entry_price)
+    if overhead:
+        return round((overhead[0] - entry_price) / risk_per_share, 4)
+    if breakout:
+        return float("inf")
+    return None
 
 
 def _prefix_for_code(code: str) -> str:
@@ -153,9 +253,16 @@ def _recommend(
     fundamentals: FundamentalSnapshot | None = None,
     profile: str = "neutral",
     risk_budget_pct: float = 1.0,
-    atr_multiple: float = 2.0,
+    stop_buffer_atr: float | None = None,
     cost_basis: float | None = None,
     inverse: bool = False,
+    leveraged: bool = False,
+    horizon: str = "short",
+    event_days: int | None = None,
+    underlying_confirmed: bool | None = None,
+    portfolio_open_risk_pct: float | None = None,
+    theme_open_risk_pct: float | None = None,
+    trade_id: str | None = None,
 ) -> Recommendation:
     """Run every analyzer over `state`. Missing components score a neutral 50 and are flagged in source_refs."""
     trend = analyze_trend(state.snapshot, state.daily_bars)
@@ -170,12 +277,60 @@ def _recommend(
     market = analyze_market(index_snapshots or {})
     fundamental = analyze_fundamental(fundamentals, profile=profile)
     atr = compute_atr(state.daily_bars)
-    position = analyze_position(
+    strategy_profile = get_strategy_profile(horizon, leveraged=leveraged)
+    effective_trade_id = trade_id or f"{strategy_profile.strategy_id}:{state.snapshot.code}:{state.snapshot.timestamp}"
+    exit_plan = None
+    exit_plan_error = None
+    try:
+        exit_plan = build_profile_exit_plan(
+            strategy_profile,
+            entry_price=state.snapshot.last_price,
+            structural_invalidation=trend.invalidation_level,
+            atr=atr,
+            risk_budget_pct=risk_budget_pct,
+            stop_buffer_atr=stop_buffer_atr,
+        )
+    except ValueError as exc:
+        exit_plan_error = str(exc)
+    heat_allowed: bool | None = None
+    heat_note: str | None = None
+    if exit_plan is not None and portfolio_open_risk_pct is not None and theme_open_risk_pct is not None:
+        heat = assess_portfolio_heat(
+            proposed_risk_pct=exit_plan.risk_sizing.planned_risk_pct,
+            portfolio_open_risk_pct=portfolio_open_risk_pct,
+            theme_open_risk_pct=theme_open_risk_pct,
+        )
+        heat_allowed = heat.allowed
+        heat_note = (
+            f"portfolio_heat: allowed={heat.allowed}, planned={heat.allowed_risk_pct}%, "
+            f"portfolio_headroom={heat.portfolio_headroom_pct}%, theme_headroom={heat.theme_headroom_pct}%"
+        )
+        if heat.allowed and heat.scaled:
+            sizing = exit_plan.risk_sizing
+            reduced_size = heat.allowed_risk_pct / sizing.stop_distance_pct * 100.0
+            exit_plan = replace(
+                exit_plan,
+                risk_sizing=replace(
+                    sizing,
+                    suggested_size_pct=round(reduced_size, 2),
+                    planned_risk_pct=heat.allowed_risk_pct,
+                    capped=True,
+                ),
+            )
+    # Keep the legacy position-fit score frozen so Phase 2 can be compared against
+    # historical totals. Execution guidance and sizing come exclusively from ExitPlan.
+    legacy_position = analyze_position(
         last_price=state.snapshot.last_price,
         atr=atr,
         invalidation_level=trend.invalidation_level,
         risk_budget_pct=risk_budget_pct,
-        atr_multiple=atr_multiple,
+        last_trim_price=state.user_context.get("last_trim_price"),
+        cost_basis=cost_basis,
+    )
+    position = analyze_structured_position(
+        exit_plan,
+        atr,
+        exit_plan_error,
         last_trim_price=state.user_context.get("last_trim_price"),
         cost_basis=cost_basis,
     )
@@ -192,14 +347,21 @@ def _recommend(
         "macro_risk": macro_available,
         "market_regime": has_market_evidence(index_snapshots or {}),
         "fundamental": fundamentals is not None and fundamentals.pe_ttm is not None,
-        "position_fit": position.stop_price is not None,
+        "position_fit": exit_plan is not None,
     }
+    session_phase = classify_session_phase(
+        state.snapshot.code,
+        state.snapshot.captured_at or state.snapshot.timestamp,
+    )
     data_quality = assess_data_quality(
         availability,
-        classify_session_phase(state.snapshot.code, state.snapshot.timestamp),
+        session_phase,
+        stale_components=detect_stale_components(state.snapshot, state.capital, session_phase),
     )
 
     refs = list(source_refs)
+    if heat_note:
+        refs.append(heat_note)
     if not availability["trend"]:
         refs.append("trend: neutral default (no usable K-line evidence; need >=2 daily bars)")
     if not availability["capital_flow"]:
@@ -218,18 +380,22 @@ def _recommend(
         if atr is None:
             refs.append("position_fit: neutral (no usable ATR evidence; need >=2 daily bars)")
         else:
-            refs.append("position_fit: neutral (ATR available but no valid stop below price)")
+            refs.append(
+                "position_fit: neutral (no valid structured exit plan"
+                + (f": {exit_plan_error}" if exit_plan_error else "")
+                + ")"
+            )
     if inverse:
         refs.append("inverse-etf: backdrop (market/cross/macro) scores inverted")
 
-    return build_recommendation(
+    recommendation = build_recommendation(
         state=state,
         trend=trend,
         capital=capital,
         macro=macro,
         cross_market=cross,
         sector_score=sector.score,
-        position_fit_score=position.score,
+        position_fit_score=legacy_position.score,
         weights=weights,
         source_refs=refs,
         data_quality=data_quality,
@@ -242,6 +408,98 @@ def _recommend(
         position_size_pct=position.suggested_size_pct,
         position_stance=position.stance,
         inverse=inverse,
+        exit_plan=exit_plan,
+        position_state=PositionStateSnapshot(
+            state="entered" if cost_basis is not None else "flat",
+            remaining_fraction=1.0 if cost_basis is not None else 0.0,
+            trade_id=effective_trade_id,
+        ),
+    )
+    volume_ratio = _volume_ratio(state.daily_bars)
+    if volume_ratio is None:
+        volume_score = 50.0
+    elif volume_ratio >= strategy_profile.minimum_volume_ratio:
+        volume_score = 80.0
+    elif volume_ratio >= 0.8:
+        volume_score = 50.0
+    else:
+        volume_score = 30.0
+    relative_strength_positive = (
+        None if sector.relative_strength is None else sector.relative_strength >= 0
+    )
+    if trend.status == "breakout-confirmed":
+        trigger_confirmed: bool | None = True
+    elif trend.status in {"breakdown-risk", "breakout-vs-downtrend"}:
+        trigger_confirmed = False
+    else:
+        trigger_confirmed = None
+    resistance_room_r = (
+        None
+        if exit_plan is None
+        else _resistance_room_r(
+            state.snapshot.last_price,
+            trend.resistance_levels,
+            exit_plan.risk_per_share,
+            trigger_confirmed is True,
+        )
+    )
+    backdrop_score = round((market.score + macro.score + cross.score) / 3.0, 2)
+    liquidity_ok = state.snapshot.volume > 0 and state.snapshot.turnover > 0
+    factor_scores = {
+        "price_volume": round((trend.score + volume_score) / 2.0, 2),
+        "relative_strength": sector.score,
+        "market_regime": market.score,
+        "capital_flow": capital.score,
+        "liquidity_event": 70.0 if liquidity_ok else 20.0,
+        "position_fit": legacy_position.score,
+        "trend_quality": trend.score,
+        "fundamental": fundamental.score,
+        "backdrop": backdrop_score,
+        "volume_accumulation": capital.score,
+    }
+    evidence = StrategyEvidence(
+        factor_scores=factor_scores,
+        data_confidence=data_quality.confidence,
+        data_entry_eligible=data_quality.entry_eligible,
+        exit_plan_valid=exit_plan is not None,
+        session_phase=data_quality.session_phase,
+        trend_regime=trend.trend_regime,
+        relative_strength_positive=relative_strength_positive,
+        volume_ratio=volume_ratio,
+        trigger_confirmed=trigger_confirmed,
+        resistance_room_r=resistance_room_r,
+        market_regime=market.regime,
+        liquidity_ok=liquidity_ok,
+        weekly_aligned=_weekly_alignment(state.daily_bars),
+        event_days=event_days,
+        underlying_confirmed=underlying_confirmed,
+        portfolio_heat_allowed=heat_allowed,
+    )
+    strategy_assessment = evaluate_strategy(
+        strategy_profile,
+        evidence,
+        has_position=cost_basis is not None,
+        legacy_label=recommendation.label,
+    )
+    missing_text = (
+        f" missing={','.join(strategy_assessment.gates_missing)}"
+        if strategy_assessment.gates_missing
+        else ""
+    )
+    strategy_text = (
+        f" Strategy {strategy_assessment.strategy_id}: setup {strategy_assessment.setup_score}, "
+        f"entry={strategy_assessment.entry_decision}.{missing_text}"
+    )
+    return replace(
+        recommendation,
+        trader_plan=recommendation.trader_plan + strategy_text,
+        schema_version="recommendation-v4",
+        strategy_assessment=strategy_assessment,
+        strategy_id=strategy_assessment.strategy_id,
+        strategy_version="v1",
+        horizon=horizon,
+        trade_id=effective_trade_id,
+        leveraged=leveraged,
     )
 
 
@@ -271,6 +529,9 @@ def _cmd_dry_run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> i
         fundamentals=FundamentalSnapshot(FIXTURE_CODE, pe_ttm=66.1, pb=18.0, eps=1.99, dividend_ratio=0.34, market_val=2.85e11, eps_growth=40.0),
         profile="growth",
         cost_basis=140.0,
+        trade_id="fixture-trade",
+        horizon=args.horizon,
+        event_days=args.event_days,
     )
     _write(args.output, recommendation)
     return 0
@@ -281,12 +542,13 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     from .futu_fetcher import FutuFetcher
 
     fetcher = FutuFetcher()
+    shared_snapshots = _load_shared_snapshots(args.shared_context)
     user_context = {"last_trim_price": args.last_trim_price} if args.last_trim_price is not None else {}
     state = fetcher.build_state(args.code, num_bars=args.bars, user_context=user_context)
 
     tags = _tags_for_code(args.code, args.watchlist)
     cross_codes = args.cross if args.cross is not None else _default_cross_codes_for(args.code, tags)
-    cross_snapshots: dict[str, MarketSnapshot] = fetcher.get_index_snapshots(cross_codes) if cross_codes else {}
+    cross_snapshots: dict[str, MarketSnapshot] = _snapshots_for_codes(fetcher, cross_codes, shared_snapshots) if cross_codes else {}
 
     refs = [f"futu:snapshot:{args.code}"]
     if len(state.daily_bars) >= 2:
@@ -308,7 +570,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     index_snapshots: dict[str, MarketSnapshot] | None = None
     if not args.no_market:
         index_codes = args.indices or _default_index_codes_for(args.code)
-        index_snapshots = fetcher.get_index_snapshots(index_codes)
+        index_snapshots = _snapshots_for_codes(fetcher, index_codes, shared_snapshots)
         market_evidence_codes = _evidence_codes(index_snapshots, has_market_evidence)
         if market_evidence_codes:
             refs.append(f"market:{','.join(market_evidence_codes)}")
@@ -320,7 +582,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         if has_macro_input_evidence(macro_inputs):
             refs.append("macro:manual-override")
     elif not args.no_macro:
-        macro_snapshots = fetcher.get_index_snapshots(args.macro_codes or DEFAULT_MACRO_CODES)
+        macro_snapshots = _snapshots_for_codes(fetcher, args.macro_codes or DEFAULT_MACRO_CODES, shared_snapshots)
         macro_evidence_codes = _evidence_codes(macro_snapshots, has_macro_proxy_evidence)
         if macro_evidence_codes:
             refs.append(f"macro:proxies:{','.join(macro_evidence_codes)}")
@@ -375,6 +637,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
                 refs.append("revenue_breakdown:" + ",".join(f"{name}={pct:g}%" for name, pct in financials.revenue_breakdown))
 
     inverse = args.inverse if args.inverse is not None else is_inverse_instrument(state.snapshot.name, tags)
+    leveraged = _is_leveraged(state.snapshot.name, tags)
     weights = load_weights(args.weights) if args.weights else DEFAULT_WEIGHTS
     recommendation = _recommend(
         state=state,
@@ -388,9 +651,16 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         fundamentals=fundamentals,
         profile=profile,
         risk_budget_pct=args.risk_budget_pct,
-        atr_multiple=args.atr_multiple,
+        stop_buffer_atr=args.stop_buffer_atr,
         cost_basis=args.cost_basis,
         inverse=inverse,
+        leveraged=leveraged,
+        horizon=args.horizon,
+        event_days=args.event_days,
+        underlying_confirmed=args.underlying_confirmed,
+        portfolio_open_risk_pct=args.portfolio_open_risk_pct,
+        theme_open_risk_pct=args.theme_open_risk_pct,
+        trade_id=args.trade_id,
     )
     _write(args.output, recommendation)
     if not args.no_journal:
@@ -455,9 +725,9 @@ def _cmd_review(args: argparse.Namespace) -> int:
         entry = save_weights(args.weights, suggestion["weights"], reason=reason)
         print(f"Applied new weights (backup at {args.weights}.bak). History: {entry['timestamp']}")
     elif args.apply:
-        print("Weights not applied: realised review sample is below the safety threshold.")
+        print("Weights not applied: the legacy suggestion is ineligible; use the advisory evidence-optimize report.")
     else:
-        print("Suggestion only. Re-run with --apply after the sample is eligible to write weights back.")
+        print("Outcome review complete. Legacy weight mutation is frozen; use evidence-optimize for advisory evaluation.")
     return 0
 
 
@@ -496,6 +766,7 @@ def _cmd_analyze_offline(args: argparse.Namespace) -> int:
         refs.append(f"offline:fundamental(profile={profile},pe_ttm={fundamentals.pe_ttm})")
 
     inverse = args.inverse if args.inverse is not None else is_inverse_instrument(state.snapshot.name, tags)
+    leveraged = _is_leveraged(state.snapshot.name, tags)
     weights = load_weights(args.weights) if args.weights else DEFAULT_WEIGHTS
     recommendation = _recommend(
         state=state,
@@ -509,9 +780,16 @@ def _cmd_analyze_offline(args: argparse.Namespace) -> int:
         fundamentals=fundamentals,
         profile=profile,
         risk_budget_pct=args.risk_budget_pct,
-        atr_multiple=args.atr_multiple,
+        stop_buffer_atr=args.stop_buffer_atr,
         cost_basis=args.cost_basis,
         inverse=inverse,
+        leveraged=leveraged,
+        horizon=args.horizon,
+        event_days=args.event_days,
+        underlying_confirmed=args.underlying_confirmed,
+        portfolio_open_risk_pct=args.portfolio_open_risk_pct,
+        theme_open_risk_pct=args.theme_open_risk_pct,
+        trade_id=args.trade_id,
     )
     _write(args.output, recommendation)
     if not args.no_journal:
@@ -538,6 +816,38 @@ def _cmd_backtest(args: argparse.Namespace) -> int:
         out = Path(args.output)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(text, encoding="utf-8")
+    print(text)
+    return 0
+
+
+def _cmd_path_backtest(args: argparse.Namespace) -> int:
+    from .path_backtest import run_path_backtest, scenarios_from_record
+
+    source = Path(args.scenario)
+    payload = json.loads(source.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("path-backtest scenario must be a JSON object")
+    report = run_path_backtest(scenarios_from_record(payload))
+    text = json.dumps(report, ensure_ascii=False, indent=2)
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(text, encoding="utf-8")
+    print(text)
+    return 0
+
+
+def _cmd_evidence_optimize(args: argparse.Namespace) -> int:
+    from .evidence_optimization import build_evidence_report
+
+    report = build_evidence_report(
+        read_records(args.recommendations),
+        read_records(args.reviews),
+        load_weights(args.weights),
+    )
+    text = json.dumps(report, ensure_ascii=False, indent=2)
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(text, encoding="utf-8")
     print(text)
     return 0
 
@@ -585,6 +895,8 @@ def main(argv: list[str] | None = None) -> int:
     dry_run = subparsers.add_parser("dry-run", help=f"Replay the frozen {FIXTURE_CODE} fixture offline (pipeline check only)")
     dry_run.add_argument("--code", required=True, help=f"Must be {FIXTURE_CODE}; the fixture is not a real-data analysis of other codes")
     dry_run.add_argument("--output", required=True)
+    dry_run.add_argument("--horizon", choices=["short", "swing"], default="short", help="Strategy horizon for the frozen fixture")
+    dry_run.add_argument("--event-days", type=int, default=None, help="Trading days until a known event for swing-gate verification")
 
     analyze = subparsers.add_parser("analyze", help="Analyze a real instrument via Futu OpenD (snapshot + daily K-line + capital flow)")
     analyze.add_argument("--code", required=True, help="Instrument code, e.g. SZ.002463, US.NVDA, CC.BTC")
@@ -611,18 +923,28 @@ def main(argv: list[str] | None = None) -> int:
     analyze.add_argument("--roe", type=float, default=None, help="Return on equity %% for the business-quality sub-score")
     analyze.add_argument("--profile", choices=["growth", "value", "neutral"], default=None, help="Valuation profile; default inferred from watchlist tags")
     analyze.add_argument("--watchlist", default=DEFAULT_WATCHLIST_PATH, help=f"Watchlist path for profile inference (default: {DEFAULT_WATCHLIST_PATH})")
+    analyze.add_argument("--shared-context", default=None, help=argparse.SUPPRESS)
     analyze.add_argument("--risk-budget-pct", type=float, default=1.0, help="Account %% to risk per trade for position sizing (default: 1.0)")
-    analyze.add_argument("--atr-multiple", type=float, default=2.0, help="ATR multiple for the volatility stop (default: 2.0)")
+    analyze.add_argument(
+        "--stop-buffer-atr", "--atr-multiple", dest="stop_buffer_atr", type=float, default=None,
+        help="Override the profile ATR buffer beyond structural invalidation (short 0.25, swing 0.5; --atr-multiple is a compatibility alias)",
+    )
+    analyze.add_argument("--horizon", choices=["short", "swing"], default="short", help="Strategy horizon (default: short, 1-3 trading days)")
+    analyze.add_argument("--event-days", type=int, default=None, help="Trading days until the next known major event; required to clear the swing event gate")
+    analyze.add_argument("--underlying-confirmed", action=argparse.BooleanOptionalAction, default=None, help="Whether a leveraged ETF is confirmed by its underlying proxy")
+    analyze.add_argument("--portfolio-open-risk-pct", type=float, default=None, help="Current total open portfolio risk %% for the 6%% heat gate")
+    analyze.add_argument("--theme-open-risk-pct", type=float, default=None, help="Current correlated-theme open risk %% for the 3%% heat gate")
     analyze.add_argument("--cost-basis", type=float, default=None, help="Existing cost basis, to report open P&L in the plan")
+    analyze.add_argument("--trade-id", default=None, help="Existing trade id for position-management records; new entries get a deterministic id")
     analyze.add_argument("--inverse", action=argparse.BooleanOptionalAction, default=None, help="Treat as an inverse/short ETF (invert backdrop scores); default auto-detected from name/tags")
 
-    review = subparsers.add_parser("review", help="Review past recommendations against later price action and suggest weight changes")
+    review = subparsers.add_parser("review", help="Review past recommendations against later price action and record outcomes")
     review.add_argument("--window", choices=sorted(REVIEW_WINDOW_DAYS), default="3d", help="Review horizon in trading days (default: 3d)")
     review.add_argument("--code", default=None, help="Only review recommendations for this code")
     review.add_argument("--recommendations", default=DEFAULT_RECOMMENDATIONS, help=f"Recommendation journal path (default: {DEFAULT_RECOMMENDATIONS})")
     review.add_argument("--reviews", default=DEFAULT_REVIEWS, help=f"Reviews output path (default: {DEFAULT_REVIEWS})")
     review.add_argument("--weights", default=DEFAULT_WEIGHTS_PATH, help=f"Signal weights path (default: {DEFAULT_WEIGHTS_PATH})")
-    review.add_argument("--apply", action="store_true", help="Write suggested weights back (creates a .bak backup and a history entry)")
+    review.add_argument("--apply", action="store_true", help="Deprecated compatibility flag; legacy weight mutation is frozen")
 
     offline = subparsers.add_parser("analyze-offline", help="Score from pre-fetched futuapi JSON (snapshot + kline), no OpenD")
     offline.add_argument("--code", required=True, help="Instrument code, e.g. US.SOXL")
@@ -642,8 +964,17 @@ def main(argv: list[str] | None = None) -> int:
     offline.add_argument("--net-margin", type=float, default=None, help="Net margin %% (business-quality)")
     offline.add_argument("--roe", type=float, default=None, help="ROE %% (business-quality)")
     offline.add_argument("--risk-budget-pct", type=float, default=1.0, help="Account %% to risk per trade (default: 1.0)")
-    offline.add_argument("--atr-multiple", type=float, default=2.0, help="ATR multiple for the volatility stop (default: 2.0)")
+    offline.add_argument(
+        "--stop-buffer-atr", "--atr-multiple", dest="stop_buffer_atr", type=float, default=None,
+        help="Override the profile ATR buffer beyond structural invalidation (short 0.25, swing 0.5; --atr-multiple is a compatibility alias)",
+    )
+    offline.add_argument("--horizon", choices=["short", "swing"], default="short", help="Strategy horizon (default: short, 1-3 trading days)")
+    offline.add_argument("--event-days", type=int, default=None, help="Trading days until the next known major event; required to clear the swing event gate")
+    offline.add_argument("--underlying-confirmed", action=argparse.BooleanOptionalAction, default=None, help="Whether a leveraged ETF is confirmed by its underlying proxy")
+    offline.add_argument("--portfolio-open-risk-pct", type=float, default=None, help="Current total open portfolio risk %% for the 6%% heat gate")
+    offline.add_argument("--theme-open-risk-pct", type=float, default=None, help="Current correlated-theme open risk %% for the 3%% heat gate")
     offline.add_argument("--cost-basis", type=float, default=None, help="Existing cost basis, to report open P&L")
+    offline.add_argument("--trade-id", default=None, help="Existing trade id for position-management records; new entries get a deterministic id")
     offline.add_argument("--inverse", action=argparse.BooleanOptionalAction, default=None, help="Treat as an inverse/short ETF (invert backdrop scores); default auto-detected from name/tags")
     offline.add_argument("--last-trim-price", type=float, default=None, help="Prior partial-trim price for position context")
     offline.add_argument("--weights", default=None, help="Path to a signal_weights.json; defaults to built-in weights")
@@ -656,11 +987,27 @@ def main(argv: list[str] | None = None) -> int:
     backtest.add_argument("--code", default=None, help="Only back-test this code")
     backtest.add_argument("--output", default=None, help="Optional path to also write the JSON report")
 
+    path_backtest = subparsers.add_parser("path-backtest", help="Replay structured exit plans through chronological OHLC bars")
+    path_backtest.add_argument("--scenario", required=True, help="JSON file containing serialized exit plans, bars, and optional execution costs")
+    path_backtest.add_argument("--output", required=True, help="Path for the JSON path-backtest report")
+
+    evidence_optimize = subparsers.add_parser(
+        "evidence-optimize",
+        help="Build an advisory strategy-versioned walk-forward optimisation report",
+    )
+    evidence_optimize.add_argument("--recommendations", default=DEFAULT_RECOMMENDATIONS)
+    evidence_optimize.add_argument("--reviews", default=DEFAULT_REVIEWS)
+    evidence_optimize.add_argument("--weights", default=DEFAULT_WEIGHTS_PATH)
+    evidence_optimize.add_argument("--output", required=True)
+
     prepost = subparsers.add_parser("prepost", help="Show pre-market / after-hours price and change for US codes (via Futu OpenD)")
     prepost.add_argument("codes", nargs="+", help="One or more codes, e.g. US.SOXL US.SMH US.NVDA")
     prepost.add_argument("--json", action="store_true", help="Emit JSON instead of a text table")
 
     args = parser.parse_args(argv)
+
+    if args.command in {"analyze", "analyze-offline"} and args.cost_basis is not None and not args.trade_id:
+        parser.error("--cost-basis position management requires --trade-id to link the original trade")
 
     if args.command == "dry-run":
         return _cmd_dry_run(args, parser)
@@ -672,6 +1019,10 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_analyze_offline(args)
     if args.command == "backtest":
         return _cmd_backtest(args)
+    if args.command == "path-backtest":
+        return _cmd_path_backtest(args)
+    if args.command == "evidence-optimize":
+        return _cmd_evidence_optimize(args)
     if args.command == "prepost":
         return _cmd_prepost(args)
     return 2

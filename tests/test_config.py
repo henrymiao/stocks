@@ -27,6 +27,67 @@ class ConfigTests(unittest.TestCase):
 
         self.assertEqual([entry["code"] for entry in entries], ["SZ.002463"])
         self.assertEqual(entries[0]["tags"], ["pcb"])
+        self.assertEqual(entries[0]["tier"], "thematic")
+        self.assertEqual(entries[0]["strategy_profiles"], ["short", "swing"])
+        self.assertEqual(entries[0]["asset_type"], "equity")
+        self.assertEqual(entries[0]["benchmark"], "SZ.399006")
+
+    def test_load_watchlist_infers_core_proxy_and_leveraged_metadata(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "core.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "watchlist": [
+                            {"code": "HK.09868", "name": "小鹏", "tags": ["holding", "growth"]},
+                            {"code": "US.QQQ", "name": "QQQ", "tags": ["index", "macro"]},
+                            {"code": "US.SOXL", "name": "SOXL", "tags": ["leveraged", "semiconductor"]},
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            entries = load_watchlist(path)
+
+        by_code = {entry["code"]: entry for entry in entries}
+        self.assertEqual(by_code["HK.09868"]["tier"], "core")
+        self.assertEqual(by_code["US.QQQ"]["tier"], "proxy")
+        self.assertEqual(by_code["US.SOXL"]["asset_type"], "leveraged-etf")
+        self.assertEqual(by_code["US.SOXL"]["underlying_proxy"], "US.SMH")
+        self.assertEqual(by_code["HK.09868"]["valuation_profile"], "growth")
+
+    def test_load_watchlist_rejects_duplicate_codes_even_when_names_differ(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "core.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "watchlist": [
+                            {"code": "US.NVDA", "name": "NVIDIA", "tags": []},
+                            {"code": "US.NVDA", "name": "英伟达", "tags": ["ai"]},
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "Duplicate watchlist code: US.NVDA"):
+                load_watchlist(path)
+
+    def test_load_watchlist_rejects_invalid_tier_priority_and_strategy(self):
+        cases = [
+            ({"tier": "vip"}, "tier"),
+            ({"priority": 101}, "priority"),
+            ({"strategy_profiles": ["monthly"]}, "strategy_profiles"),
+        ]
+        for overrides, expected in cases:
+            with self.subTest(overrides=overrides), tempfile.TemporaryDirectory() as tmpdir:
+                path = Path(tmpdir) / "core.json"
+                entry = {"code": "US.NVDA", "name": "NVIDIA", "tags": []} | overrides
+                path.write_text(json.dumps({"watchlist": [entry]}), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, expected):
+                    load_watchlist(path)
 
     def test_load_weights_requires_all_components_and_sum_one(self):
         with tempfile.TemporaryDirectory() as tmpdir:

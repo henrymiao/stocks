@@ -10,6 +10,9 @@ _MACRO_INPUT_VALUES = {
     "geopolitical_risk": ("elevated", "normal"),
     "oil_shock": (True, False),
     "dollar_pressure": ("high", "normal"),
+    "jgb_stress": ("elevated", "normal"),
+    "yen_carry_stress": ("elevated", "normal"),
+    "credit_stress": ("elevated", "normal"),
 }
 
 
@@ -53,6 +56,15 @@ def analyze_macro_risk(inputs: dict[str, object]) -> MacroAnalysis:
     if _supported_macro_value(inputs, "dollar_pressure") == "high":
         score -= 6
         notes.append("Dollar or yield pressure is high.")
+    if _supported_macro_value(inputs, "jgb_stress") == "elevated":
+        score -= 10
+        notes.append("JGB yield stress is elevated.")
+    if _supported_macro_value(inputs, "yen_carry_stress") == "elevated":
+        score -= 12
+        notes.append("Yen carry-trade unwind risk is elevated.")
+    if _supported_macro_value(inputs, "credit_stress") == "elevated":
+        score -= 10
+        notes.append("Credit-market stress is elevated.")
 
     score = round(max(0.0, min(100.0, score)), 2)
     if score >= 60:
@@ -75,8 +87,14 @@ _MACRO_PROXIES = {
     "US.USO": (-8, "原油"),            # oil spike -> inflation/geopolitics risk-off
     "US.GLD": (-4, "黄金"),            # gold bid -> mild risk-off / hedging
     "US.TLT": (10, "长端美债价格"),     # bond price up = yields down -> risk-on for growth
+    "US.FXY": (-14, "日元价格代理"),     # yen up -> carry unwind / forced deleveraging risk
+    "US.HYG": (10, "高收益信用债"),      # junk credit up -> easier risk conditions
+    "US.LQD": (4, "投资级信用债"),       # investment-grade credit up -> mildly risk-on
 }
 _BIG_MOVE = 0.015  # 1.5% is a meaningful one-day move for these proxies
+_YEN_STRESS_MOVE = 0.01
+_CREDIT_RELATIVE_STRESS = -0.0075
+_FEAR_STRESS_MOVE = 0.03
 
 
 def _has_snapshot_evidence(
@@ -118,6 +136,29 @@ def analyze_macro_from_proxies(snapshots: dict[str, MarketSnapshot]) -> MacroAna
         direction = "up" if change > 0 else "down"
         notes.append(f"{label} ({code}) {direction} {round(change * 100, 2)}%.")
 
+    yen_change = _snapshot_change(snapshots, "US.FXY")
+    fear_change = _snapshot_change(snapshots, "US.VIXY")
+    hyg_change = _snapshot_change(snapshots, "US.HYG")
+    lqd_change = _snapshot_change(snapshots, "US.LQD")
+    credit_relative = (
+        hyg_change - lqd_change
+        if hyg_change is not None and lqd_change is not None
+        else None
+    )
+    if yen_change is not None and yen_change >= _YEN_STRESS_MOVE:
+        notes.append("日元单日明显升值，套息交易平仓风险上升。")
+        if fear_change is not None and fear_change >= _FEAR_STRESS_MOVE:
+            score -= 8
+            notes.append("日元升值与恐慌指标同步上升，去杠杆信号形成共振。")
+        if credit_relative is not None and credit_relative <= _CREDIT_RELATIVE_STRESS:
+            score -= 8
+            notes.append("日元升值且高收益债弱于投资级债，套息与信用压力形成共振。")
+    if credit_relative is not None and credit_relative <= _CREDIT_RELATIVE_STRESS:
+        notes.append(
+            "信用风险偏好恶化：高收益债相对投资级债落后"
+            f" {round(abs(credit_relative) * 100, 2)} 个百分点。"
+        )
+
     if used == 0:
         return MacroAnalysis(score=50.0, regime="neutral", notes=["No macro proxy data; macro regime is neutral."])
 
@@ -129,6 +170,14 @@ def analyze_macro_from_proxies(snapshots: dict[str, MarketSnapshot]) -> MacroAna
     else:
         regime = "neutral"
     return MacroAnalysis(score=score, regime=regime, notes=notes)
+
+
+def _snapshot_change(
+    snapshots: dict[str, MarketSnapshot],
+    code: str,
+) -> float | None:
+    snapshot = snapshots.get(code)
+    return _pct_change(snapshot) if snapshot is not None else None
 
 
 def _pct_change(snapshot: MarketSnapshot) -> float | None:

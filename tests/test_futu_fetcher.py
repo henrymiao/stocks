@@ -198,6 +198,13 @@ class FutuFetcherTests(unittest.TestCase):
         self.assertEqual(snapshot.last_price, 147.9)
         self.assertIn("get_snapshot.py", runner.commands[0][1])
 
+    def test_snapshot_preserves_market_update_time_and_capture_time(self):
+        payload = {"data": [{**SNAPSHOT_PAYLOAD["data"][0], "update_time": "2026-07-10 14:59:00"}]}
+        snapshot = _fetcher(FakeRunner({"get_snapshot.py": payload})).get_snapshot("SZ.002463")
+
+        self.assertEqual(snapshot.timestamp, "2026-07-10 14:59:00")
+        self.assertIsNotNone(snapshot.captured_at)
+
     def test_get_daily_bars_parses_kline_records(self):
         runner = FakeRunner({"get_kline.py": KLINE_PAYLOAD})
         bars = _fetcher(runner).get_daily_bars("SZ.002463", num=2)

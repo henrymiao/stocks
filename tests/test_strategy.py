@@ -91,6 +91,41 @@ class StrategyGateTests(unittest.TestCase):
         self.assertEqual(short.suggested_allocation_pct, 20.0)
         self.assertGreater(short.setup_score, 65.0)
         self.assertGreater(swing.setup_score, 65.0)
+        self.assertEqual(short.decision_policy, "logic-first-correlation-aware-v3")
+        self.assertIn("market_behavior", short.factor_clusters)
+
+    def test_correlated_tape_factors_are_aggregated_once(self):
+        scores = dict(_good_evidence().factor_scores)
+        scores.update(
+            fundamental=50.0,
+            price_volume=100.0,
+            relative_strength=100.0,
+            capital_flow=100.0,
+            market_regime=50.0,
+            liquidity_event=50.0,
+            position_fit=50.0,
+        )
+        result = evaluate_strategy(
+            get_strategy_profile("short"),
+            _good_evidence(factor_scores=scores),
+        )
+
+        self.assertEqual(result.factor_clusters["market_behavior"], 100.0)
+        self.assertEqual(result.setup_score, 70.0)
+
+    def test_independent_thesis_cluster_changes_short_setup(self):
+        scores = dict(_good_evidence().factor_scores)
+        for key in scores:
+            scores[key] = 50.0
+        scores["fundamental"] = 100.0
+
+        result = evaluate_strategy(
+            get_strategy_profile("short"),
+            _good_evidence(factor_scores=scores),
+        )
+
+        self.assertEqual(result.factor_clusters["thesis"], 100.0)
+        self.assertEqual(result.setup_score, 60.0)
 
     def test_low_confidence_or_missing_exit_plan_rejects_entry(self):
         profile = get_strategy_profile("short")

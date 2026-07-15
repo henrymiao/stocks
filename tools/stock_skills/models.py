@@ -280,6 +280,7 @@ class StrategyAssessment:
     entry_decision: str
     position_decision: str | None
     factor_scores: dict[str, float]
+    factor_clusters: dict[str, float]
     gates_passed: tuple[str, ...]
     gates_failed: tuple[str, ...]
     gates_missing: tuple[str, ...]

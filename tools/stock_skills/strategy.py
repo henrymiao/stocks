@@ -12,6 +12,8 @@ class StrategyProfile:
     strategy_id: str
     horizon: str
     factor_weights: dict[str, float]
+    factor_clusters: dict[str, tuple[str, ...]]
+    cluster_weights: dict[str, float]
     stop_buffer_atr: float
     target_specs: tuple[tuple[str, float, float], ...]
     trailing_atr_multiple: float
@@ -54,12 +56,25 @@ SHORT_PROFILE = StrategyProfile(
     strategy_id="short-balanced-v1",
     horizon="short",
     factor_weights={
-        "price_volume": 0.30,
-        "relative_strength": 0.20,
-        "market_regime": 0.15,
-        "capital_flow": 0.15,
-        "liquidity_event": 0.10,
-        "position_fit": 0.10,
+        "fundamental": 1.00,
+        "price_volume": 0.40,
+        "relative_strength": 0.30,
+        "capital_flow": 0.30,
+        "market_regime": 0.60,
+        "liquidity_event": 0.40,
+        "position_fit": 1.00,
+    },
+    factor_clusters={
+        "thesis": ("fundamental",),
+        "market_behavior": ("price_volume", "relative_strength", "capital_flow"),
+        "environment": ("market_regime", "liquidity_event"),
+        "risk_fit": ("position_fit",),
+    },
+    cluster_weights={
+        "thesis": 0.20,
+        "market_behavior": 0.40,
+        "environment": 0.20,
+        "risk_fit": 0.20,
     },
     stop_buffer_atr=0.25,
     target_specs=(("tp1", 1.0, 0.25), ("tp2", 1.8, 0.25)),
@@ -81,12 +96,24 @@ SWING_PROFILE = StrategyProfile(
     strategy_id="swing-balanced-v1",
     horizon="swing",
     factor_weights={
-        "trend_quality": 0.25,
-        "relative_strength": 0.20,
-        "fundamental": 0.20,
-        "backdrop": 0.15,
-        "volume_accumulation": 0.10,
-        "position_fit": 0.10,
+        "fundamental": 1.00,
+        "trend_quality": 0.35,
+        "relative_strength": 0.35,
+        "volume_accumulation": 0.30,
+        "backdrop": 1.00,
+        "position_fit": 1.00,
+    },
+    factor_clusters={
+        "thesis": ("fundamental",),
+        "market_behavior": ("trend_quality", "relative_strength", "volume_accumulation"),
+        "environment": ("backdrop",),
+        "risk_fit": ("position_fit",),
+    },
+    cluster_weights={
+        "thesis": 0.30,
+        "market_behavior": 0.35,
+        "environment": 0.20,
+        "risk_fit": 0.15,
     },
     stop_buffer_atr=0.5,
     target_specs=(("tp1", 1.5, 0.20), ("tp2", 2.5, 0.20)),
@@ -159,14 +186,47 @@ def _finite_score(name: str, value: object) -> float:
     return max(0.0, min(100.0, float(value)))
 
 
-def _setup_score(profile: StrategyProfile, scores: dict[str, float]) -> tuple[float, dict[str, float]]:
+def _setup_score(
+    profile: StrategyProfile,
+    scores: dict[str, float],
+) -> tuple[float, dict[str, float], dict[str, float]]:
+    """Aggregate correlated factors once through independent evidence clusters."""
     used: dict[str, float] = {}
-    total = 0.0
-    for name, weight in profile.factor_weights.items():
+    for name in profile.factor_weights:
         score = _finite_score(name, scores.get(name))
         used[name] = round(score, 2)
-        total += score * weight
-    return round(total, 2), used
+
+    cluster_names = set(profile.factor_clusters)
+    if cluster_names != set(profile.cluster_weights):
+        raise ValueError("factor_clusters and cluster_weights must use the same cluster names")
+    if not math.isclose(sum(profile.cluster_weights.values()), 1.0, abs_tol=1e-9):
+        raise ValueError("cluster_weights must sum to 1")
+
+    clustered_factors = [
+        factor
+        for members in profile.factor_clusters.values()
+        for factor in members
+    ]
+    if len(clustered_factors) != len(set(clustered_factors)):
+        raise ValueError("Each factor may belong to only one correlation cluster")
+    if set(clustered_factors) != set(profile.factor_weights):
+        raise ValueError("Every weighted factor must belong to exactly one correlation cluster")
+
+    cluster_scores: dict[str, float] = {}
+    total = 0.0
+    for cluster, members in profile.factor_clusters.items():
+        if not members:
+            raise ValueError(f"Empty factor cluster: {cluster}")
+        within_weights = [profile.factor_weights[name] for name in members]
+        within_total = sum(within_weights)
+        if within_total <= 0:
+            raise ValueError(f"Factor cluster has no positive weight: {cluster}")
+        cluster_score = sum(
+            used[name] * profile.factor_weights[name] for name in members
+        ) / within_total
+        cluster_scores[cluster] = round(cluster_score, 2)
+        total += cluster_score * profile.cluster_weights[cluster]
+    return round(total, 2), used, cluster_scores
 
 
 def evaluate_strategy(
@@ -177,7 +237,7 @@ def evaluate_strategy(
     legacy_label: str | None = None,
     position_stage: str | None = None,
 ) -> StrategyAssessment:
-    setup_score, factor_scores = _setup_score(profile, evidence.factor_scores)
+    setup_score, factor_scores, factor_clusters = _setup_score(profile, evidence.factor_scores)
     passed: list[str] = []
     failed: list[str] = []
     missing: list[str] = []
@@ -309,7 +369,8 @@ def evaluate_strategy(
 
     notes = (
         "Setup score and entry decision are horizon-specific; legacy total_score is unchanged.",
-        "Decision policy opportunity-layered-v2 separates hard risk vetoes from confirmation gates.",
+        "Decision policy logic-first-correlation-aware-v3 separates hard vetoes from confirmation gates.",
+        "Correlated price, relative-strength, and capital evidence is aggregated once as market_behavior.",
     )
     return StrategyAssessment(
         strategy_id=profile.strategy_id,
@@ -318,11 +379,12 @@ def evaluate_strategy(
         entry_decision=entry_decision,
         position_decision=position_decision,
         factor_scores=factor_scores,
+        factor_clusters=factor_clusters,
         gates_passed=tuple(passed),
         gates_failed=tuple(failed),
         gates_missing=tuple(missing),
         leveraged_overlay=profile.leveraged_overlay,
-        decision_policy="opportunity-layered-v2",
+        decision_policy="logic-first-correlation-aware-v3",
         suggested_allocation_pct=suggested_allocation_pct,
         allocation_rationale=allocation_rationale,
         notes=notes,

@@ -120,6 +120,25 @@ python3 -m tools.stock_skills.cli path-backtest \
 
 The simulator uses stop-first ordering for ambiguous OHLC bars, fills gaps through stops at the open, weights partial exits by fraction, activates monotonic trailing stops only from completed-bar information, and applies time/maximum-holding exits. A trade may include `add_ons` entries with `trigger_r`, `fraction`, and `stop_after_add`; they execute only from a completed close and are rejected if the raised stop would leave total open risk above the original 1R budget. Repeated scenarios carrying the same `trade_id` count once. Its report includes expectancy and profit factor in R, maximum drawdown, average win/loss, MFE capture, profit giveback, holding time, and consecutive losses. This command is offline and never places orders.
 
+## Market store + price alerts (SQLite cache, `monitor`)
+
+`data/market.db` is a **cache and monitoring layer, never the source of truth**: journals stay in JSONL (git-diffable, feeding review/backtest/evidence unchanged), and everything in the store can be rebuilt by re-fetching from Futu. The store keeps five tables: `bars` (K-line cache, upsert-idempotent), `snapshots` and `capital_flow` (time series the analysis loop otherwise throws away — e.g. 特大单 flow across days), `alerts` (one-shot price levels), and `earnings` (event calendar).
+
+```bash
+# Arm levels and record earnings dates (offline, no OpenD):
+python3 -m tools.stock_skills.cli monitor \
+  --add "US.COIN:below:150:价值区上沿" \
+  --add "US.COIN:above:180:中期决策位" \
+  --earnings-add "US.COIN:2026-07-30:盘后:Q2财报(预计)" \
+  --list
+
+# Live pass (needs OpenD): record snapshots + capital flow, cache 60 daily bars,
+# fire any crossed alerts, surface earnings within 30 days:
+python3 -m tools.stock_skills.cli monitor --sync-bars 60 --earnings-window 30
+```
+
+Alerts are one-shot: once triggered (`⚠ TRIGGERED` on stdout, `triggered_at`/`triggered_price` recorded) they never fire again — re-arm explicitly if the level matters twice. Monitored codes default to the union of armed-alert codes plus `--codes`. `--output report.json` writes a machine-readable report; running it from a daily cron/scheduled task turns the framework's "最后一米" (watching the levels you already decided on) into a loop that doesn't depend on remembering to ask.
+
 ## Analyze without OpenD (offline, from pre-fetched JSON)
 
 When this process cannot reach OpenD (e.g. a sandbox), fetch on a machine that *can*

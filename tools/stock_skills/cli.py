@@ -263,6 +263,7 @@ def _recommend(
     portfolio_open_risk_pct: float | None = None,
     theme_open_risk_pct: float | None = None,
     trade_id: str | None = None,
+    position_stage: str | None = None,
 ) -> Recommendation:
     """Run every analyzer over `state`. Missing components score a neutral 50 and are flagged in source_refs."""
     trend = analyze_trend(state.snapshot, state.daily_bars)
@@ -276,7 +277,28 @@ def _recommend(
     sector = analyze_sector(_instrument_change(state), sector_changes or [])
     market = analyze_market(index_snapshots or {})
     fundamental = analyze_fundamental(fundamentals, profile=profile)
+    session_phase = classify_session_phase(
+        state.snapshot.code,
+        state.snapshot.captured_at or state.snapshot.timestamp,
+    )
     atr = compute_atr(state.daily_bars)
+    structural_invalidation = trend.invalidation_level
+    opening_range_fallback = False
+    if (
+        atr is None
+        and session_phase == "intraday"
+        and 0 < state.snapshot.low < state.snapshot.last_price
+        and state.snapshot.high > state.snapshot.low
+    ):
+        # New listings and event-driven dislocations may not have enough daily
+        # history for ATR.  The live opening range supplies a provisional stop
+        # geometry so opportunity mode can size a small probe instead of turning
+        # missing history into a permanent no-trade verdict.
+        opening_range = state.snapshot.high - state.snapshot.low
+        gap_range = abs(state.snapshot.open - state.snapshot.prev_close)
+        atr = max(opening_range, gap_range * 0.35, state.snapshot.last_price * 0.01)
+        structural_invalidation = state.snapshot.low
+        opening_range_fallback = True
     strategy_profile = get_strategy_profile(horizon, leveraged=leveraged)
     effective_trade_id = trade_id or f"{strategy_profile.strategy_id}:{state.snapshot.code}:{state.snapshot.timestamp}"
     exit_plan = None
@@ -285,7 +307,7 @@ def _recommend(
         exit_plan = build_profile_exit_plan(
             strategy_profile,
             entry_price=state.snapshot.last_price,
-            structural_invalidation=trend.invalidation_level,
+            structural_invalidation=structural_invalidation,
             atr=atr,
             risk_budget_pct=risk_budget_pct,
             stop_buffer_atr=stop_buffer_atr,
@@ -322,7 +344,7 @@ def _recommend(
     legacy_position = analyze_position(
         last_price=state.snapshot.last_price,
         atr=atr,
-        invalidation_level=trend.invalidation_level,
+        invalidation_level=structural_invalidation,
         risk_budget_pct=risk_budget_pct,
         last_trim_price=state.user_context.get("last_trim_price"),
         cost_basis=cost_basis,
@@ -349,10 +371,6 @@ def _recommend(
         "fundamental": fundamentals is not None and fundamentals.pe_ttm is not None,
         "position_fit": exit_plan is not None,
     }
-    session_phase = classify_session_phase(
-        state.snapshot.code,
-        state.snapshot.captured_at or state.snapshot.timestamp,
-    )
     data_quality = assess_data_quality(
         availability,
         session_phase,
@@ -385,6 +403,10 @@ def _recommend(
                 + (f": {exit_plan_error}" if exit_plan_error else "")
                 + ")"
             )
+    if opening_range_fallback:
+        refs.append(
+            "opportunity-mode: provisional opening-range stop used because daily ATR history is unavailable"
+        )
     if inverse:
         refs.append("inverse-etf: backdrop (market/cross/macro) scores inverted")
 
@@ -416,7 +438,13 @@ def _recommend(
         ),
     )
     volume_ratio = _volume_ratio(state.daily_bars)
-    if volume_ratio is None:
+    if opening_range_fallback and state.snapshot.last_price >= state.snapshot.open:
+        range_position = (
+            (state.snapshot.last_price - state.snapshot.low)
+            / (state.snapshot.high - state.snapshot.low)
+        )
+        volume_score = 80.0 if range_position >= 0.60 else 60.0
+    elif volume_ratio is None:
         volume_score = 50.0
     elif volume_ratio >= strategy_profile.minimum_volume_ratio:
         volume_score = 80.0
@@ -427,7 +455,14 @@ def _recommend(
     relative_strength_positive = (
         None if sector.relative_strength is None else sector.relative_strength >= 0
     )
-    if trend.status == "breakout-confirmed":
+    if (
+        opening_range_fallback
+        and state.snapshot.last_price > state.snapshot.open
+        and state.snapshot.last_price
+        >= state.snapshot.low + 0.60 * (state.snapshot.high - state.snapshot.low)
+    ):
+        trigger_confirmed = True
+    elif trend.status == "breakout-confirmed":
         trigger_confirmed: bool | None = True
     elif trend.status in {"breakdown-risk", "breakout-vs-downtrend"}:
         trigger_confirmed = False
@@ -474,12 +509,17 @@ def _recommend(
         event_days=event_days,
         underlying_confirmed=underlying_confirmed,
         portfolio_heat_allowed=heat_allowed,
+        data_probe_eligible=data_quality.probe_eligible,
+        planned_allocation_pct=(
+            None if exit_plan is None else exit_plan.risk_sizing.suggested_size_pct
+        ),
     )
     strategy_assessment = evaluate_strategy(
         strategy_profile,
         evidence,
         has_position=cost_basis is not None,
         legacy_label=recommendation.label,
+        position_stage=position_stage,
     )
     missing_text = (
         f" missing={','.join(strategy_assessment.gates_missing)}"
@@ -487,13 +527,15 @@ def _recommend(
         else ""
     )
     strategy_text = (
-        f" Strategy {strategy_assessment.strategy_id}: setup {strategy_assessment.setup_score}, "
-        f"entry={strategy_assessment.entry_decision}.{missing_text}"
+        f" Authoritative execution decision ({strategy_assessment.decision_policy}): "
+        f"setup={strategy_assessment.setup_score}, entry={strategy_assessment.entry_decision}, "
+        f"allocation={strategy_assessment.suggested_allocation_pct}. "
+        f"Legacy action label is retained for historical compatibility only.{missing_text}"
     )
     return replace(
         recommendation,
         trader_plan=recommendation.trader_plan + strategy_text,
-        schema_version="recommendation-v4",
+        schema_version="recommendation-v5",
         strategy_assessment=strategy_assessment,
         strategy_id=strategy_assessment.strategy_id,
         strategy_version="v1",
@@ -661,6 +703,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         portfolio_open_risk_pct=args.portfolio_open_risk_pct,
         theme_open_risk_pct=args.theme_open_risk_pct,
         trade_id=args.trade_id,
+        position_stage=args.position_stage,
     )
     _write(args.output, recommendation)
     if not args.no_journal:
@@ -790,6 +833,7 @@ def _cmd_analyze_offline(args: argparse.Namespace) -> int:
         portfolio_open_risk_pct=args.portfolio_open_risk_pct,
         theme_open_risk_pct=args.theme_open_risk_pct,
         trade_id=args.trade_id,
+        position_stage=args.position_stage,
     )
     _write(args.output, recommendation)
     if not args.no_journal:
@@ -888,6 +932,103 @@ def _cmd_prepost(args: argparse.Namespace) -> int:
     return 0
 
 
+def _parse_alert_spec(spec: str) -> tuple[str, str, float, str]:
+    parts = spec.split(":", 3)
+    if len(parts) < 3:
+        raise ValueError(f"alert spec must be CODE:DIRECTION:LEVEL[:NOTE], got {spec!r}")
+    code, direction, level = parts[0], parts[1], parts[2]
+    note = parts[3] if len(parts) == 4 else ""
+    return code, direction, float(level), note
+
+
+def _parse_earnings_spec(spec: str) -> tuple[str, str, str, str]:
+    parts = spec.split(":", 3)
+    if len(parts) < 2:
+        raise ValueError(f"earnings spec must be CODE:DATE[:SESSION[:NOTE]], got {spec!r}")
+    code, event_date = parts[0], parts[1]
+    session = parts[2] if len(parts) >= 3 else ""
+    note = parts[3] if len(parts) == 4 else ""
+    return code, event_date, session, note
+
+
+def _cmd_monitor(args: argparse.Namespace) -> int:
+    """Record snapshots/capital flow into the market store and fire price alerts."""
+    from .store import MarketStore, sync_daily_bars
+
+    with MarketStore(args.db) as store:
+        for spec in args.add or []:
+            code, direction, level, note = _parse_alert_spec(spec)
+            alert_id = store.add_alert(code, direction, level, note)
+            print(f"armed alert #{alert_id}: {code} {direction} {level} {note}".rstrip())
+        for spec in args.earnings_add or []:
+            code, event_date, session, note = _parse_earnings_spec(spec)
+            store.upsert_earnings(code, event_date, session, note)
+            print(f"earnings: {code} {event_date} {session} {note}".rstrip())
+
+        armed = store.active_alerts()
+        upcoming = store.upcoming_earnings(within_days=args.earnings_window)
+        if args.list:
+            print(f"-- armed alerts ({len(armed)}) --")
+            for alert in armed:
+                print(f"  #{alert['id']} {alert['code']:10s} {alert['direction']:5s} {alert['level']:<10g} {alert['note']}")
+            print(f"-- earnings within {args.earnings_window}d ({len(upcoming)}) --")
+            for row in upcoming:
+                print(f"  {row['code']:10s} {row['event_date']} ({row['days_until']}d) {row['session']} {row['note']}")
+            return 0
+
+        codes: list[str] = []
+        for code in [alert["code"] for alert in armed] + list(args.codes or []):
+            if code not in codes:
+                codes.append(code)
+        if not codes:
+            print("nothing to monitor: no armed alerts and no --codes")
+            return 0
+
+        from .futu_fetcher import FutuFetcher
+
+        fetcher = FutuFetcher()
+        snapshots = {snapshot.code: snapshot for snapshot in fetcher.get_snapshots(codes)}
+        for code in codes:
+            snapshot = snapshots.get(code)
+            if snapshot is None:
+                print(f"{code:10s} no snapshot")
+                continue
+            store.record_snapshot(snapshot)
+            change = (
+                (snapshot.last_price - snapshot.prev_close) / snapshot.prev_close * 100.0
+                if snapshot.prev_close > 0
+                else 0.0
+            )
+            print(f"{code:10s} last {snapshot.last_price:<10g} ({change:+.2f}%)")
+            if not args.no_capital:
+                capital = fetcher.get_capital_distribution(code)
+                if capital is not None:
+                    store.record_capital(code, capital)
+                    print(f"{'':10s} capital net {capital.net_inflow:+,.0f} (super {capital.super_inflow:+,.0f})")
+            if args.sync_bars:
+                cached = sync_daily_bars(store, fetcher, code, num=args.sync_bars)
+                print(f"{'':10s} cached {len(cached)} daily bars (total {store.bar_count(code)})")
+
+        triggered = store.check_alerts(snapshots)
+        for alert in triggered:
+            print(
+                f"⚠ TRIGGERED #{alert['id']}: {alert['code']} {alert['direction']} {alert['level']}"
+                f" @ {alert['triggered_price']} {alert['note']}".rstrip()
+            )
+        for row in upcoming:
+            print(f"📅 earnings {row['code']} {row['event_date']} ({row['days_until']}d) {row['session']} {row['note']}".rstrip())
+        if args.output:
+            payload = {
+                "captured_at": datetime.now().isoformat(timespec="seconds"),
+                "codes": codes,
+                "triggered": triggered,
+                "armed": store.active_alerts(),
+                "upcoming_earnings": upcoming,
+            }
+            Path(args.output).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Self-evolving stock skill tools")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -935,6 +1076,7 @@ def main(argv: list[str] | None = None) -> int:
     analyze.add_argument("--portfolio-open-risk-pct", type=float, default=None, help="Current total open portfolio risk %% for the 6%% heat gate")
     analyze.add_argument("--theme-open-risk-pct", type=float, default=None, help="Current correlated-theme open risk %% for the 3%% heat gate")
     analyze.add_argument("--cost-basis", type=float, default=None, help="Existing cost basis, to report open P&L in the plan")
+    analyze.add_argument("--position-stage", choices=["probe", "core"], default=None, help="Existing position stage; a confirmed probe may become an add candidate")
     analyze.add_argument("--trade-id", default=None, help="Existing trade id for position-management records; new entries get a deterministic id")
     analyze.add_argument("--inverse", action=argparse.BooleanOptionalAction, default=None, help="Treat as an inverse/short ETF (invert backdrop scores); default auto-detected from name/tags")
 
@@ -974,6 +1116,7 @@ def main(argv: list[str] | None = None) -> int:
     offline.add_argument("--portfolio-open-risk-pct", type=float, default=None, help="Current total open portfolio risk %% for the 6%% heat gate")
     offline.add_argument("--theme-open-risk-pct", type=float, default=None, help="Current correlated-theme open risk %% for the 3%% heat gate")
     offline.add_argument("--cost-basis", type=float, default=None, help="Existing cost basis, to report open P&L")
+    offline.add_argument("--position-stage", choices=["probe", "core"], default=None, help="Existing position stage; a confirmed probe may become an add candidate")
     offline.add_argument("--trade-id", default=None, help="Existing trade id for position-management records; new entries get a deterministic id")
     offline.add_argument("--inverse", action=argparse.BooleanOptionalAction, default=None, help="Treat as an inverse/short ETF (invert backdrop scores); default auto-detected from name/tags")
     offline.add_argument("--last-trim-price", type=float, default=None, help="Prior partial-trim price for position context")
@@ -1004,10 +1147,26 @@ def main(argv: list[str] | None = None) -> int:
     prepost.add_argument("codes", nargs="+", help="One or more codes, e.g. US.SOXL US.SMH US.NVDA")
     prepost.add_argument("--json", action="store_true", help="Emit JSON instead of a text table")
 
+    monitor = subparsers.add_parser(
+        "monitor",
+        help="Record snapshots/capital flow into the market store (SQLite cache) and fire one-shot price alerts",
+    )
+    monitor.add_argument("--db", default="data/market.db", help="Market store path (default: data/market.db)")
+    monitor.add_argument("--add", action="append", default=None, metavar="CODE:DIR:LEVEL[:NOTE]", help="Arm an alert, e.g. US.COIN:below:150:价值区上沿")
+    monitor.add_argument("--earnings-add", action="append", default=None, metavar="CODE:DATE[:SESSION[:NOTE]]", help="Record an earnings date, e.g. US.COIN:2026-08-12:盘后:Q2财报")
+    monitor.add_argument("--codes", nargs="*", default=None, help="Extra codes to record beyond armed-alert codes")
+    monitor.add_argument("--list", action="store_true", help="List armed alerts and upcoming earnings without fetching")
+    monitor.add_argument("--sync-bars", type=int, default=0, help="Also cache N daily bars per monitored code (default: 0 = skip)")
+    monitor.add_argument("--no-capital", action="store_true", help="Skip capital-distribution recording")
+    monitor.add_argument("--earnings-window", type=int, default=14, help="Days ahead to surface earnings (default: 14)")
+    monitor.add_argument("--output", default=None, help="Optional JSON report path")
+
     args = parser.parse_args(argv)
 
     if args.command in {"analyze", "analyze-offline"} and args.cost_basis is not None and not args.trade_id:
         parser.error("--cost-basis position management requires --trade-id to link the original trade")
+    if args.command in {"analyze", "analyze-offline"} and args.position_stage is not None and args.cost_basis is None:
+        parser.error("--position-stage requires --cost-basis and --trade-id for an existing position")
 
     if args.command == "dry-run":
         return _cmd_dry_run(args, parser)
@@ -1025,6 +1184,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_evidence_optimize(args)
     if args.command == "prepost":
         return _cmd_prepost(args)
+    if args.command == "monitor":
+        return _cmd_monitor(args)
     return 2
 
 

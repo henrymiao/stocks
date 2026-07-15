@@ -22,6 +22,9 @@ class StrategyProfile:
     minimum_resistance_r: float
     minimum_volume_ratio: float
     allocation_cap_pct: float
+    probe_score_threshold: float
+    probe_allocation_fraction: float
+    probe_allocation_cap_pct: float
     leveraged_overlay: bool = False
 
 
@@ -43,6 +46,8 @@ class StrategyEvidence:
     event_days: int | None
     underlying_confirmed: bool | None
     portfolio_heat_allowed: bool | None = None
+    data_probe_eligible: bool = False
+    planned_allocation_pct: float | None = None
 
 
 SHORT_PROFILE = StrategyProfile(
@@ -66,6 +71,9 @@ SHORT_PROFILE = StrategyProfile(
     minimum_resistance_r=1.8,
     minimum_volume_ratio=1.2,
     allocation_cap_pct=25.0,
+    probe_score_threshold=58.0,
+    probe_allocation_fraction=0.25,
+    probe_allocation_cap_pct=5.0,
 )
 
 
@@ -90,6 +98,9 @@ SWING_PROFILE = StrategyProfile(
     minimum_resistance_r=2.5,
     minimum_volume_ratio=1.0,
     allocation_cap_pct=25.0,
+    probe_score_threshold=62.0,
+    probe_allocation_fraction=0.20,
+    probe_allocation_cap_pct=5.0,
 )
 
 
@@ -109,6 +120,8 @@ def get_strategy_profile(horizon: str, leveraged: bool = False) -> StrategyProfi
         trailing_atr_multiple=1.2,
         trailing_activation_r=1.5,
         allocation_cap_pct=15.0,
+        probe_allocation_fraction=0.20,
+        probe_allocation_cap_pct=3.0,
         leveraged_overlay=True,
     )
 
@@ -162,6 +175,7 @@ def evaluate_strategy(
     *,
     has_position: bool = False,
     legacy_label: str | None = None,
+    position_stage: str | None = None,
 ) -> StrategyAssessment:
     setup_score, factor_scores = _setup_score(profile, evidence.factor_scores)
     passed: list[str] = []
@@ -213,21 +227,81 @@ def evaluate_strategy(
         # Missing confirmation is a rejection, not a neutral observation.
         gate("underlying-confirmation", evidence.underlying_confirmed is True)
 
-    if failed:
+    # Trader-style opportunity layer: only failures that make a trade
+    # unexecutable are hard vetoes.  Confirmation failures may still permit a
+    # tightly-sized probe when leadership and capital evidence are strong.
+    hard_failed = {
+        name
+        for name in failed
+        if name in {"structured-exit-plan", "liquidity", "portfolio-heat", "event-window"}
+    }
+    if "data-confidence" in failed and not evidence.data_probe_eligible:
+        hard_failed.add("data-confidence")
+    if profile.leveraged_overlay and "underlying-confirmation" in set(failed + missing):
+        hard_failed.add("underlying-confirmation")
+
+    capital_score = factor_scores.get("capital_flow", factor_scores.get("volume_accumulation", 0.0))
+    price_volume_score = factor_scores.get("price_volume", factor_scores.get("trend_quality", 0.0))
+    risk_off_probe_ok = (
+        evidence.market_regime != "risk-off"
+        or (setup_score >= 68.0 and capital_score >= 70.0)
+    )
+    horizon_probe_ok = profile.horizon == "short" or evidence.weekly_aligned is True
+    probe_qualifies = (
+        not hard_failed
+        and evidence.data_probe_eligible
+        and evidence.exit_plan_valid
+        and evidence.liquidity_ok is True
+        and evidence.portfolio_heat_allowed is not False
+        and evidence.relative_strength_positive is True
+        and evidence.trigger_confirmed is not False
+        and capital_score >= 60.0
+        and price_volume_score >= 55.0
+        and setup_score >= profile.probe_score_threshold
+        and risk_off_probe_ok
+        and horizon_probe_ok
+    )
+
+    if hard_failed:
         entry_decision = "reject"
+    elif not failed and not missing and setup_score >= 65.0:
+        entry_decision = "enter"
+    elif probe_qualifies:
+        entry_decision = "probe"
     elif missing:
         entry_decision = "watch"
-    elif setup_score >= 65.0:
-        entry_decision = "enter"
+    elif failed:
+        entry_decision = "reject"
     elif setup_score >= 50.0:
         entry_decision = "watch"
     else:
         entry_decision = "reject"
 
+    suggested_allocation_pct: float | None = None
+    allocation_rationale: str | None = None
+    if evidence.planned_allocation_pct is not None:
+        planned = max(0.0, float(evidence.planned_allocation_pct))
+        if entry_decision == "enter":
+            suggested_allocation_pct = round(planned, 2)
+            allocation_rationale = "All confirmation gates passed; use the risk-sized planned allocation."
+        elif entry_decision == "probe":
+            suggested_allocation_pct = round(
+                min(planned * profile.probe_allocation_fraction, profile.probe_allocation_cap_pct),
+                2,
+            )
+            allocation_rationale = (
+                "Opportunity probe only: cap exposure until trigger, volume, trend, and resistance-room "
+                "confirmation improve."
+            )
+
     position_decision: str | None = None
     if has_position:
         if legacy_label in {"avoid", "risk-reduce"}:
             position_decision = "full-exit"
+        elif position_stage == "probe" and entry_decision == "enter":
+            position_decision = "add"
+        elif position_stage == "probe" and entry_decision in {"probe", "watch"}:
+            position_decision = "hold-probe"
         elif legacy_label == "trim-on-strength":
             position_decision = "partial-exit"
         else:
@@ -235,6 +309,7 @@ def evaluate_strategy(
 
     notes = (
         "Setup score and entry decision are horizon-specific; legacy total_score is unchanged.",
+        "Decision policy opportunity-layered-v2 separates hard risk vetoes from confirmation gates.",
     )
     return StrategyAssessment(
         strategy_id=profile.strategy_id,
@@ -247,5 +322,8 @@ def evaluate_strategy(
         gates_failed=tuple(failed),
         gates_missing=tuple(missing),
         leveraged_overlay=profile.leveraged_overlay,
+        decision_policy="opportunity-layered-v2",
+        suggested_allocation_pct=suggested_allocation_pct,
+        allocation_rationale=allocation_rationale,
         notes=notes,
     )

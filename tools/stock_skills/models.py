@@ -284,6 +284,9 @@ class StrategyAssessment:
     gates_failed: tuple[str, ...]
     gates_missing: tuple[str, ...]
     leveraged_overlay: bool
+    decision_policy: str = "opportunity-layered-v2"
+    suggested_allocation_pct: float | None = None
+    allocation_rationale: str | None = None
     notes: tuple[str, ...] = ()
 
 
@@ -295,6 +298,7 @@ class DataQuality:
     stale_components: tuple[str, ...]
     session_phase: str
     entry_eligible: bool
+    probe_eligible: bool = False
 
 
 @dataclass(frozen=True)

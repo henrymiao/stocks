@@ -1,0 +1,10 @@
+{
+  "schema_version": 2,
+  "watchlist": [
+  {"code": "HK.00700", "name": "腾讯控股", "enabled": true, "tier": "core", "priority": 100, "strategy_profiles": ["short", "swing"], "valuation_profile": "growth", "tags": ["hk", "holding", "internet", "mega-cap", "gaming", "cloud", "growth"]},
+  {"code": "HK.09988", "name": "阿里巴巴-W", "enabled": true, "tier": "core", "priority": 100, "strategy_profiles": ["short", "swing"], "valuation_profile": "growth", "tags": ["hk", "holding", "internet", "e-commerce", "cloud", "growth"]},
+  {"code": "HK.09868", "name": "小鹏汽车-W", "enabled": true, "tier": "core", "priority": 100, "strategy_profiles": ["short", "swing"], "valuation_profile": "growth", "tags": ["hk", "holding", "ev", "smart-vehicle", "high-volatility", "growth"]},
+  {"code": "HK.03690", "name": "美团-W", "enabled": true, "tier": "thematic", "priority": 90, "strategy_profiles": ["short", "swing"], "valuation_profile": "growth", "tags": ["hk", "internet", "consumer", "local-services", "growth"]},
+  {"code": "HK.09961", "name": "携程集团-S", "enabled": true, "tier": "thematic", "priority": 85, "strategy_profiles": ["short", "swing"], "valuation_profile": "growth", "tags": ["hk", "internet", "travel", "consumer", "growth"]}
+  ]
+}

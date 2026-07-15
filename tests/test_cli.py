@@ -344,7 +344,7 @@ class CliTests(unittest.TestCase):
         self.assertIn("fundamental:profile=", refs)
         self.assertIsNotNone(payload["data_quality"])
         self.assertEqual(payload["data_quality"]["session_phase"], "after-close")
-        self.assertEqual(payload["schema_version"], "recommendation-v4")
+        self.assertEqual(payload["schema_version"], "recommendation-v5")
         self.assertEqual(payload["strategy_id"], "short-balanced-v1")
         self.assertEqual(payload["strategy_version"], "v1")
         self.assertEqual(payload["horizon"], "short")
@@ -355,7 +355,10 @@ class CliTests(unittest.TestCase):
         self.assertLessEqual(payload["exit_plan"]["risk_sizing"]["suggested_size_pct"], 25.0)
         self.assertEqual(len(payload["exit_plan"]["targets"]), 2)
         self.assertIsNotNone(payload["strategy_assessment"])
-        self.assertIn(payload["strategy_assessment"]["entry_decision"], {"enter", "watch", "reject"})
+        self.assertIn(
+            payload["strategy_assessment"]["entry_decision"],
+            {"enter", "probe", "watch", "reject"},
+        )
         # Position management appears in the trader plan (stop + suggested size).
         self.assertIn("Risk plan: stop near", payload["trader_plan"])
         self.assertIn("TP1", payload["trader_plan"])
@@ -676,6 +679,56 @@ class CliTests(unittest.TestCase):
         self.assertIn("position_fit: neutral", refs)
         self.assertNotIn("cross_market: neutral default", refs)
         self.assertNotIn("market_regime: neutral default", refs)
+
+    def test_new_listing_opening_range_can_produce_a_capped_probe(self):
+        snapshot = MarketSnapshot(
+            "US.SKHY", "SK hynix", 171.16, 168.22, 171.82, 166.82, 152.35,
+            12_419_985, 2_084_434_640.0,
+            "2026-07-14T09:53:00-04:00", "2026-07-14T09:53:00-04:00",
+        )
+        state = InstrumentState(
+            snapshot=snapshot,
+            daily_bars=[],
+            intraday_bars=[],
+            capital=CapitalSnapshot(
+                500_000_000.0, 260_000_000.0, 160_000_000.0,
+                60_000_000.0, 20_000_000.0, snapshot.timestamp,
+            ),
+        )
+        qqq = MarketSnapshot(
+            "US.QQQ", "QQQ", 101.0, 100.0, 101.0, 100.0, 100.0,
+            1_000, 100_000.0, snapshot.timestamp,
+        )
+        spy = MarketSnapshot(
+            "US.SPY", "SPY", 101.0, 100.0, 101.0, 100.0, 100.0,
+            1_000, 100_000.0, snapshot.timestamp,
+        )
+        fundamentals = FundamentalSnapshot(
+            "US.SKHY", pe_ttm=20.0, pb=4.0, eps=8.0,
+            dividend_ratio=0.2, market_val=200e9, eps_growth=35.0,
+        )
+
+        recommendation = _recommend(
+            state=state,
+            weights=DEFAULT_WEIGHTS,
+            macro_inputs={"fed_bias": "hold", "geopolitical_risk": "normal"},
+            macro_snapshots=None,
+            cross_snapshots={"US.QQQ": qqq},
+            sector_changes=[0.04, 0.05, 0.03],
+            index_snapshots={"US.SPY": spy},
+            source_refs=[],
+            fundamentals=fundamentals,
+            profile="growth",
+        )
+
+        self.assertIsNotNone(recommendation.exit_plan)
+        self.assertTrue(recommendation.data_quality.probe_eligible)
+        self.assertEqual(recommendation.strategy_assessment.entry_decision, "probe")
+        self.assertLessEqual(
+            recommendation.strategy_assessment.suggested_allocation_pct,
+            5.0,
+        )
+        self.assertIn("opening-range stop", " ".join(recommendation.source_refs))
 
     def test_us_analyze_uses_us_market_and_theme_cross_defaults(self):
         with tempfile.TemporaryDirectory() as tmpdir:

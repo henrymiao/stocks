@@ -44,6 +44,7 @@ class DataQualityTests(unittest.TestCase):
         self.assertEqual(quality.stale_components, ())
         self.assertEqual(quality.session_phase, "intraday")
         self.assertTrue(quality.entry_eligible)
+        self.assertTrue(quality.probe_eligible)
 
     def test_missing_cross_market_and_macro_risk_reduce_confidence(self):
         availability = {component: True for component in COMPONENTS}
@@ -75,6 +76,7 @@ class DataQualityTests(unittest.TestCase):
 
         self.assertEqual(quality.confidence, 0.875)
         self.assertFalse(quality.entry_eligible)
+        self.assertTrue(quality.probe_eligible)
 
     def test_unknown_availability_components_are_rejected_in_sorted_order(self):
         with self.assertRaisesRegex(ValueError, r"alpha, zeta"):
@@ -115,6 +117,7 @@ class DataQualityTests(unittest.TestCase):
         self.assertEqual(quality.confidence, 0.9375)
         self.assertEqual(quality.stale_components, ("trend",))
         self.assertFalse(quality.entry_eligible)
+        self.assertFalse(quality.probe_eligible)
 
 
 if __name__ == "__main__":

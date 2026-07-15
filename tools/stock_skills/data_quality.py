@@ -19,6 +19,7 @@ COMPONENTS = (
 )
 CRITICAL_COMPONENTS = frozenset({"trend", "position_fit"})
 ENTRY_CONFIDENCE_THRESHOLD = 0.80
+PROBE_CONFIDENCE_THRESHOLD = 0.625
 
 
 def _market_datetime(code: str, value: str) -> datetime | None:
@@ -120,6 +121,15 @@ def assess_data_quality(
         and not CRITICAL_COMPONENTS.intersection(missing)
         and not CRITICAL_COMPONENTS.intersection(stale)
     )
+    # Opportunity mode may work with incomplete trend history (for example a new
+    # listing or an event-driven dislocation), but never without a fresh price and
+    # an executable structural stop.  Missing evidence reduces size instead of
+    # being silently treated as confirmation.
+    probe_eligible = (
+        confidence >= PROBE_CONFIDENCE_THRESHOLD
+        and "position_fit" not in missing
+        and not CRITICAL_COMPONENTS.intersection(stale)
+    )
 
     return DataQuality(
         confidence=confidence,
@@ -128,4 +138,5 @@ def assess_data_quality(
         stale_components=stale,
         session_phase=session_phase,
         entry_eligible=entry_eligible,
+        probe_eligible=probe_eligible,
     )

@@ -37,6 +37,8 @@ def _good_evidence(**overrides):
         event_days=10,
         underlying_confirmed=True,
         portfolio_heat_allowed=True,
+        data_probe_eligible=True,
+        planned_allocation_pct=20.0,
     )
     values.update(overrides)
     return StrategyEvidence(**values)
@@ -86,13 +88,19 @@ class StrategyGateTests(unittest.TestCase):
 
         self.assertEqual(short.entry_decision, "enter")
         self.assertEqual(swing.entry_decision, "enter")
+        self.assertEqual(short.suggested_allocation_pct, 20.0)
         self.assertGreater(short.setup_score, 65.0)
         self.assertGreater(swing.setup_score, 65.0)
 
     def test_low_confidence_or_missing_exit_plan_rejects_entry(self):
         profile = get_strategy_profile("short")
         low_confidence = evaluate_strategy(
-            profile, _good_evidence(data_confidence=0.75, data_entry_eligible=False),
+            profile,
+            _good_evidence(
+                data_confidence=0.50,
+                data_entry_eligible=False,
+                data_probe_eligible=False,
+            ),
         )
         no_plan = evaluate_strategy(profile, _good_evidence(exit_plan_valid=False))
 
@@ -101,15 +109,16 @@ class StrategyGateTests(unittest.TestCase):
         self.assertEqual(no_plan.entry_decision, "reject")
         self.assertIn("structured-exit-plan", no_plan.gates_failed)
 
-    def test_short_profile_rejects_risk_off_and_watches_missing_trigger(self):
+    def test_short_profile_uses_probe_for_strong_risk_off_or_missing_trigger_setup(self):
         profile = get_strategy_profile("short")
         risk_off = evaluate_strategy(profile, _good_evidence(market_regime="risk-off"))
         missing_trigger = evaluate_strategy(profile, _good_evidence(trigger_confirmed=None))
 
-        self.assertEqual(risk_off.entry_decision, "reject")
+        self.assertEqual(risk_off.entry_decision, "probe")
         self.assertIn("market-regime", risk_off.gates_failed)
-        self.assertEqual(missing_trigger.entry_decision, "watch")
+        self.assertEqual(missing_trigger.entry_decision, "probe")
         self.assertIn("entry-trigger", missing_trigger.gates_missing)
+        self.assertEqual(missing_trigger.suggested_allocation_pct, 5.0)
 
     def test_swing_profile_requires_weekly_and_event_evidence(self):
         profile = get_strategy_profile("swing")
@@ -132,13 +141,14 @@ class StrategyGateTests(unittest.TestCase):
         self.assertEqual(confirmed.entry_decision, "enter")
         self.assertIn("underlying-confirmation", missing.gates_failed)
 
-    def test_missing_heat_watches_and_exhausted_heat_rejects(self):
+    def test_missing_heat_caps_probe_and_exhausted_heat_rejects(self):
         profile = get_strategy_profile("short")
         missing = evaluate_strategy(profile, _good_evidence(portfolio_heat_allowed=None))
         exhausted = evaluate_strategy(profile, _good_evidence(portfolio_heat_allowed=False))
 
-        self.assertEqual(missing.entry_decision, "watch")
+        self.assertEqual(missing.entry_decision, "probe")
         self.assertIn("portfolio-heat", missing.gates_missing)
+        self.assertEqual(missing.suggested_allocation_pct, 5.0)
         self.assertEqual(exhausted.entry_decision, "reject")
         self.assertIn("portfolio-heat", exhausted.gates_failed)
 
@@ -150,6 +160,25 @@ class StrategyGateTests(unittest.TestCase):
             legacy_label="trim-on-strength",
         )
         self.assertEqual(assessment.position_decision, "partial-exit")
+
+    def test_confirmed_probe_can_become_add_candidate(self):
+        confirmed = evaluate_strategy(
+            get_strategy_profile("short"),
+            _good_evidence(),
+            has_position=True,
+            legacy_label="hold",
+            position_stage="probe",
+        )
+        still_incomplete = evaluate_strategy(
+            get_strategy_profile("short"),
+            _good_evidence(trigger_confirmed=None),
+            has_position=True,
+            legacy_label="hold",
+            position_stage="probe",
+        )
+
+        self.assertEqual(confirmed.position_decision, "add")
+        self.assertEqual(still_incomplete.position_decision, "hold-probe")
 
 
 if __name__ == "__main__":

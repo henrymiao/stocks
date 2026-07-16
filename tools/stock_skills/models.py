@@ -4,6 +4,11 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
+# Single source of truth for the record schema every writer emits. Readers keep
+# accepting older versions found in stored journals.
+SCHEMA_VERSION = "recommendation-v5"
+
+
 @dataclass(frozen=True)
 class MarketSnapshot:
     code: str
@@ -320,7 +325,7 @@ class Recommendation:
     entry_price: float = 0.0
     user_context: dict[str, Any] = field(default_factory=dict)
     data_quality: DataQuality | None = None
-    schema_version: str = "recommendation-v1"
+    schema_version: str = SCHEMA_VERSION
     position_state: PositionStateSnapshot | None = None
     exit_plan: ExitPlan | None = None
     strategy_assessment: StrategyAssessment | None = None
@@ -333,4 +338,12 @@ class Recommendation:
     def to_record(self) -> dict[str, Any]:
         payload = asdict(self)
         payload["component_scores"] = self.component_scores.to_record()
+        # `label` is the legacy classifier kept for historical comparability; the
+        # authoritative execution verdict lives in strategy_assessment. Mirror it at
+        # the top level so consumers that only read shallow fields cannot mistake a
+        # legacy "hold" for an actionable decision.
+        payload["entry_decision"] = (
+            self.strategy_assessment.entry_decision if self.strategy_assessment else None
+        )
+        payload["label_semantics"] = "legacy-compatibility-only"
         return payload

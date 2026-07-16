@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .models import (
+    SCHEMA_VERSION,
     CapitalAnalysis,
     ComponentScores,
     CrossMarketAnalysis,
@@ -197,7 +198,7 @@ def build_recommendation(
         entry_price=state.snapshot.last_price,
         user_context=state.user_context,
         data_quality=data_quality,
-        schema_version="recommendation-v2",
+        schema_version=SCHEMA_VERSION,
         position_state=position_state,
         exit_plan=exit_plan,
     )

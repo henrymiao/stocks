@@ -18,7 +18,12 @@ class TrendTests(unittest.TestCase):
 
         self.assertGreaterEqual(result.score, 80)
         self.assertEqual(result.status, "breakout-confirmed")
-        self.assertIn(149.9, result.resistance_levels)
+        # 149.9 was cleared by the breakout, so it is retest support now; only
+        # levels above the live price may appear as resistance.
+        self.assertIn(149.9, result.support_levels)
+        self.assertNotIn(149.9, result.resistance_levels)
+        self.assertTrue(all(level > snapshot.last_price for level in result.resistance_levels))
+        self.assertTrue(all(level < snapshot.last_price for level in result.support_levels))
 
     def test_failed_breakout_near_resistance_scores_mid(self):
         bars = [

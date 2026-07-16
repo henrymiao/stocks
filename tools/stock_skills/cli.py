@@ -24,6 +24,7 @@ from .macro import (
 )
 from .market import analyze_market, has_market_evidence
 from .models import (
+    SCHEMA_VERSION,
     CapitalSnapshot,
     FundamentalSnapshot,
     InstrumentState,
@@ -480,6 +481,13 @@ def _recommend(
     )
     backdrop_score = round((market.score + macro.score + cross.score) / 3.0, 2)
     liquidity_ok = state.snapshot.volume > 0 and state.snapshot.turnover > 0
+    # Factor names describe the evidence ROLE in the strategy profile; the mapping
+    # below records the actual provenance so the two are never confused:
+    #   relative_strength   <- sector.score (stock vs its own sector constituents);
+    #                          the relative-strength GATE reads sector.relative_strength
+    #   volume_accumulation <- capital.score (net-flow proxy; no OBV-style series yet)
+    #   backdrop            <- plain mean of market/macro/cross (the legacy total instead
+    #                          uses backdrop_blend's de-duplicated version)
     factor_scores = {
         "price_volume": round((trend.score + volume_score) / 2.0, 2),
         "relative_strength": sector.score,
@@ -535,7 +543,7 @@ def _recommend(
     return replace(
         recommendation,
         trader_plan=recommendation.trader_plan + strategy_text,
-        schema_version="recommendation-v5",
+        schema_version=SCHEMA_VERSION,
         strategy_assessment=strategy_assessment,
         strategy_id=strategy_assessment.strategy_id,
         strategy_version="v1",

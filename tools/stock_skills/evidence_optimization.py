@@ -51,6 +51,21 @@ def _is_leveraged(recommendation: dict[str, Any]) -> bool:
     return bool(isinstance(assessment, dict) and assessment.get("leveraged_overlay") is True)
 
 
+def _decision_policy(recommendation: dict[str, Any]) -> str:
+    """Bucket samples by the decision policy that produced them.
+
+    A strategy_id alone does not change when the gate/veto logic evolves (v1 profiles
+    ran under several decision policies), so without this key trades produced by
+    different decision logic would silently share one optimization bucket.
+    """
+    assessment = recommendation.get("strategy_assessment")
+    if isinstance(assessment, dict):
+        policy = assessment.get("decision_policy")
+        if isinstance(policy, str) and policy:
+            return policy
+    return "legacy"
+
+
 def _phase(strategy_id: str) -> str:
     if strategy_id == "legacy-baseline-v1":
         return "baseline"
@@ -123,10 +138,24 @@ def _candidate_weights(base: dict[str, float], delta: float = 0.02) -> list[dict
     return candidates
 
 
-def _weighted_pnl(row: dict[str, Any], weights: dict[str, float]) -> float | None:
-    scores = row["recommendation"].get("component_scores")
+def _score_source(row: dict[str, Any], source: str) -> dict[str, Any] | None:
+    """Return the score mapping a weight set applies to.
+
+    "component" reads the legacy component_scores (the weights the legacy total uses);
+    "cluster" reads strategy_assessment.factor_clusters (the strategy-track weights).
+    """
+    if source == "component":
+        scores = row["recommendation"].get("component_scores")
+    else:
+        assessment = row["recommendation"].get("strategy_assessment")
+        scores = assessment.get("factor_clusters") if isinstance(assessment, dict) else None
+    return scores if isinstance(scores, dict) else None
+
+
+def _weighted_pnl(row: dict[str, Any], weights: dict[str, float], source: str = "component") -> float | None:
+    scores = _score_source(row, source)
     raw_return = _number(row["review"].get("final_return_pct"))
-    if not isinstance(scores, dict) or raw_return is None:
+    if scores is None or raw_return is None:
         return None
     present = {
         key: (value, _number(scores.get(key)))
@@ -141,8 +170,13 @@ def _weighted_pnl(row: dict[str, Any], weights: dict[str, float]) -> float | Non
     return direction * raw_return
 
 
-def _score_candidate(rows: list[dict[str, Any]], weights: dict[str, float], base: dict[str, float]) -> float:
-    pnl = [value for row in rows if (value := _weighted_pnl(row, weights)) is not None]
+def _score_candidate(
+    rows: list[dict[str, Any]],
+    weights: dict[str, float],
+    base: dict[str, float],
+    source: str = "component",
+) -> float:
+    pnl = [value for row in rows if (value := _weighted_pnl(row, weights, source)) is not None]
     metrics = _metrics(pnl)
     if metrics["expectancy_pct"] is None:
         return -math.inf
@@ -151,15 +185,19 @@ def _score_candidate(rows: list[dict[str, Any]], weights: dict[str, float], base
     return metrics["expectancy_pct"] - 0.25 * drawdown_penalty - 10.0 * regularization
 
 
-def _walk_forward(rows: list[dict[str, Any]], base: dict[str, float]) -> list[dict[str, Any]]:
+def _walk_forward(
+    rows: list[dict[str, Any]],
+    base: dict[str, float],
+    source: str = "component",
+) -> list[dict[str, Any]]:
     folds: list[dict[str, Any]] = []
     for split in range(INITIAL_TRAIN_SIZE, len(rows) - TEST_SIZE + 1, TEST_SIZE):
         train = rows[:split]
         test = rows[split : split + TEST_SIZE]
         candidates = _candidate_weights(base)
-        selected = max(candidates, key=lambda weights: _score_candidate(train, weights, base))
-        baseline_pnl = [value for row in test if (value := _weighted_pnl(row, base)) is not None]
-        candidate_pnl = [value for row in test if (value := _weighted_pnl(row, selected)) is not None]
+        selected = max(candidates, key=lambda weights: _score_candidate(train, weights, base, source))
+        baseline_pnl = [value for row in test if (value := _weighted_pnl(row, base, source)) is not None]
+        candidate_pnl = [value for row in test if (value := _weighted_pnl(row, selected, source)) is not None]
         folds.append(
             {
                 "train_n": len(train),
@@ -176,6 +214,32 @@ def _walk_forward(rows: list[dict[str, Any]], base: dict[str, float]) -> list[di
             }
         )
     return folds
+
+
+def _proposal_eligible(folds: list[dict[str, Any]]) -> bool:
+    if not folds:
+        return False
+    baseline_exp = [fold["out_of_sample"]["baseline"]["expectancy_pct"] for fold in folds]
+    candidate_exp = [fold["out_of_sample"]["candidate"]["expectancy_pct"] for fold in folds]
+    baseline_dd = [fold["out_of_sample"]["baseline"]["maximum_drawdown_pct"] for fold in folds]
+    candidate_dd = [fold["out_of_sample"]["candidate"]["maximum_drawdown_pct"] for fold in folds]
+    complete = all(value is not None for value in baseline_exp + candidate_exp + baseline_dd + candidate_dd)
+    return (
+        complete
+        and mean(candidate_exp) > mean(baseline_exp)
+        and mean(candidate_dd) <= mean(baseline_dd) * 1.10
+    )
+
+
+def _cluster_base_weights(strategy_id: str) -> dict[str, float] | None:
+    # Imported lazily to keep report generation usable without the strategy module
+    # in stripped-down offline environments.
+    from .strategy import SHORT_PROFILE, SWING_PROFILE
+
+    for profile in (SHORT_PROFILE, SWING_PROFILE):
+        if strategy_id == profile.strategy_id or strategy_id.startswith(profile.strategy_id + "+"):
+            return dict(profile.cluster_weights)
+    return None
 
 
 def build_evidence_report(
@@ -216,6 +280,7 @@ def build_evidence_report(
                 "timestamp": timestamp.isoformat(),
                 "trade_id": trade_id,
                 "strategy_id": _strategy_id(recommendation),
+                "decision_policy": _decision_policy(recommendation),
                 "leveraged": _is_leveraged(recommendation),
                 "recommendation": recommendation,
                 "review": review,
@@ -232,37 +297,53 @@ def build_evidence_report(
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in sorted(unique.values(), key=lambda item: item["timestamp_value"]):
         instrument_class = "leveraged" if row["leveraged"] else "ordinary"
-        grouped[f"{row['strategy_id']}|{instrument_class}"].append(row)
+        grouped[f"{row['strategy_id']}|{row['decision_policy']}|{instrument_class}"].append(row)
 
     buckets: dict[str, Any] = {}
     for key, rows in sorted(grouped.items()):
         directionally_useful = len(rows) >= MIN_STRATEGY_BUCKET
         folds = _walk_forward(rows, current_weights) if directionally_useful else []
-        proposal_eligible = False
-        if folds:
-            baseline_exp = [fold["out_of_sample"]["baseline"]["expectancy_pct"] for fold in folds]
-            candidate_exp = [fold["out_of_sample"]["candidate"]["expectancy_pct"] for fold in folds]
-            baseline_dd = [fold["out_of_sample"]["baseline"]["maximum_drawdown_pct"] for fold in folds]
-            candidate_dd = [fold["out_of_sample"]["candidate"]["maximum_drawdown_pct"] for fold in folds]
-            complete = all(value is not None for value in baseline_exp + candidate_exp + baseline_dd + candidate_dd)
-            proposal_eligible = (
-                complete
-                and mean(candidate_exp) > mean(baseline_exp)
-                and mean(candidate_dd) <= mean(baseline_dd) * 1.10
+        strategy_id, decision_policy, instrument_class = key.rsplit("|", 2)
+
+        # Parallel advisory track for the strategy-side cluster weights, so evidence
+        # feedback reaches the authoritative track instead of only the legacy score.
+        cluster_base = _cluster_base_weights(strategy_id)
+        cluster_rows = [row for row in rows if _score_source(row, "cluster") is not None]
+        cluster_folds = (
+            _walk_forward(cluster_rows, cluster_base, "cluster")
+            if cluster_base is not None and len(cluster_rows) >= MIN_STRATEGY_BUCKET
+            else []
+        )
+        cluster_notes: list[str] = []
+        if cluster_base is None:
+            cluster_notes.append("No cluster-weight baseline for this strategy_id; cluster advisory skipped.")
+        elif len(cluster_rows) < MIN_STRATEGY_BUCKET:
+            cluster_notes.append(
+                f"Need {MIN_STRATEGY_BUCKET} closed trades with stored factor_clusters for a cluster-weight advisory."
             )
-        strategy_id, instrument_class = key.rsplit("|", 1)
+
         buckets[key] = {
             "phase": _phase(strategy_id),
             "strategy_id": strategy_id,
+            "decision_policy": decision_policy,
             "instrument_class": instrument_class,
             "closed_trades": len(rows),
             "minimum_required": MIN_STRATEGY_BUCKET,
             "directionally_useful": directionally_useful,
-            "proposal_eligible": proposal_eligible,
+            "proposal_eligible": _proposal_eligible(folds),
             "advisory_only": True,
             "walk_forward_folds": folds,
             "latest_advisory_weights": folds[-1]["selected_weights"] if folds else None,
-            "notes": [] if directionally_useful else [f"Need {MIN_STRATEGY_BUCKET} unique realised closed trades in this exact bucket."],
+            "cluster_walk_forward_folds": cluster_folds,
+            "cluster_proposal_eligible": _proposal_eligible(cluster_folds),
+            "latest_advisory_cluster_weights": cluster_folds[-1]["selected_weights"] if cluster_folds else None,
+            "weights_targets": {
+                "walk_forward_folds": "legacy-component-weights",
+                "cluster_walk_forward_folds": "strategy-cluster-weights",
+            },
+            "notes": (
+                [] if directionally_useful else [f"Need {MIN_STRATEGY_BUCKET} unique realised closed trades in this exact bucket."]
+            ) + cluster_notes,
         }
 
     phase_rows: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -274,7 +355,7 @@ def build_evidence_report(
     }
 
     return {
-        "schema_version": "evidence-optimization-v1",
+        "schema_version": "evidence-optimization-v2",
         "joined_pairs": joined_pairs,
         "unmatched_reviews": unmatched_reviews,
         "excluded_synthetic": excluded_synthetic,
@@ -287,5 +368,7 @@ def build_evidence_report(
         "notes": [
             "All proposals are advisory; this report never writes weights.",
             "Training selection and out-of-sample evaluation use non-overlapping chronological windows.",
+            "walk_forward_folds advise the legacy component weights; cluster_walk_forward_folds advise the strategy cluster weights.",
+            "Buckets are keyed by strategy_id, decision_policy, and instrument class so policy changes never share samples.",
         ],
     }

@@ -143,8 +143,20 @@ def analyze_trend(snapshot: MarketSnapshot, bars: list[KLineBar]) -> TrendAnalys
             score -= 4
             notes.append("Constructive bar but inside a downtrend — treat as a bounce, not a turn.")
 
-    support_levels = sorted({_round_level(prior.low), _round_level(prior_low), _round_level(recent.low)}, reverse=True)
-    resistance_levels = sorted({_round_level(prior.high), _round_level(prior_high), _round_level(recent.high)})
+    # Partition candidate levels by the live price: a prior high the price has already
+    # cleared is a retest support, not overhead resistance, and a prior low the price
+    # has broken below is overhead supply. Without this split the trader plan can list
+    # a "resistance" below the current price.
+    candidate_levels = {
+        _round_level(prior.low),
+        _round_level(prior_low),
+        _round_level(recent.low),
+        _round_level(prior.high),
+        _round_level(prior_high),
+        _round_level(recent.high),
+    }
+    support_levels = sorted((level for level in candidate_levels if level < price), reverse=True)
+    resistance_levels = sorted(level for level in candidate_levels if level > price)
     if status == "high-level-consolidation":
         invalidation_level = _round_level(recent.low)
     else:

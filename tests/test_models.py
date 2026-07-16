@@ -110,7 +110,7 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(recommendation.entry_price, 147.9)
         self.assertEqual(recommendation.user_context, {"last_trim_price": 149.5})
         self.assertIsNone(recommendation.data_quality)
-        self.assertEqual(recommendation.schema_version, "recommendation-v1")
+        self.assertEqual(recommendation.schema_version, "recommendation-v5")
         self.assertIsNone(recommendation.position_state)
         self.assertIsNone(recommendation.exit_plan)
         self.assertIsNone(recommendation.strategy_assessment)

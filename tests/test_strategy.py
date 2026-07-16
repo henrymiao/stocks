@@ -91,7 +91,7 @@ class StrategyGateTests(unittest.TestCase):
         self.assertEqual(short.suggested_allocation_pct, 20.0)
         self.assertGreater(short.setup_score, 65.0)
         self.assertGreater(swing.setup_score, 65.0)
-        self.assertEqual(short.decision_policy, "logic-first-correlation-aware-v3")
+        self.assertEqual(short.decision_policy, "logic-first-correlation-aware-v4")
         self.assertIn("market_behavior", short.factor_clusters)
 
     def test_correlated_tape_factors_are_aggregated_once(self):
@@ -188,13 +188,41 @@ class StrategyGateTests(unittest.TestCase):
         self.assertIn("portfolio-heat", exhausted.gates_failed)
 
     def test_existing_position_gets_separate_position_decision(self):
-        assessment = evaluate_strategy(
-            get_strategy_profile("short"),
+        profile = get_strategy_profile("short")
+        strong_scores = dict(
+            _good_evidence().factor_scores,
+            fundamental=90.0,
+            price_volume=90.0,
+            relative_strength=85.0,
+            capital_flow=85.0,
+            market_regime=85.0,
+            position_fit=90.0,
+        )
+
+        # Strong setup pinned under resistance -> trim, from strategy evidence alone.
+        pinned = evaluate_strategy(
+            profile,
+            _good_evidence(factor_scores=strong_scores, resistance_room_r=1.0),
+            has_position=True,
+        )
+        # Broken trend -> full exit regardless of scores.
+        broken = evaluate_strategy(
+            profile,
+            _good_evidence(trend_regime="downtrend", trigger_confirmed=False),
+            has_position=True,
+        )
+        # Healthy setup holds even if the legacy label demands a trim: the legacy
+        # label must no longer drive position decisions.
+        healthy = evaluate_strategy(
+            profile,
             _good_evidence(),
             has_position=True,
             legacy_label="trim-on-strength",
         )
-        self.assertEqual(assessment.position_decision, "partial-exit")
+
+        self.assertEqual(pinned.position_decision, "partial-exit")
+        self.assertEqual(broken.position_decision, "full-exit")
+        self.assertEqual(healthy.position_decision, "hold")
 
     def test_confirmed_probe_can_become_add_candidate(self):
         confirmed = evaluate_strategy(

@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 
-from tools.stock_skills.evidence_optimization import build_evidence_report
+from tools.stock_skills.evidence_optimization import _weighted_pnl, build_evidence_report
 
 
 WEIGHTS = {
@@ -59,6 +59,35 @@ def _pair(
                 "market_behavior": 55,
                 "environment": 50,
                 "risk_fit": 60,
+            }
+            assessment["decision_policy"] = policy or "logic-first-correlation-aware-v5"
+            assessment["decision_inputs"] = {
+                "factor_scores": {
+                    "fundamental": 80 if winning else 20,
+                    "price_volume": 55,
+                    "relative_strength": 55,
+                    "capital_flow": 55,
+                    "market_regime": 50,
+                    "liquidity_event": 50,
+                    "position_fit": 60,
+                },
+                "data_confidence": 1.0,
+                "data_entry_eligible": True,
+                "exit_plan_valid": True,
+                "session_phase": "after-close",
+                "trend_regime": "uptrend",
+                "relative_strength_positive": True,
+                "volume_ratio": 1.3,
+                "trigger_confirmed": True,
+                "resistance_room_r": 3.0,
+                "market_regime": "risk-on",
+                "liquidity_ok": True,
+                "weekly_aligned": True,
+                "event_days": 10,
+                "underlying_confirmed": True,
+                "portfolio_heat_allowed": True,
+                "data_probe_eligible": True,
+                "planned_allocation_pct": 20.0,
             }
         recommendation["strategy_assessment"] = assessment
     review = {
@@ -163,7 +192,9 @@ class EvidenceOptimizationTests(unittest.TestCase):
             WEIGHTS,
         )
 
-        bucket = report["buckets"]["short-balanced-v1|legacy|ordinary"]
+        bucket = report["buckets"][
+            "short-balanced-v1|logic-first-correlation-aware-v5|ordinary"
+        ]
         self.assertEqual(len(bucket["cluster_walk_forward_folds"]), 1)
         advisory = bucket["latest_advisory_cluster_weights"]
         self.assertEqual(set(advisory), {"thesis", "market_behavior", "environment", "risk_fit"})
@@ -171,6 +202,43 @@ class EvidenceOptimizationTests(unittest.TestCase):
         self.assertEqual(
             bucket["weights_targets"]["cluster_walk_forward_folds"], "strategy-cluster-weights"
         )
+
+    def test_cluster_weights_replay_entry_decision_and_allocation(self):
+        recommendation, review = _pair(1, clusters=True)
+        scores = {
+            "fundamental": 100.0,
+            "price_volume": 62.0,
+            "relative_strength": 62.0,
+            "capital_flow": 62.0,
+            "market_regime": 50.0,
+            "liquidity_event": 50.0,
+            "position_fit": 50.0,
+        }
+        assessment = recommendation["strategy_assessment"]
+        assessment["factor_clusters"] = {
+            "thesis": 100.0,
+            "market_behavior": 62.0,
+            "environment": 50.0,
+            "risk_fit": 50.0,
+        }
+        assessment["decision_inputs"]["factor_scores"] = scores
+        review["final_return_pct"] = 5.0
+        row = {"recommendation": recommendation, "review": review}
+        baseline = {
+            "thesis": 0.20,
+            "market_behavior": 0.40,
+            "environment": 0.20,
+            "risk_fit": 0.20,
+        }
+        candidate = {
+            "thesis": 0.22,
+            "market_behavior": 0.3933333333333333,
+            "environment": 0.19333333333333333,
+            "risk_fit": 0.19333333333333333,
+        }
+
+        self.assertEqual(_weighted_pnl(row, baseline, "cluster"), 0.25)
+        self.assertEqual(_weighted_pnl(row, candidate, "cluster"), 1.0)
 
     def test_cluster_advisory_skipped_without_stored_clusters(self):
         pairs = [_pair(index) for index in range(60)]
@@ -185,6 +253,22 @@ class EvidenceOptimizationTests(unittest.TestCase):
         self.assertIsNone(bucket["latest_advisory_cluster_weights"])
         self.assertFalse(bucket["cluster_proposal_eligible"])
         self.assertTrue(any("factor_clusters" in note for note in bucket["notes"]))
+
+    def test_cluster_advisory_skips_legacy_rows_without_replay_inputs(self):
+        pairs = [_pair(index, clusters=True) for index in range(60)]
+        for recommendation, _ in pairs:
+            recommendation["strategy_assessment"].pop("decision_inputs")
+        report = build_evidence_report(
+            [pair[0] for pair in pairs],
+            [pair[1] for pair in pairs],
+            WEIGHTS,
+        )
+
+        bucket = report["buckets"][
+            "short-balanced-v1|logic-first-correlation-aware-v5|ordinary"
+        ]
+        self.assertEqual(bucket["cluster_walk_forward_folds"], [])
+        self.assertTrue(any("decision_inputs" in note for note in bucket["notes"]))
 
 
 if __name__ == "__main__":

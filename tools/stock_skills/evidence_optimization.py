@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict
+from dataclasses import replace
 from datetime import datetime, timezone
 from statistics import mean
 from typing import Any
@@ -152,11 +153,73 @@ def _score_source(row: dict[str, Any], source: str) -> dict[str, Any] | None:
     return scores if isinstance(scores, dict) else None
 
 
+def _replayed_strategy_pnl(row: dict[str, Any], weights: dict[str, float]) -> float | None:
+    """Replay the current entry policy and allocation under candidate cluster weights.
+
+    Old records that only stored the final cluster scores cannot reproduce gates,
+    probes, or risk sizing, so they are deliberately excluded from this track.
+    """
+    recommendation = row["recommendation"]
+    assessment = recommendation.get("strategy_assessment")
+    raw_return = _number(row["review"].get("final_return_pct"))
+    if not isinstance(assessment, dict) or raw_return is None:
+        return None
+    decision_inputs = assessment.get("decision_inputs")
+    if not isinstance(decision_inputs, dict):
+        return None
+
+    # Imported lazily so legacy component reports remain usable in stripped-down
+    # offline environments that do not load the strategy engine.
+    from .strategy import (
+        DECISION_POLICY,
+        StrategyEvidence,
+        evaluate_strategy,
+        get_strategy_profile,
+    )
+
+    if assessment.get("decision_policy") != DECISION_POLICY:
+        return None
+    horizon = assessment.get("horizon", recommendation.get("horizon"))
+    if horizon not in {"short", "swing"}:
+        return None
+    try:
+        profile = get_strategy_profile(str(horizon), leveraged=_is_leveraged(recommendation))
+        evidence = StrategyEvidence(**decision_inputs)
+    except (TypeError, ValueError):
+        return None
+
+    stored_strategy_id = assessment.get("strategy_id", recommendation.get("strategy_id"))
+    if stored_strategy_id != profile.strategy_id:
+        return None
+    if set(weights) != set(profile.cluster_weights):
+        return None
+    numeric_weights = {key: _number(value) for key, value in weights.items()}
+    if any(value is None or value < 0.0 for value in numeric_weights.values()):
+        return None
+    if not math.isclose(sum(numeric_weights.values()), 1.0, abs_tol=1e-9):
+        return None
+    if _number(evidence.planned_allocation_pct) is None:
+        return None
+
+    replayed = evaluate_strategy(
+        replace(profile, cluster_weights={key: float(value) for key, value in numeric_weights.items()}),
+        evidence,
+    )
+    if replayed.entry_decision not in {"enter", "probe"}:
+        return 0.0
+    allocation = _number(replayed.suggested_allocation_pct)
+    if allocation is None or allocation <= 0.0:
+        return 0.0
+    return round(raw_return * allocation / 100.0, 8)
+
+
 def _weighted_pnl(row: dict[str, Any], weights: dict[str, float], source: str = "component") -> float | None:
     scores = _score_source(row, source)
     raw_return = _number(row["review"].get("final_return_pct"))
     if scores is None or raw_return is None:
         return None
+    if source == "cluster":
+        return _replayed_strategy_pnl(row, weights)
     present = {
         key: (value, _number(scores.get(key)))
         for key, value in weights.items()
@@ -308,7 +371,12 @@ def build_evidence_report(
         # Parallel advisory track for the strategy-side cluster weights, so evidence
         # feedback reaches the authoritative track instead of only the legacy score.
         cluster_base = _cluster_base_weights(strategy_id)
-        cluster_rows = [row for row in rows if _score_source(row, "cluster") is not None]
+        cluster_rows = [
+            row
+            for row in rows
+            if cluster_base is not None
+            and _weighted_pnl(row, cluster_base, "cluster") is not None
+        ]
         cluster_folds = (
             _walk_forward(cluster_rows, cluster_base, "cluster")
             if cluster_base is not None and len(cluster_rows) >= MIN_STRATEGY_BUCKET
@@ -319,7 +387,8 @@ def build_evidence_report(
             cluster_notes.append("No cluster-weight baseline for this strategy_id; cluster advisory skipped.")
         elif len(cluster_rows) < MIN_STRATEGY_BUCKET:
             cluster_notes.append(
-                f"Need {MIN_STRATEGY_BUCKET} closed trades with stored factor_clusters for a cluster-weight advisory."
+                f"Need {MIN_STRATEGY_BUCKET} closed trades with factor_clusters and replayable "
+                "decision_inputs from the current decision policy for a cluster-weight advisory."
             )
 
         buckets[key] = {
@@ -355,7 +424,7 @@ def build_evidence_report(
     }
 
     return {
-        "schema_version": "evidence-optimization-v2",
+        "schema_version": "evidence-optimization-v3",
         "joined_pairs": joined_pairs,
         "unmatched_reviews": unmatched_reviews,
         "excluded_synthetic": excluded_synthetic,
@@ -369,6 +438,7 @@ def build_evidence_report(
             "All proposals are advisory; this report never writes weights.",
             "Training selection and out-of-sample evaluation use non-overlapping chronological windows.",
             "walk_forward_folds advise the legacy component weights; cluster_walk_forward_folds advise the strategy cluster weights.",
+            "Cluster candidates replay gates, entry/probe decisions, and risk-sized allocation; non-actionable observations contribute zero exposure.",
             "Buckets are keyed by strategy_id, decision_policy, and instrument class so policy changes never share samples.",
         ],
     }

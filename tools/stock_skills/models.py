@@ -293,6 +293,7 @@ class StrategyAssessment:
     decision_policy: str = "opportunity-layered-v2"
     suggested_allocation_pct: float | None = None
     allocation_rationale: str | None = None
+    decision_inputs: dict[str, Any] = field(default_factory=dict)
     notes: tuple[str, ...] = ()
 
 

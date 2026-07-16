@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, replace
 
 from .exit_engine import build_exit_plan
 from .models import ExitPlan, StrategyAssessment
@@ -12,6 +12,9 @@ from .models import ExitPlan, StrategyAssessment
 # hunting literals through the decision logic.
 ENTER_MIN_SETUP = 65.0            # all gates passed and setup at least this -> enter
 WATCH_MIN_SETUP = 50.0            # below this with no missing evidence -> reject
+SUPPORTING_CLUSTER_MIN_SCORE = 60.0  # inclusive: a cluster at 60 counts as support
+ENTER_MIN_SUPPORTING_CLUSTERS = 2  # full entry/add needs independent confirmation
+PROBE_MIN_SUPPORTING_CLUSTERS = 1  # one live cluster may justify a small early probe
 PROBE_MIN_CAPITAL_SCORE = 60.0    # probe needs real capital sponsorship...
 PROBE_MIN_PRICE_VOLUME_SCORE = 55.0  # ...and at least neutral price/volume behaviour
 RISK_OFF_PROBE_MIN_SETUP = 68.0   # risk-off tape: probe only for clear leadership...
@@ -19,6 +22,7 @@ RISK_OFF_PROBE_MIN_CAPITAL = 70.0  # ...with strong capital confirmation
 POSITION_FULL_EXIT_MAX_SETUP = 45.0  # held position below this setup -> full exit
 POSITION_TRIM_MAX_SETUP = 55.0    # held position below this setup -> partial exit
 POSITION_TRIM_ON_STRENGTH_MIN_SETUP = 80.0  # strong setup pinned at resistance -> trim
+DECISION_POLICY = "logic-first-correlation-aware-v5"
 
 
 @dataclass(frozen=True)
@@ -252,6 +256,11 @@ def evaluate_strategy(
     position_stage: str | None = None,
 ) -> StrategyAssessment:
     setup_score, factor_scores, factor_clusters = _setup_score(profile, evidence.factor_scores)
+    supporting_clusters = tuple(
+        name
+        for name, score in factor_clusters.items()
+        if score >= SUPPORTING_CLUSTER_MIN_SCORE
+    )
     passed: list[str] = []
     failed: list[str] = []
     missing: list[str] = []
@@ -290,6 +299,14 @@ def evaluate_strategy(
     gate("market-regime", evidence.market_regime != "risk-off")
     gate("liquidity", evidence.liquidity_ok)
     gate("portfolio-heat", evidence.portfolio_heat_allowed)
+    if len(supporting_clusters) >= ENTER_MIN_SUPPORTING_CLUSTERS:
+        passed.append("independent-clusters")
+    elif len(supporting_clusters) >= PROBE_MIN_SUPPORTING_CLUSTERS:
+        # One cluster is incomplete confirmation, not contradictory evidence. This
+        # keeps the fast probe path available without authorising a full position.
+        missing.append("independent-clusters")
+    else:
+        failed.append("independent-clusters")
 
     if profile.horizon == "swing":
         gate("weekly-alignment", evidence.weekly_aligned)
@@ -331,6 +348,7 @@ def evaluate_strategy(
         and evidence.trigger_confirmed is not False
         and capital_score >= PROBE_MIN_CAPITAL_SCORE
         and price_volume_score >= PROBE_MIN_PRICE_VOLUME_SCORE
+        and len(supporting_clusters) >= PROBE_MIN_SUPPORTING_CLUSTERS
         and setup_score >= profile.probe_score_threshold
         and risk_off_probe_ok
         and horizon_probe_ok
@@ -376,6 +394,8 @@ def evaluate_strategy(
         trend_broken = evidence.trend_regime == "downtrend" and evidence.trigger_confirmed is False
         if setup_score < POSITION_FULL_EXIT_MAX_SETUP or trend_broken:
             position_decision = "full-exit"
+        elif position_stage == "probe" and entry_decision == "reject":
+            position_decision = "full-exit"
         elif position_stage == "probe" and entry_decision == "enter":
             position_decision = "add"
         elif position_stage == "probe" and entry_decision in {"probe", "watch"}:
@@ -389,8 +409,9 @@ def evaluate_strategy(
 
     notes = (
         "Setup score and entry decision are horizon-specific; legacy total_score is unchanged.",
-        "Decision policy logic-first-correlation-aware-v4 separates hard vetoes from confirmation gates.",
+        f"Decision policy {DECISION_POLICY} separates hard vetoes from confirmation gates.",
         "Correlated price, relative-strength, and capital evidence is aggregated once as market_behavior.",
+        "Full entry/add needs two independent clusters at or above 60; one cluster can only support a capped probe.",
         "Position decisions read strategy-track evidence (setup bands, trend break, resistance room), not the legacy label.",
     )
     return StrategyAssessment(
@@ -405,8 +426,9 @@ def evaluate_strategy(
         gates_failed=tuple(failed),
         gates_missing=tuple(missing),
         leveraged_overlay=profile.leveraged_overlay,
-        decision_policy="logic-first-correlation-aware-v4",
+        decision_policy=DECISION_POLICY,
         suggested_allocation_pct=suggested_allocation_pct,
         allocation_rationale=allocation_rationale,
+        decision_inputs=asdict(evidence),
         notes=notes,
     )

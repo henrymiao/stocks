@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections.abc import Callable
 from dataclasses import replace
 from datetime import date, datetime, timedelta
@@ -946,7 +947,11 @@ def _parse_alert_spec(spec: str) -> tuple[str, str, float, str]:
         raise ValueError(f"alert spec must be CODE:DIRECTION:LEVEL[:NOTE], got {spec!r}")
     code, direction, level = parts[0], parts[1], parts[2]
     note = parts[3] if len(parts) == 4 else ""
-    return code, direction, float(level), note
+    try:
+        parsed_level = float(level)
+    except ValueError:
+        raise ValueError(f"alert LEVEL must be a number, got {level!r} in {spec!r}") from None
+    return code, direction, parsed_level, note
 
 
 def _parse_earnings_spec(spec: str) -> tuple[str, str, str, str]:
@@ -964,14 +969,18 @@ def _cmd_monitor(args: argparse.Namespace) -> int:
     from .store import MarketStore, sync_daily_bars
 
     with MarketStore(args.db) as store:
-        for spec in args.add or []:
-            code, direction, level, note = _parse_alert_spec(spec)
-            alert_id = store.add_alert(code, direction, level, note)
-            print(f"armed alert #{alert_id}: {code} {direction} {level} {note}".rstrip())
-        for spec in args.earnings_add or []:
-            code, event_date, session, note = _parse_earnings_spec(spec)
-            store.upsert_earnings(code, event_date, session, note)
-            print(f"earnings: {code} {event_date} {session} {note}".rstrip())
+        try:
+            for spec in args.add or []:
+                code, direction, level, note = _parse_alert_spec(spec)
+                alert_id = store.add_alert(code, direction, level, note)
+                print(f"armed alert #{alert_id}: {code} {direction} {level} {note}".rstrip())
+            for spec in args.earnings_add or []:
+                code, event_date, session, note = _parse_earnings_spec(spec)
+                store.upsert_earnings(code, event_date, session, note)
+                print(f"earnings: {code} {event_date} {session} {note}".rstrip())
+        except ValueError as exc:
+            print(f"monitor: {exc}", file=sys.stderr)
+            return 2
 
         armed = store.active_alerts()
         upcoming = store.upcoming_earnings(within_days=args.earnings_window)

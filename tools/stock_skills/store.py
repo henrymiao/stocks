@@ -146,10 +146,14 @@ class MarketStore:
         return len(rows)
 
     def get_bars(self, code: str, ktype: str = "1d", limit: int | None = None) -> list[KLineBar]:
-        query = "SELECT time, open, high, low, close, volume, turnover FROM bars WHERE code = ? AND ktype = ? ORDER BY time"
-        rows = self._conn.execute(query, (code, ktype)).fetchall()
-        if limit is not None:
-            rows = rows[-limit:]
+        query = "SELECT time, open, high, low, close, volume, turnover FROM bars WHERE code = ? AND ktype = ?"
+        if limit is None:
+            rows = self._conn.execute(query + " ORDER BY time", (code, ktype)).fetchall()
+        else:
+            # Newest `limit` rows, returned in chronological order.
+            rows = self._conn.execute(
+                query + " ORDER BY time DESC LIMIT ?", (code, ktype, int(limit))
+            ).fetchall()[::-1]
         return [
             KLineBar(
                 time=row["time"],

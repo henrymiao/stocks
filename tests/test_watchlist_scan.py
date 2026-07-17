@@ -106,6 +106,7 @@ class WatchlistScanTests(unittest.TestCase):
             fetcher,
             analyzer=analyze,
             deep_top=1,
+            deep_bottom=0,
             deep_horizons=("short",),
         )
 
@@ -114,6 +115,57 @@ class WatchlistScanTests(unittest.TestCase):
         self.assertEqual(len(result["deep_analysis"]), 2)
         slow = next(row for row in result["candidates"] if row["code"] == "US.SLOW")
         self.assertEqual(slow["treatment"], "rank-only")
+
+    def test_always_top_and_bottom_candidates_receive_deep_analysis(self):
+        entries = self.entries + [
+            {
+                "code": "US.REDUCED",
+                "name": "Reduced",
+                "tier": "thematic",
+                "priority": 90,
+                "strategy_profiles": ["short"],
+                "benchmark": "US.SPY",
+                "underlying_proxy": None,
+                "tags": ["holding"],
+                "scan_policy": "always",
+                "position_status": "reduced-holding",
+            }
+        ]
+        fetcher = FakeFetcher(
+            {
+                "US.CORE": _snapshot("US.CORE", 0.5),
+                "US.FAST": _snapshot("US.FAST", 4.0),
+                "US.SLOW": _snapshot("US.SLOW", -6.0),
+                "US.SPY": _snapshot("US.SPY", 1.0),
+                "US.NEW": _snapshot("US.NEW", 8.0),
+                "US.REDUCED": _snapshot("US.REDUCED", -0.5),
+            }
+        )
+        calls = []
+
+        result = run_watchlist_scan(
+            entries,
+            fetcher,
+            analyzer=lambda entry, horizon, shared: calls.append(entry["code"]) or {},
+            deep_top=1,
+            deep_bottom=1,
+            deep_horizons=("short",),
+        )
+
+        self.assertEqual(set(calls), {"US.CORE", "US.REDUCED", "US.FAST", "US.SLOW"})
+        reasons = {
+            item["code"]: item["selection_reasons"]
+            for item in result["selections"]["short"]
+        }
+        self.assertIn("always", reasons["US.REDUCED"])
+        self.assertIn("top", reasons["US.FAST"])
+        self.assertIn("bottom", reasons["US.SLOW"])
+
+    def test_negative_deep_bottom_is_rejected(self):
+        fetcher = FakeFetcher({})
+
+        with self.assertRaisesRegex(ValueError, "deep_bottom"):
+            run_watchlist_scan(self.entries, fetcher, deep_bottom=-1)
 
     def test_missing_and_illiquid_snapshots_are_rejected_without_recommendation(self):
         fetcher = FakeFetcher(

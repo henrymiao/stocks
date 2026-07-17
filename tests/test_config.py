@@ -57,6 +57,50 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(by_code["US.SOXL"]["underlying_proxy"], "US.SMH")
         self.assertEqual(by_code["HK.09868"]["valuation_profile"], "growth")
 
+    def test_load_watchlist_normalizes_position_and_scan_policy(self):
+        entry = {
+            "code": "HK.00700",
+            "name": "腾讯控股",
+            "tags": ["hk", "holding", "growth"],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "core.json"
+            path.write_text(json.dumps({"watchlist": [entry]}), encoding="utf-8")
+
+            loaded = load_watchlist(path)[0]
+
+        self.assertEqual(loaded["position_status"], "holding")
+        self.assertEqual(loaded["scan_policy"], "always")
+
+    def test_load_watchlist_rejects_invalid_position_and_scan_policy(self):
+        cases = [
+            ({"position_status": "sold"}, "position_status"),
+            ({"scan_policy": "sometimes"}, "scan_policy"),
+        ]
+        for overrides, expected in cases:
+            with self.subTest(overrides=overrides), tempfile.TemporaryDirectory() as tmpdir:
+                path = Path(tmpdir) / "core.json"
+                entry = {"code": "HK.00700", "name": "腾讯控股", "tags": ["hk"]} | overrides
+                path.write_text(json.dumps({"watchlist": [entry]}), encoding="utf-8")
+
+                with self.assertRaisesRegex(ValueError, expected):
+                    load_watchlist(path)
+
+    def test_load_watchlist_rejects_leveraged_etf_without_underlying(self):
+        entry = {
+            "code": "HK.07709",
+            "name": "XL二南方海力士",
+            "tags": ["hk", "leveraged"],
+            "asset_type": "leveraged-etf",
+            "underlying_proxy": None,
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "core.json"
+            path.write_text(json.dumps({"watchlist": [entry]}), encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "underlying_proxy"):
+                load_watchlist(path)
+
     def test_load_watchlist_rejects_duplicate_codes_even_when_names_differ(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             path = Path(tmpdir) / "core.json"
@@ -74,6 +118,80 @@ class ConfigTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "Duplicate watchlist code: US.NVDA"):
                 load_watchlist(path)
+
+    def test_load_watchlist_resolves_one_level_tag_view(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "core.json").write_text(
+                json.dumps(
+                    {
+                        "watchlist": [
+                            {
+                                "code": "SZ.002463",
+                                "name": "沪电股份",
+                                "tags": ["a-share", "national-tech"],
+                            },
+                            {
+                                "code": "HK.00700",
+                                "name": "腾讯控股",
+                                "tags": ["hk", "national-tech"],
+                            },
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / "view.json").write_text(
+                json.dumps(
+                    {
+                        "source": "core.json",
+                        "filters": {
+                            "market": ["HK"],
+                            "include_tags_all": ["national-tech"],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            entries = load_watchlist(root / "view.json")
+
+        self.assertEqual([entry["code"] for entry in entries], ["HK.00700"])
+
+    def test_load_watchlist_rejects_nested_view(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "base.json").write_text(
+                json.dumps({"source": "core.json", "filters": {}}),
+                encoding="utf-8",
+            )
+            (root / "view.json").write_text(
+                json.dumps({"source": "base.json", "filters": {}}),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "nested watchlist view"):
+                load_watchlist(root / "view.json")
+
+    def test_load_watchlist_rejects_unknown_or_non_list_view_filters(self):
+        cases = [
+            ({"unknown": ["x"]}, "Unknown watchlist view filters"),
+            ({"market": "HK"}, "must be a list"),
+        ]
+        for filters, expected in cases:
+            with self.subTest(filters=filters), tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                (root / "core.json").write_text(
+                    json.dumps({"watchlist": [{"code": "HK.00700", "name": "腾讯控股", "tags": ["hk"]}]}),
+                    encoding="utf-8",
+                )
+                (root / "view.json").write_text(
+                    json.dumps({"source": "core.json", "filters": filters}),
+                    encoding="utf-8",
+                )
+
+                with self.assertRaisesRegex(ValueError, expected):
+                    load_watchlist(root / "view.json")
 
     def test_load_watchlist_rejects_invalid_tier_priority_and_strategy(self):
         cases = [

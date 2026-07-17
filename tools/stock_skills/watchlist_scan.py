@@ -33,6 +33,17 @@ def _liquidity_score(snapshot: MarketSnapshot) -> float:
     return _clamp((math.log10(snapshot.turnover) - 4.0) * 20.0)
 
 
+def _entry_scan_policy(entry: dict[str, Any]) -> str:
+    policy = entry.get("scan_policy")
+    if isinstance(policy, str):
+        return policy
+    if entry["tier"] == "core":
+        return "always"
+    if entry["tier"] in {"proxy", "discovery"}:
+        return "snapshot-only"
+    return "ranked"
+
+
 def _cheap_score(
     entry: dict[str, Any],
     snapshot: MarketSnapshot,
@@ -88,6 +99,8 @@ def _candidate_record(entry: dict[str, Any], snapshots: dict[str, MarketSnapshot
         "tier": entry["tier"],
         "priority": entry["priority"],
         "strategy_profiles": entry["strategy_profiles"],
+        "position_status": entry.get("position_status", "watch"),
+        "scan_policy": _entry_scan_policy(entry),
         "filter_status": "rejected" if reasons else "eligible",
         "rejection_reasons": reasons,
         "treatment": "snapshot-only" if entry["tier"] in {"proxy", "discovery"} else "rank-only",
@@ -130,6 +143,7 @@ def run_watchlist_scan(
     *,
     analyzer: DeepAnalyzer | None = None,
     deep_top: int = 10,
+    deep_bottom: int = 5,
     deep_horizons: tuple[str, ...] = ("short",),
     context_codes: tuple[str, ...] = (),
 ) -> dict[str, Any]:
@@ -141,6 +155,8 @@ def run_watchlist_scan(
     """
     if deep_top < 0:
         raise ValueError("deep_top must be non-negative")
+    if deep_bottom < 0:
+        raise ValueError("deep_bottom must be non-negative")
     invalid_horizons = set(deep_horizons) - {"short", "swing"}
     if invalid_horizons:
         raise ValueError(f"Invalid deep horizons: {sorted(invalid_horizons)}")
@@ -149,12 +165,14 @@ def run_watchlist_scan(
     snapshot_list = fetcher.get_snapshots(codes)
     snapshots = {snapshot.code: snapshot for snapshot in snapshot_list}
     candidates = [_candidate_record(entry, snapshots) for entry in entries]
+    by_code = {entry["code"]: entry for entry in entries}
 
     rankings: dict[str, list[dict[str, Any]]] = {}
     for horizon in ("short", "swing"):
         ranked = [
             row for row in candidates
             if row["tier"] == "thematic"
+            and _entry_scan_policy(by_code[row["code"]]) == "ranked"
             and row["filter_status"] == "eligible"
             and horizon in row["scores"]
         ]
@@ -164,18 +182,59 @@ def run_watchlist_scan(
             for index, row in enumerate(ranked, start=1)
         ]
 
-    selected: dict[str, set[str]] = {}
+    selected: dict[str, set[str]] = {"short": set(), "swing": set()}
+    selections: dict[str, list[dict[str, Any]]] = {"short": [], "swing": []}
     for horizon in deep_horizons:
-        core = {
-            row["code"] for row in candidates
-            if row["tier"] == "core"
-            and row["filter_status"] == "eligible"
-            and horizon in row["strategy_profiles"]
-        }
-        promoted = {item["code"] for item in rankings[horizon][:deep_top]}
-        selected[horizon] = core | promoted
+        reasons_by_code: dict[str, set[str]] = {}
+        for row in candidates:
+            if (
+                row["filter_status"] == "eligible"
+                and horizon in row["strategy_profiles"]
+                and _entry_scan_policy(by_code[row["code"]]) == "always"
+            ):
+                reasons_by_code.setdefault(row["code"], set()).add("always")
 
-    by_code = {entry["code"]: entry for entry in entries}
+        for item in rankings[horizon][:deep_top]:
+            reasons_by_code.setdefault(item["code"], set()).add("top")
+
+        bottom_candidates = [
+            row
+            for row in candidates
+            if row["tier"] == "thematic"
+            and _entry_scan_policy(by_code[row["code"]]) == "ranked"
+            and row["filter_status"] == "eligible"
+            and horizon in row["scores"]
+        ]
+        bottom_candidates.sort(
+            key=lambda row: (
+                math.inf if row.get("change_pct") is None else row["change_pct"],
+                math.inf if row.get("relative_strength_pct") is None else row["relative_strength_pct"],
+                row["code"],
+            )
+        )
+        for row in bottom_candidates[:deep_bottom]:
+            reasons_by_code.setdefault(row["code"], set()).add("bottom")
+
+        ordered_codes = sorted(
+            reasons_by_code,
+            key=lambda code: (
+                min(
+                    {"always": 0, "top": 1, "bottom": 2}[reason]
+                    for reason in reasons_by_code[code]
+                ),
+                -by_code[code]["priority"],
+                code,
+            ),
+        )
+        selected[horizon] = set(ordered_codes)
+        selections[horizon] = [
+            {
+                "code": code,
+                "selection_reasons": sorted(reasons_by_code[code]),
+            }
+            for code in ordered_codes
+        ]
+
     candidate_by_code = {row["code"]: row for row in candidates}
     deep_analysis: list[dict[str, Any]] = []
     if analyzer is not None:
@@ -200,6 +259,7 @@ def run_watchlist_scan(
         "snapshot_received_count": len(snapshots),
         "missing_snapshot_codes": missing_codes,
         "rankings": rankings,
+        "selections": selections,
         "candidates": candidates,
         "deep_analysis": deep_analysis,
     }

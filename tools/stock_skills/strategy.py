@@ -4,7 +4,7 @@ import math
 from dataclasses import asdict, dataclass, replace
 
 from .exit_engine import build_exit_plan
-from .models import ExitPlan, StrategyAssessment
+from .models import DECISION_POLICY, ExitPlan, StrategyAssessment
 
 
 # ---- Decision thresholds (setup_score is on a 0-100 scale) ----------------------
@@ -22,7 +22,6 @@ RISK_OFF_PROBE_MIN_CAPITAL = 70.0  # ...with strong capital confirmation
 POSITION_FULL_EXIT_MAX_SETUP = 45.0  # held position below this setup -> full exit
 POSITION_TRIM_MAX_SETUP = 55.0    # held position below this setup -> partial exit
 POSITION_TRIM_ON_STRENGTH_MIN_SETUP = 80.0  # strong setup pinned at resistance -> trim
-DECISION_POLICY = "logic-first-correlation-aware-v5"
 
 
 @dataclass(frozen=True)

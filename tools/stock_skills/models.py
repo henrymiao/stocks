@@ -8,6 +8,12 @@ from typing import Any
 # accepting older versions found in stored journals.
 SCHEMA_VERSION = "recommendation-v5"
 
+# Single source of truth for the decision policy label. Evidence optimization
+# buckets samples by this string, so it must be bumped whenever gate/veto/probe
+# logic changes, and every StrategyAssessment must carry the value current at
+# the time it was produced.
+DECISION_POLICY = "logic-first-correlation-aware-v5"
+
 
 @dataclass(frozen=True)
 class MarketSnapshot:
@@ -290,7 +296,7 @@ class StrategyAssessment:
     gates_failed: tuple[str, ...]
     gates_missing: tuple[str, ...]
     leveraged_overlay: bool
-    decision_policy: str = "opportunity-layered-v2"
+    decision_policy: str = DECISION_POLICY
     suggested_allocation_pct: float | None = None
     allocation_rationale: str | None = None
     decision_inputs: dict[str, Any] = field(default_factory=dict)

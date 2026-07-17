@@ -28,7 +28,7 @@ Treat the current workspace root as the repository root. Do not assume a user-sp
 Core files:
 
 - `tools/stock_skills/`: Python analysis package.
-- `data/watchlists/core.json`: editable core watchlist.
+- `data/watchlists/core.json`: canonical editable watchlist; the other JSON files in that directory are compatibility views filtered from this source.
 - `data/models/signal_weights.json`: initial signal weights.
 - `docs/self-evolving-stock-skills-usage.md`: usage notes.
 - `tests/`: unit tests.
@@ -65,13 +65,16 @@ python3 -m tools.stock_skills.cli path-backtest --scenario /tmp/path-scenarios.j
 
 `path-backtest` is distinct from the frozen fixed-window baseline: it applies partial fills, conservative same-bar ordering, gap-through-stop fills, monotonic trailing stops, time exits, optional completed-close add-ons, and configurable execution costs, then reports R-based expectancy, profit factor, drawdown, capture/giveback, and holding metrics. Each serialized add-on supplies `trigger_r`, `fraction`, and `stop_after_add`; the simulator rejects it unless the raised stop keeps total open risk at or below the original 1R budget.
 
-Scan the tiered watchlist with one shared batch snapshot, then deeply analyze only core and promoted thematic names:
+Scan the canonical tiered watchlist with one shared batch snapshot. Always-scan holdings, top-ranked thematic leaders, and bounded thematic decliners receive deep analysis:
 
 ```bash
-python3 tools/stock_skills/scan_watchlist.py --horizon short --deep-top 10 --output /tmp/watchlist-scan.json
+python3 tools/stock_skills/scan_watchlist.py \
+  --watchlist data/watchlists/core.json \
+  --horizon both --deep-top 10 --deep-bottom 5 \
+  --output /tmp/watchlist-scan.json
 ```
 
-The four tiers are `core`, `thematic`, `proxy`, and `discovery`. The loader fills compatible defaults for older entries but rejects duplicate enabled codes and invalid metadata. The scanner ranks thematic candidates separately for short and swing profiles using cheap liquidity, daily momentum, and benchmark-relative-strength evidence. These scores are promotion scores only, never trade recommendations. Proxy/discovery and rejected rows remain snapshot-only; core plus Top N thematic rows receive the normal strategy analysis. `--horizon both` runs both deep profiles, while `--snapshot-only` performs no deep analysis. Shared macro/index snapshots are reused across promoted names, temporary outputs are unique to the scan, and deep analysis uses `--no-journal`.
+The four tiers are `core`, `thematic`, `proxy`, and `discovery`. `position_status` distinguishes active, reduced, exited, and watch-only names; `scan_policy` controls always/ranked/snapshot-only treatment. The loader validates the canonical source and resolves one-level compatibility views without copying instrument records. The scanner ranks thematic candidates separately for short and swing profiles using cheap liquidity, daily momentum, and benchmark-relative-strength evidence, while `--deep-bottom` prevents the largest declines from disappearing behind a momentum-only Top N. Selection reasons are recorded as `always`, `top`, or `bottom`. These scores are promotion scores only, never trade recommendations. Proxy/discovery and rejected rows remain snapshot-only. `--snapshot-only` performs no deep analysis, shared macro/index snapshots are reused, and deep analysis uses `--no-journal`.
 
 To populate the journals immediately from the repo's existing 复盘 notes (so `backtest` has data without waiting for live calls), run the backfill importer:
 
@@ -133,7 +136,7 @@ python3 -c "import json; p=json.load(open('/tmp/hudian-recommendation.json')); p
    - `strategy.py`: versioned short/swing correlation clusters, horizon-specific hard gates, exit-policy selection, and `leveraged-overlay-v1`. The `logic-first-correlation-aware-v3` policy aggregates correlated factors once before weighting independent evidence clusters. Missing critical evidence cannot be converted into an entry.
    - `path_backtest.py`: chronological OHLC execution simulator, costs, R metrics, aggregation, and portfolio/theme heat checks. It is offline-only and never calls trade APIs.
    - `evidence_optimization.py`: versioned evidence joins, synthetic/incomplete exclusion, trade-id deduplication, ordinary/leveraged buckets, and advisory chronological walk-forward evaluation.
-   - `watchlist_scan.py`: tier-aware snapshot filters, separate short/swing promotion rankings, and bounded core/Top-N deep-analysis selection. The command wrapper is `scan_watchlist.py`.
+   - `watchlist_scan.py`: tier-aware snapshot filters, separate short/swing promotion rankings, and bounded always/Top-N/Bottom-N deep-analysis selection. The command wrapper is `scan_watchlist.py`.
    - `position.py`: ATR (`compute_atr`) plus structured-plan position description (`analyze_structured_position`). The old `analyze_position` remains only to preserve the frozen `position_fit` component score for baseline comparisons; its stop and sizing are not used as execution guidance by new live/offline recommendations.
    - `engine.py`: total score, action label, analyst hypothesis, trader plan. `backdrop_blend` de-duplicates the three correlated backdrop factors so an agreeing tape is not triple-counted.
    - `backtest.py`: offline aggregation of `reviews.jsonl` into win rate, expectancy, MFE/MAE, label/code breakdowns, and per-component predictive edge. Driven by the `backtest` command.

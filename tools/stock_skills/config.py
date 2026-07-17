@@ -22,6 +22,15 @@ WATCHLIST_TIERS = {"core", "thematic", "proxy", "discovery"}
 STRATEGY_PROFILES = {"short", "swing"}
 VALUATION_PROFILES = {"growth", "value", "neutral"}
 ASSET_TYPES = {"equity", "etf", "leveraged-etf", "crypto", "index", "fund"}
+POSITION_STATUSES = {"holding", "reduced-holding", "exited-watch", "watch"}
+SCAN_POLICIES = {"always", "ranked", "snapshot-only"}
+WATCHLIST_VIEW_FILTERS = {
+    "include_tags_any",
+    "include_tags_all",
+    "codes",
+    "market",
+    "tier",
+}
 
 
 def _infer_tier(tags: list[str]) -> str:
@@ -53,6 +62,18 @@ def _infer_valuation_profile(tags: list[str]) -> str:
     if lowered & {"value", "dividend", "defensive", "utility", "bank"}:
         return "value"
     return "neutral"
+
+
+def _default_position_status(tags: list[str]) -> str:
+    return "holding" if "holding" in set(tags) else "watch"
+
+
+def _default_scan_policy(tier: str, position_status: str) -> str:
+    if position_status in {"holding", "reduced-holding"} or tier == "core":
+        return "always"
+    if tier in {"proxy", "discovery"}:
+        return "snapshot-only"
+    return "ranked"
 
 
 def _default_benchmark(code: str) -> str | None:
@@ -113,9 +134,17 @@ def normalize_watchlist_entry(entry: dict[str, Any]) -> dict[str, Any]:
     for field_name, related_code in (("benchmark", benchmark), ("underlying_proxy", underlying)):
         if related_code is not None and (not isinstance(related_code, str) or "." not in related_code):
             raise ValueError(f"Invalid {field_name} for {code}: {related_code!r}")
+    if asset_type == "leveraged-etf" and underlying is None:
+        raise ValueError(f"Leveraged ETF {code} requires underlying_proxy")
     event_policy = entry.get("event_policy", "none" if tier == "proxy" else "standard")
     if not isinstance(event_policy, str) or not event_policy:
         raise ValueError(f"Invalid event_policy for {code}: {event_policy!r}")
+    position_status = entry.get("position_status", _default_position_status(tags))
+    if position_status not in POSITION_STATUSES:
+        raise ValueError(f"Invalid position_status for {code}: {position_status!r}")
+    scan_policy = entry.get("scan_policy", _default_scan_policy(tier, position_status))
+    if scan_policy not in SCAN_POLICIES:
+        raise ValueError(f"Invalid scan_policy for {code}: {scan_policy!r}")
 
     normalized = dict(entry)
     normalized.update(
@@ -131,6 +160,8 @@ def normalize_watchlist_entry(entry: dict[str, Any]) -> dict[str, Any]:
         benchmark=benchmark,
         underlying_proxy=underlying,
         event_policy=event_policy,
+        position_status=position_status,
+        scan_policy=scan_policy,
     )
     return normalized
 
@@ -143,8 +174,7 @@ def load_json(path: str | Path) -> dict[str, Any]:
     return payload
 
 
-def load_watchlist(path: str | Path) -> list[dict[str, Any]]:
-    payload = load_json(path)
+def _normalize_watchlist_payload(payload: dict[str, Any]) -> list[dict[str, Any]]:
     entries = payload.get("watchlist")
     if not isinstance(entries, list):
         raise ValueError("watchlist must be a list")
@@ -163,6 +193,70 @@ def load_watchlist(path: str | Path) -> list[dict[str, Any]]:
             continue
         enabled_entries.append(normalized)
     return enabled_entries
+
+
+def _validate_view_filters(filters: Any) -> dict[str, list[str]]:
+    if not isinstance(filters, dict):
+        raise ValueError("watchlist view filters must be an object")
+    unknown = set(filters) - WATCHLIST_VIEW_FILTERS
+    if unknown:
+        raise ValueError(f"Unknown watchlist view filters: {sorted(unknown)}")
+
+    validated: dict[str, list[str]] = {}
+    for key, values in filters.items():
+        if not isinstance(values, list):
+            raise ValueError(f"watchlist view filter {key} must be a list")
+        if any(not isinstance(value, str) or not value for value in values):
+            raise ValueError(f"watchlist view filter {key} must contain non-empty strings")
+        validated[key] = list(dict.fromkeys(values))
+    return validated
+
+
+def _apply_view_filters(
+    entries: list[dict[str, Any]],
+    filters: dict[str, list[str]],
+) -> list[dict[str, Any]]:
+    selected: list[dict[str, Any]] = []
+    for entry in entries:
+        tags = set(entry["tags"])
+        include_any = set(filters.get("include_tags_any", []))
+        include_all = set(filters.get("include_tags_all", []))
+        codes = set(filters.get("codes", []))
+        markets = set(filters.get("market", []))
+        tiers = set(filters.get("tier", []))
+        if include_any and not tags.intersection(include_any):
+            continue
+        if include_all and not include_all.issubset(tags):
+            continue
+        if codes and entry["code"] not in codes:
+            continue
+        if markets and entry["code"].split(".", 1)[0] not in markets:
+            continue
+        if tiers and entry["tier"] not in tiers:
+            continue
+        selected.append(entry)
+    return selected
+
+
+def _load_watchlist(path: Path, *, allow_view: bool) -> list[dict[str, Any]]:
+    payload = load_json(path)
+    if "source" not in payload:
+        return _normalize_watchlist_payload(payload)
+    if not allow_view:
+        raise ValueError(f"nested watchlist view is not allowed: {path}")
+    if "watchlist" in payload:
+        raise ValueError(f"watchlist view cannot also contain watchlist entries: {path}")
+
+    source = payload.get("source")
+    if not isinstance(source, str) or not source:
+        raise ValueError(f"Invalid watchlist view source in {path}: {source!r}")
+    filters = _validate_view_filters(payload.get("filters", {}))
+    source_entries = _load_watchlist(path.parent / source, allow_view=False)
+    return _apply_view_filters(source_entries, filters)
+
+
+def load_watchlist(path: str | Path) -> list[dict[str, Any]]:
+    return _load_watchlist(Path(path), allow_view=True)
 
 
 def validate_weights(payload: dict[str, Any]) -> dict[str, float]:

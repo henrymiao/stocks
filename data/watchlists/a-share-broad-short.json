@@ -1,19 +1,10 @@
 {
-  "schema_version": 2,
-  "watchlist": [
-    {"code": "SH.603259", "name": "药明康德", "enabled": true, "priority": 90, "tags": ["a-share", "broad-screen", "healthcare", "growth"]},
-    {"code": "SH.601899", "name": "紫金矿业", "enabled": true, "priority": 90, "tags": ["a-share", "broad-screen", "metals", "cyclical", "value"]},
-    {"code": "SH.600276", "name": "恒瑞医药", "enabled": true, "priority": 85, "tags": ["a-share", "broad-screen", "healthcare", "growth"]},
-    {"code": "SH.600030", "name": "中信证券", "enabled": true, "priority": 80, "tags": ["a-share", "broad-screen", "brokerage", "value"]},
-    {"code": "SH.600150", "name": "中国船舶", "enabled": true, "priority": 85, "tags": ["a-share", "broad-screen", "industrial", "cyclical"]},
-    {"code": "SH.600309", "name": "万华化学", "enabled": true, "priority": 80, "tags": ["a-share", "broad-screen", "chemicals", "cyclical", "value"]},
-    {"code": "SZ.002602", "name": "世纪华通", "enabled": true, "priority": 80, "tags": ["a-share", "broad-screen", "gaming", "growth"]},
-    {"code": "SH.600489", "name": "中金黄金", "enabled": true, "priority": 80, "tags": ["a-share", "broad-screen", "gold", "cyclical", "value"]},
-    {"code": "SZ.000975", "name": "山金国际", "enabled": true, "priority": 80, "tags": ["a-share", "broad-screen", "gold", "cyclical", "value"]},
-    {"code": "SH.601168", "name": "西部矿业", "enabled": true, "priority": 80, "tags": ["a-share", "broad-screen", "metals", "cyclical", "value"]},
-    {"code": "SH.688018", "name": "乐鑫科技", "enabled": true, "priority": 80, "tags": ["a-share", "broad-screen", "semiconductor", "growth"]},
-    {"code": "SZ.002236", "name": "大华股份", "enabled": true, "priority": 75, "tags": ["a-share", "broad-screen", "computer-equipment", "value"]},
-    {"code": "SH.601766", "name": "中国中车", "enabled": true, "priority": 75, "tags": ["a-share", "broad-screen", "rail-equipment", "value"]},
-    {"code": "SH.688271", "name": "联影医疗", "enabled": true, "priority": 75, "tags": ["a-share", "broad-screen", "medical-device", "growth"]}
-  ]
+  "schema_version": 3,
+  "source": "core.json",
+  "filters": {
+    "include_tags_all": [
+      "a-share",
+      "broad-screen"
+    ]
+  }
 }

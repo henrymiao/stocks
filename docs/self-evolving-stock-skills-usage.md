@@ -44,19 +44,20 @@ Use the scanner for a bounded daily review instead of running full analysis over
 
 ```bash
 python3 tools/stock_skills/scan_watchlist.py \
-  --horizon short --deep-top 10 \
+  --watchlist data/watchlists/core.json \
+  --horizon both --deep-top 10 --deep-bottom 5 \
   --portfolio-open-risk-pct 2.0 --theme-open-risk-pct 1.0 \
   --output /tmp/watchlist-scan.json
 ```
 
-Watchlist entries support `tier`, `priority`, `strategy_profiles`, `asset_type`, `valuation_profile`, `benchmark`, `underlying_proxy`, `event_policy`, `enabled`, and `tags`. Missing metadata is inferred for compatibility; duplicate enabled codes and invalid metadata are rejected. Tiers behave as follows:
+`data/watchlists/core.json` 是唯一主档；同目录其他清单是从主档筛选出的兼容视图，不再复制股票记录。Watchlist entries support `tier`, `priority`, `strategy_profiles`, `asset_type`, `valuation_profile`, `benchmark`, `underlying_proxy`, `event_policy`, `position_status`, `scan_policy`, `enabled`, and `tags`. Missing metadata is inferred for compatibility; duplicate codes and invalid metadata are rejected. Tiers behave as follows:
 
-- `core`: every eligible row receives deep analysis for the requested horizon.
-- `thematic`: one batch snapshot is scored and only Top N receives deep analysis.
+- `core`: every eligible row normally uses `scan_policy: always` and receives deep analysis for the requested horizon.
+- `thematic`: `scan_policy: ranked` entries compete for bounded Top N and Bottom N slots.
 - `proxy`: fetched once as shared market/macro context, never promoted automatically.
 - `discovery`: snapshot/filter only until manually promoted.
 
-The scanner always produces separate `short` and `swing` rankings. Use `--horizon both` to deeply analyze both sets, `--snapshot-only` to stop after filtering, and `--tag`, `--market`, or `--tier` to narrow the pool. The cheap scan score only controls promotion; it is not an entry decision. Rejected, proxy, and discovery rows contain no trade recommendation. Deep analyses run with unique temporary outputs and `--no-journal`, and reuse the batch macro/index snapshot instead of fetching that shared context once per stock.
+The scanner always produces separate `short` and `swing` rankings. `scan_policy: always` keeps active/reduced holdings in deep analysis; `--deep-top` captures leaders and `--deep-bottom` captures the largest eligible decliners. The JSON result records `always`, `top`, and `bottom` selection reasons. Use `--snapshot-only` to stop after filtering, and `--tag`, `--market`, or `--tier` to narrow the pool. Promotion is not an entry decision, and the scanner never executes a trade. Rejected, proxy, and discovery rows contain no recommendation. Deep analyses run with unique temporary outputs and `--no-journal`, reusing the batch macro/index snapshot.
 
 ## Review and evidence accumulation
 

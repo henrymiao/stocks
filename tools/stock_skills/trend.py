@@ -155,7 +155,9 @@ def analyze_trend(snapshot: MarketSnapshot, bars: list[KLineBar]) -> TrendAnalys
         _round_level(prior_high),
         _round_level(recent.high),
     }
-    support_levels = sorted((level for level in candidate_levels if level < price), reverse=True)
+    # A level sitting exactly at the live price is the one being tested right now;
+    # keep it visible as support rather than dropping it from both lists.
+    support_levels = sorted((level for level in candidate_levels if level <= price), reverse=True)
     resistance_levels = sorted(level for level in candidate_levels if level > price)
     if status == "high-level-consolidation":
         invalidation_level = _round_level(recent.low)

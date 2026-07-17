@@ -1,80 +1,3185 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "watchlist": [
-    {"code": "SZ.002463", "name": "沪电股份", "enabled": true, "tags": ["a-share", "pcb", "ai-hardware"]},
-    {"code": "SZ.002938", "name": "鹏鼎控股", "enabled": true, "tags": ["a-share", "pcb", "consumer-electronics"]},
-    {"code": "SH.600584", "name": "长电科技", "enabled": true, "tags": ["a-share", "semiconductor", "packaging", "cyclical", "valuation-reference-only"]},
-    {"code": "US.MRVL", "name": "Marvell", "enabled": true, "tags": ["us", "ai-infrastructure", "semiconductor"]},
-    {"code": "US.GOOGL", "name": "Alphabet", "enabled": true, "tags": ["us", "mega-cap", "ai"]},
-    {"code": "US.CRCL", "name": "Circle", "enabled": true, "tags": ["us", "crypto-equity", "stablecoin"]},
-    {"code": "US.COIN", "name": "Coinbase", "enabled": true, "tags": ["us", "crypto-equity", "exchange"]},
-    {"code": "US.SOXL", "name": "Direxion Daily Semiconductor Bull 3X", "enabled": true, "tags": ["us", "semiconductor", "leveraged"]},
-    {"code": "US.SOXS", "name": "Direxion Daily Semiconductor Bear 3X", "enabled": true, "tags": ["us", "semiconductor", "hedge"]},
-    {"code": "US.NVDA", "name": "NVIDIA", "enabled": true, "tags": ["us", "ai-hardware", "semiconductor"]},
-    {"code": "US.MU", "name": "Micron Technology", "enabled": true, "tags": ["us", "semiconductor", "ai-hardware", "memory"]},
-    {"code": "HK.09868", "name": "小鹏汽车-W", "enabled": true, "tier": "core", "priority": 100, "strategy_profiles": ["short", "swing"], "tags": ["hk", "ev", "china-growth", "holding", "auto", "growth"]},
-    {"code": "US.QQQ", "name": "Invesco QQQ Trust", "enabled": true, "tags": ["us", "index", "core", "macro"]},
-    {"code": "US.SPY", "name": "SPDR S&P 500 ETF", "enabled": true, "tags": ["us", "index", "core", "macro"]},
-    {"code": "HK.02800", "name": "盈富基金", "enabled": true, "tags": ["hk", "index", "core"]},
-    {"code": "HK.03067", "name": "恒生科技ETF", "enabled": true, "tags": ["hk", "index", "tech"]},
-    {"code": "SH.510300", "name": "沪深300ETF", "enabled": true, "tags": ["a-share", "index", "core"]},
-    {"code": "HK.02888", "name": "渣打集团", "enabled": true, "tags": ["hk", "bank", "value", "defensive"]},
-    {"code": "HK.00002", "name": "中电控股", "enabled": true, "tags": ["hk", "utility", "dividend", "defensive"]},
-    {"code": "SH.600900", "name": "长江电力", "enabled": true, "tags": ["a-share", "utility", "dividend", "defensive"]},
-    {"code": "US.GLD", "name": "SPDR Gold ETF", "enabled": true, "tier": "proxy", "priority": 40, "strategy_profiles": [], "tags": ["us", "gold", "hedge", "defensive", "safe-haven", "cyclical"]},
-    {"code": "US.SCHD", "name": "Schwab US Dividend ETF", "enabled": true, "tags": ["us", "dividend", "etf", "defensive"]},
-    {"code": "HK.00700", "name": "腾讯控股", "enabled": true, "tags": ["hk", "internet", "mega-cap", "china", "gaming"]},
-    {"code": "HK.03690", "name": "美团-W", "enabled": true, "tags": ["hk", "internet", "consumer", "china", "local-services"]},
-    {"code": "SH.600660", "name": "福耀玻璃", "enabled": true, "tags": ["a-share", "auto-parts", "cyclical", "global", "manufacturing"]},
-    {"code": "HK.02899", "name": "紫金矿业", "enabled": true, "tags": ["hk", "metals", "gold", "cyclical", "commodity", "copper", "materials"]},
-    {"code": "HK.01919", "name": "中远海控", "enabled": true, "tags": ["hk", "shipping", "cyclical"]},
-    {"code": "SH.600309", "name": "万华化学", "enabled": true, "tags": ["a-share", "chemicals", "cyclical"]},
-    {"code": "HK.09880", "name": "优必选", "enabled": true, "tags": ["hk", "robotics", "humanoid", "theme"]},
-    {"code": "SZ.002050", "name": "三花智控", "enabled": true, "tags": ["a-share", "robotics", "auto-parts", "optimus-chain"]},
-    {"code": "SZ.300124", "name": "汇川技术", "enabled": true, "tags": ["a-share", "robotics", "automation"]},
-    {"code": "SH.688017", "name": "绿的谐波", "enabled": true, "tags": ["a-share", "robotics", "reducer"]},
-    {"code": "HK.01211", "name": "比亚迪股份", "enabled": true, "tags": ["hk", "ev", "auto", "china-growth", "battery"]},
-    {"code": "HK.00981", "name": "中芯国际", "enabled": true, "tags": ["hk", "semiconductor", "china", "foundry"]},
-    {"code": "HK.02359", "name": "药明康德", "enabled": true, "tags": ["hk", "pharma", "cxo", "healthcare"]},
-    {"code": "SH.600519", "name": "贵州茅台", "enabled": true, "tags": ["a-share", "consumer", "staple", "quality"]},
-    {"code": "SH.600036", "name": "招商银行", "enabled": true, "tags": ["a-share", "bank", "value", "dividend"]},
-    {"code": "SZ.300750", "name": "宁德时代", "enabled": true, "tags": ["a-share", "battery", "new-energy"]},
-    {"code": "HK.00883", "name": "中国海洋石油", "enabled": true, "tags": ["hk", "energy", "oil", "cyclical", "dividend"]},
-    {"code": "US.AAPL", "name": "Apple", "enabled": true, "tags": ["us", "mega-cap", "tech"]},
-    {"code": "US.MSFT", "name": "Microsoft", "enabled": true, "tags": ["us", "mega-cap", "ai", "software"]},
-    {"code": "US.AMZN", "name": "Amazon", "enabled": true, "tags": ["us", "mega-cap", "consumer", "cloud"]},
-    {"code": "US.META", "name": "Meta Platforms", "enabled": true, "tags": ["us", "mega-cap", "ai", "internet"]},
-    {"code": "US.TSLA", "name": "Tesla", "enabled": true, "tags": ["us", "ev", "ai", "auto"]},
-    {"code": "US.AMD", "name": "AMD", "enabled": true, "tags": ["us", "semiconductor", "ai-hardware", "gpu"]},
-    {"code": "US.TSM", "name": "台积电", "enabled": true, "tags": ["us", "semiconductor", "foundry", "ai-hardware"]},
-    {"code": "US.AVGO", "name": "Broadcom", "enabled": true, "tags": ["us", "semiconductor", "ai-hardware", "ai-infrastructure", "networking"]},
-    {"code": "US.JPM", "name": "JPMorgan", "enabled": true, "tags": ["us", "bank", "value", "financial"]},
-    {"code": "US.UNH", "name": "UnitedHealth", "enabled": true, "tags": ["us", "healthcare", "defensive"]},
-    {"code": "US.KO", "name": "Coca-Cola", "enabled": true, "tags": ["us", "consumer", "staple", "defensive"]},
-    {"code": "HK.09988", "name": "阿里巴巴-W", "enabled": true, "tags": ["hk", "internet", "mega-cap", "china", "e-commerce"]},
-    {"code": "HK.09618", "name": "京东集团-SW", "enabled": true, "tags": ["hk", "internet", "consumer", "china"]},
-    {"code": "HK.01810", "name": "小米集团-W", "enabled": true, "tags": ["hk", "hardware", "ev", "china"]},
-    {"code": "HK.09999", "name": "网易-S", "enabled": true, "tags": ["hk", "internet", "gaming", "china"]},
-    {"code": "HK.01024", "name": "快手-W", "enabled": true, "tags": ["hk", "internet", "china"]},
-    {"code": "HK.01299", "name": "友邦保险", "enabled": true, "tags": ["hk", "insurance", "financial"]},
-    {"code": "HK.00005", "name": "汇丰控股", "enabled": true, "tags": ["hk", "bank", "value", "dividend"]},
-    {"code": "SZ.000858", "name": "五粮液", "enabled": true, "tags": ["a-share", "consumer", "staple", "liquor"]},
-    {"code": "SH.601012", "name": "隆基绿能", "enabled": true, "tags": ["a-share", "solar", "new-energy"]},
-    {"code": "SZ.002415", "name": "海康威视", "enabled": true, "tags": ["a-share", "ai", "surveillance"]},
-    {"code": "SH.600276", "name": "恒瑞医药", "enabled": true, "tags": ["a-share", "pharma", "healthcare"]},
-    {"code": "SH.601318", "name": "中国平安", "enabled": true, "tags": ["a-share", "insurance", "financial"]},
-    {"code": "HK.01088", "name": "中国神华", "enabled": true, "tags": ["hk", "coal", "energy", "cyclical", "dividend"]},
-    {"code": "HK.03993", "name": "洛阳钼业", "enabled": true, "tags": ["hk", "metals", "copper", "cyclical", "commodity"]},
-    {"code": "SH.603259", "name": "药明康德", "enabled": true, "tags": ["a-share", "pharma", "cxo", "healthcare"]},
-    {"code": "SH.688046", "name": "药康生物", "enabled": true, "tags": ["a-share", "pharma", "cxo", "healthcare", "small-cap", "biotech", "cro"]},
-    {"code": "CC.BTC", "name": "Bitcoin", "enabled": true, "tags": ["crypto", "risk-appetite"]},
-    {"code": "CC.ETH", "name": "Ethereum", "enabled": true, "tags": ["crypto", "risk-appetite"]},
-    {"code": "US.ASML", "name": "阿斯麦", "enabled": true, "tags": ["us", "semiconductor", "equipment", "litho"]},
-    {"code": "SZ.300308", "name": "中际旭创", "enabled": true, "tags": ["a-share", "optical-module", "ai-hardware", "datacenter"]},
-    {"code": "SZ.000021", "name": "深科技", "enabled": true, "tags": ["a-share", "semiconductor", "storage", "advanced-manufacturing", "high-volatility", "momentum"]},
-    {"code": "US.GDX", "name": "金矿股ETF", "enabled": true, "tags": ["us", "gold-miners", "cyclical", "hedge"]},
-    {"code": "US.XOM", "name": "埃克森美孚", "enabled": true, "tags": ["us", "energy", "oil", "cyclical", "dividend"]},
-    {"code": "US.USO", "name": "原油ETF", "enabled": true, "tags": ["us", "oil", "commodity", "cyclical", "geopolitical"]},
-    {"code": "US.FCX", "name": "自由港", "enabled": true, "tags": ["us", "copper", "materials", "cyclical"]}
+    {
+      "code": "SZ.002463",
+      "name": "沪电股份",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "exited-watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "pcb",
+        "ai-hardware",
+        "national-tech",
+        "growth",
+        "exited-watch",
+        "wait-reentry"
+      ]
+    },
+    {
+      "code": "SZ.002938",
+      "name": "鹏鼎控股",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "pcb",
+        "consumer-electronics",
+        "national-tech",
+        "electronics",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.600584",
+      "name": "长电科技",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "semiconductor",
+        "packaging",
+        "cyclical",
+        "valuation-reference-only",
+        "national-tech",
+        "advanced-packaging"
+      ]
+    },
+    {
+      "code": "US.MRVL",
+      "name": "Marvell",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "ai-infrastructure",
+        "semiconductor"
+      ]
+    },
+    {
+      "code": "US.GOOGL",
+      "name": "Alphabet",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "mega-cap",
+        "ai"
+      ]
+    },
+    {
+      "code": "US.CRCL",
+      "name": "Circle",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "crypto-equity",
+        "stablecoin"
+      ]
+    },
+    {
+      "code": "US.COIN",
+      "name": "Coinbase",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "crypto-equity",
+        "exchange"
+      ]
+    },
+    {
+      "code": "US.SOXL",
+      "name": "Direxion Daily Semiconductor Bull 3X",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "leveraged-etf",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": "US.SMH",
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "semiconductor",
+        "leveraged"
+      ]
+    },
+    {
+      "code": "US.SOXS",
+      "name": "Direxion Daily Semiconductor Bear 3X",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "leveraged-etf",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": "US.SMH",
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "semiconductor",
+        "hedge"
+      ]
+    },
+    {
+      "code": "US.NVDA",
+      "name": "NVIDIA",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "ai-hardware",
+        "semiconductor"
+      ]
+    },
+    {
+      "code": "US.MU",
+      "name": "Micron Technology",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "semiconductor",
+        "ai-hardware",
+        "memory"
+      ]
+    },
+    {
+      "code": "HK.09868",
+      "name": "小鹏汽车-W",
+      "enabled": true,
+      "tier": "core",
+      "priority": 100,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "holding",
+      "scan_policy": "always",
+      "tags": [
+        "hk",
+        "ev",
+        "china-growth",
+        "holding",
+        "auto",
+        "growth",
+        "national-tech",
+        "smart-vehicle",
+        "artificial-intelligence",
+        "high-volatility",
+        "hk-focus"
+      ]
+    },
+    {
+      "code": "US.QQQ",
+      "name": "Invesco QQQ Trust",
+      "enabled": true,
+      "tier": "proxy",
+      "priority": 25,
+      "strategy_profiles": [],
+      "asset_type": "etf",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "none",
+      "position_status": "watch",
+      "scan_policy": "snapshot-only",
+      "tags": [
+        "us",
+        "index",
+        "core",
+        "macro"
+      ]
+    },
+    {
+      "code": "US.SPY",
+      "name": "SPDR S&P 500 ETF",
+      "enabled": true,
+      "tier": "proxy",
+      "priority": 25,
+      "strategy_profiles": [],
+      "asset_type": "etf",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "none",
+      "position_status": "watch",
+      "scan_policy": "snapshot-only",
+      "tags": [
+        "us",
+        "index",
+        "core",
+        "macro"
+      ]
+    },
+    {
+      "code": "HK.02800",
+      "name": "盈富基金",
+      "enabled": true,
+      "tier": "proxy",
+      "priority": 25,
+      "strategy_profiles": [],
+      "asset_type": "etf",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "none",
+      "position_status": "watch",
+      "scan_policy": "snapshot-only",
+      "tags": [
+        "hk",
+        "index",
+        "core"
+      ]
+    },
+    {
+      "code": "HK.03067",
+      "name": "恒生科技ETF",
+      "enabled": true,
+      "tier": "proxy",
+      "priority": 25,
+      "strategy_profiles": [],
+      "asset_type": "etf",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "none",
+      "position_status": "watch",
+      "scan_policy": "snapshot-only",
+      "tags": [
+        "hk",
+        "index",
+        "tech"
+      ]
+    },
+    {
+      "code": "SH.510300",
+      "name": "沪深300ETF",
+      "enabled": true,
+      "tier": "proxy",
+      "priority": 25,
+      "strategy_profiles": [],
+      "asset_type": "etf",
+      "valuation_profile": "neutral",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "none",
+      "position_status": "watch",
+      "scan_policy": "snapshot-only",
+      "tags": [
+        "a-share",
+        "index",
+        "core"
+      ]
+    },
+    {
+      "code": "HK.02888",
+      "name": "渣打集团",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "bank",
+        "value",
+        "defensive"
+      ]
+    },
+    {
+      "code": "HK.00002",
+      "name": "中电控股",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "utility",
+        "dividend",
+        "defensive"
+      ]
+    },
+    {
+      "code": "SH.600900",
+      "name": "长江电力",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "utility",
+        "dividend",
+        "defensive"
+      ]
+    },
+    {
+      "code": "US.GLD",
+      "name": "SPDR Gold ETF",
+      "enabled": true,
+      "tier": "proxy",
+      "priority": 40,
+      "strategy_profiles": [],
+      "asset_type": "etf",
+      "valuation_profile": "value",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "none",
+      "position_status": "watch",
+      "scan_policy": "snapshot-only",
+      "tags": [
+        "us",
+        "gold",
+        "hedge",
+        "defensive",
+        "safe-haven",
+        "cyclical"
+      ]
+    },
+    {
+      "code": "US.SCHD",
+      "name": "Schwab US Dividend ETF",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "etf",
+      "valuation_profile": "value",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "dividend",
+        "etf",
+        "defensive"
+      ]
+    },
+    {
+      "code": "HK.00700",
+      "name": "腾讯控股",
+      "enabled": true,
+      "tier": "core",
+      "priority": 100,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "reduced-holding",
+      "scan_policy": "always",
+      "tags": [
+        "hk",
+        "internet",
+        "mega-cap",
+        "china",
+        "gaming",
+        "national-tech",
+        "artificial-intelligence",
+        "cloud",
+        "platform",
+        "growth",
+        "holding",
+        "hk-focus",
+        "reduced-position"
+      ]
+    },
+    {
+      "code": "HK.03690",
+      "name": "美团-W",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "exited-watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "internet",
+        "consumer",
+        "china",
+        "local-services",
+        "growth",
+        "hk-focus",
+        "exited-watch",
+        "wait-reentry"
+      ]
+    },
+    {
+      "code": "SH.600660",
+      "name": "福耀玻璃",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 65,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "auto-parts",
+        "cyclical",
+        "global",
+        "manufacturing",
+        "national-tech",
+        "smart-vehicle",
+        "key-components"
+      ]
+    },
+    {
+      "code": "HK.02899",
+      "name": "紫金矿业",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "metals",
+        "gold",
+        "cyclical",
+        "commodity",
+        "copper",
+        "materials"
+      ]
+    },
+    {
+      "code": "HK.01919",
+      "name": "中远海控",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "shipping",
+        "cyclical"
+      ]
+    },
+    {
+      "code": "SH.600309",
+      "name": "万华化学",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "chemicals",
+        "cyclical",
+        "broad-screen",
+        "value"
+      ]
+    },
+    {
+      "code": "HK.09880",
+      "name": "优必选",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "robotics",
+        "humanoid",
+        "theme",
+        "national-tech",
+        "high-volatility",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.002050",
+      "name": "三花智控",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "robotics",
+        "auto-parts",
+        "optimus-chain",
+        "national-tech",
+        "key-components",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.300124",
+      "name": "汇川技术",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "robotics",
+        "automation",
+        "national-tech",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688017",
+      "name": "绿的谐波",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "robotics",
+        "reducer",
+        "national-tech",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.01211",
+      "name": "比亚迪股份",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "ev",
+        "auto",
+        "china-growth",
+        "battery",
+        "national-tech",
+        "new-energy-vehicle",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.00981",
+      "name": "中芯国际",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 100,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "semiconductor",
+        "china",
+        "foundry",
+        "national-tech",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.02359",
+      "name": "药明康德",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 70,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "pharma",
+        "cxo",
+        "healthcare",
+        "national-tech",
+        "biotech",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.600519",
+      "name": "贵州茅台",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "consumer",
+        "staple",
+        "quality"
+      ]
+    },
+    {
+      "code": "SH.600036",
+      "name": "招商银行",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "bank",
+        "value",
+        "dividend"
+      ]
+    },
+    {
+      "code": "SZ.300750",
+      "name": "宁德时代",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "battery",
+        "new-energy",
+        "national-tech",
+        "new-energy-vehicle",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.00883",
+      "name": "中国海洋石油",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "energy",
+        "oil",
+        "cyclical",
+        "dividend"
+      ]
+    },
+    {
+      "code": "US.AAPL",
+      "name": "Apple",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "mega-cap",
+        "tech"
+      ]
+    },
+    {
+      "code": "US.MSFT",
+      "name": "Microsoft",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "mega-cap",
+        "ai",
+        "software"
+      ]
+    },
+    {
+      "code": "US.AMZN",
+      "name": "Amazon",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "mega-cap",
+        "consumer",
+        "cloud"
+      ]
+    },
+    {
+      "code": "US.META",
+      "name": "Meta Platforms",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "mega-cap",
+        "ai",
+        "internet"
+      ]
+    },
+    {
+      "code": "US.TSLA",
+      "name": "Tesla",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "ev",
+        "ai",
+        "auto"
+      ]
+    },
+    {
+      "code": "US.AMD",
+      "name": "AMD",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "semiconductor",
+        "ai-hardware",
+        "gpu"
+      ]
+    },
+    {
+      "code": "US.TSM",
+      "name": "台积电",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "semiconductor",
+        "foundry",
+        "ai-hardware"
+      ]
+    },
+    {
+      "code": "US.AVGO",
+      "name": "Broadcom",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "semiconductor",
+        "ai-hardware",
+        "ai-infrastructure",
+        "networking"
+      ]
+    },
+    {
+      "code": "US.JPM",
+      "name": "JPMorgan",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "bank",
+        "value",
+        "financial"
+      ]
+    },
+    {
+      "code": "US.UNH",
+      "name": "UnitedHealth",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "healthcare",
+        "defensive"
+      ]
+    },
+    {
+      "code": "US.KO",
+      "name": "Coca-Cola",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "consumer",
+        "staple",
+        "defensive"
+      ]
+    },
+    {
+      "code": "HK.09988",
+      "name": "阿里巴巴-W",
+      "enabled": true,
+      "tier": "core",
+      "priority": 100,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "reduced-holding",
+      "scan_policy": "always",
+      "tags": [
+        "hk",
+        "internet",
+        "mega-cap",
+        "china",
+        "e-commerce",
+        "national-tech",
+        "artificial-intelligence",
+        "cloud",
+        "platform",
+        "growth",
+        "holding",
+        "hk-focus",
+        "reduced-position"
+      ]
+    },
+    {
+      "code": "HK.09618",
+      "name": "京东集团-SW",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "internet",
+        "consumer",
+        "china"
+      ]
+    },
+    {
+      "code": "HK.01810",
+      "name": "小米集团-W",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "hardware",
+        "ev",
+        "china",
+        "national-tech",
+        "smart-vehicle",
+        "artificial-intelligence",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.09999",
+      "name": "网易-S",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "internet",
+        "gaming",
+        "china"
+      ]
+    },
+    {
+      "code": "HK.01024",
+      "name": "快手-W",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 65,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "internet",
+        "china",
+        "national-tech",
+        "artificial-intelligence",
+        "platform",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.01299",
+      "name": "友邦保险",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "insurance",
+        "financial"
+      ]
+    },
+    {
+      "code": "HK.00005",
+      "name": "汇丰控股",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "bank",
+        "value",
+        "dividend"
+      ]
+    },
+    {
+      "code": "SZ.000858",
+      "name": "五粮液",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "consumer",
+        "staple",
+        "liquor"
+      ]
+    },
+    {
+      "code": "SH.601012",
+      "name": "隆基绿能",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "solar",
+        "new-energy"
+      ]
+    },
+    {
+      "code": "SZ.002415",
+      "name": "海康威视",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "ai",
+        "surveillance"
+      ]
+    },
+    {
+      "code": "SH.600276",
+      "name": "恒瑞医药",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "pharma",
+        "healthcare",
+        "broad-screen",
+        "growth",
+        "national-tech",
+        "innovative-drug",
+        "biotech"
+      ]
+    },
+    {
+      "code": "SH.601318",
+      "name": "中国平安",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "insurance",
+        "financial"
+      ]
+    },
+    {
+      "code": "HK.01088",
+      "name": "中国神华",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "coal",
+        "energy",
+        "cyclical",
+        "dividend"
+      ]
+    },
+    {
+      "code": "HK.03993",
+      "name": "洛阳钼业",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "metals",
+        "copper",
+        "cyclical",
+        "commodity"
+      ]
+    },
+    {
+      "code": "SH.603259",
+      "name": "药明康德",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "pharma",
+        "cxo",
+        "healthcare",
+        "broad-screen",
+        "growth",
+        "national-tech",
+        "biotech"
+      ]
+    },
+    {
+      "code": "SH.688046",
+      "name": "药康生物",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 65,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "pharma",
+        "cxo",
+        "healthcare",
+        "small-cap",
+        "biotech",
+        "cro",
+        "national-tech",
+        "growth"
+      ]
+    },
+    {
+      "code": "CC.BTC",
+      "name": "Bitcoin",
+      "enabled": true,
+      "tier": "proxy",
+      "priority": 25,
+      "strategy_profiles": [],
+      "asset_type": "crypto",
+      "valuation_profile": "neutral",
+      "benchmark": "CC.BTC",
+      "underlying_proxy": null,
+      "event_policy": "none",
+      "position_status": "watch",
+      "scan_policy": "snapshot-only",
+      "tags": [
+        "crypto",
+        "risk-appetite"
+      ]
+    },
+    {
+      "code": "CC.ETH",
+      "name": "Ethereum",
+      "enabled": true,
+      "tier": "proxy",
+      "priority": 25,
+      "strategy_profiles": [],
+      "asset_type": "crypto",
+      "valuation_profile": "neutral",
+      "benchmark": "CC.BTC",
+      "underlying_proxy": null,
+      "event_policy": "none",
+      "position_status": "watch",
+      "scan_policy": "snapshot-only",
+      "tags": [
+        "crypto",
+        "risk-appetite"
+      ]
+    },
+    {
+      "code": "US.ASML",
+      "name": "阿斯麦",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "semiconductor",
+        "equipment",
+        "litho"
+      ]
+    },
+    {
+      "code": "SZ.300308",
+      "name": "中际旭创",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "optical-module",
+        "ai-hardware",
+        "datacenter",
+        "national-tech",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.000021",
+      "name": "深科技",
+      "enabled": true,
+      "tier": "core",
+      "priority": 100,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "holding",
+      "scan_policy": "always",
+      "tags": [
+        "a-share",
+        "semiconductor",
+        "storage",
+        "advanced-manufacturing",
+        "high-volatility",
+        "momentum",
+        "holding"
+      ]
+    },
+    {
+      "code": "US.GDX",
+      "name": "金矿股ETF",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "etf",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "gold-miners",
+        "cyclical",
+        "hedge"
+      ]
+    },
+    {
+      "code": "US.XOM",
+      "name": "埃克森美孚",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "energy",
+        "oil",
+        "cyclical",
+        "dividend"
+      ]
+    },
+    {
+      "code": "US.USO",
+      "name": "原油ETF",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "etf",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "oil",
+        "commodity",
+        "cyclical",
+        "geopolitical"
+      ]
+    },
+    {
+      "code": "US.FCX",
+      "name": "自由港",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 50,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "copper",
+        "materials",
+        "cyclical"
+      ]
+    },
+    {
+      "code": "SH.601899",
+      "name": "紫金矿业",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "metals",
+        "cyclical",
+        "value"
+      ]
+    },
+    {
+      "code": "SH.600030",
+      "name": "中信证券",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "brokerage",
+        "value"
+      ]
+    },
+    {
+      "code": "SH.600150",
+      "name": "中国船舶",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "industrial",
+        "cyclical"
+      ]
+    },
+    {
+      "code": "SZ.002602",
+      "name": "世纪华通",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "gaming",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.600489",
+      "name": "中金黄金",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "gold",
+        "cyclical",
+        "value"
+      ]
+    },
+    {
+      "code": "SZ.000975",
+      "name": "山金国际",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "gold",
+        "cyclical",
+        "value"
+      ]
+    },
+    {
+      "code": "SH.601168",
+      "name": "西部矿业",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "metals",
+        "cyclical",
+        "value"
+      ]
+    },
+    {
+      "code": "SH.688018",
+      "name": "乐鑫科技",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "semiconductor",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.002236",
+      "name": "大华股份",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "computer-equipment",
+        "value"
+      ]
+    },
+    {
+      "code": "SH.601766",
+      "name": "中国中车",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "rail-equipment",
+        "value"
+      ]
+    },
+    {
+      "code": "SH.688271",
+      "name": "联影医疗",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "broad-screen",
+        "medical-device",
+        "growth",
+        "national-tech",
+        "high-end-equipment"
+      ]
+    },
+    {
+      "code": "SH.688256",
+      "name": "寒武纪",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "ai-compute",
+        "chip",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688041",
+      "name": "海光信息",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "ai-compute",
+        "cpu",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.000977",
+      "name": "浪潮信息",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "ai-compute",
+        "server",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.603019",
+      "name": "中科曙光",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "ai-compute",
+        "server",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.300502",
+      "name": "新易盛",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "optical-module",
+        "ai-hardware",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.601138",
+      "name": "工业富联",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "ai-infrastructure",
+        "server",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688981",
+      "name": "中芯国际",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "semiconductor",
+        "foundry",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.002371",
+      "name": "北方华创",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "semiconductor",
+        "equipment",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688012",
+      "name": "中微公司",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "semiconductor",
+        "equipment",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.603501",
+      "name": "豪威集团",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "semiconductor",
+        "sensor",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688008",
+      "name": "澜起科技",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "semiconductor",
+        "memory-interface",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688120",
+      "name": "华海清科",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "semiconductor",
+        "equipment",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.300604",
+      "name": "长川科技",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "semiconductor",
+        "testing-equipment",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.002747",
+      "name": "埃斯顿",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "industrial-robot",
+        "automation",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688777",
+      "name": "中控技术",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "industrial-software",
+        "automation",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.603728",
+      "name": "鸣志电器",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 70,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "robotics",
+        "motor",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.002594",
+      "name": "比亚迪",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "new-energy-vehicle",
+        "battery",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.300014",
+      "name": "亿纬锂能",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "battery",
+        "new-energy",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.601689",
+      "name": "拓普集团",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "smart-vehicle",
+        "key-components",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.300450",
+      "name": "先导智能",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "battery-equipment",
+        "automation",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688005",
+      "name": "容百科技",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 65,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "battery-materials",
+        "new-energy",
+        "cyclical"
+      ]
+    },
+    {
+      "code": "SH.601100",
+      "name": "恒立液压",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "high-end-equipment",
+        "key-components",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688187",
+      "name": "时代电气",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "high-end-equipment",
+        "power-semiconductor",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688235",
+      "name": "百济神州",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "innovative-drug",
+        "biotech",
+        "growth"
+      ]
+    },
+    {
+      "code": "SH.688180",
+      "name": "君实生物",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 70,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "innovative-drug",
+        "biotech",
+        "growth"
+      ]
+    },
+    {
+      "code": "SZ.300760",
+      "name": "迈瑞医疗",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "national-tech",
+        "medical-device",
+        "healthcare",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.01347",
+      "name": "华虹半导体",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "semiconductor",
+        "foundry",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.09660",
+      "name": "地平线机器人-W",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "ai-chip",
+        "smart-vehicle",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.02533",
+      "name": "黑芝麻智能",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 70,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "ai-chip",
+        "smart-vehicle",
+        "high-volatility",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.00020",
+      "name": "商汤-W",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "artificial-intelligence",
+        "software",
+        "high-volatility",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.03750",
+      "name": "宁德时代",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 95,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "battery",
+        "new-energy-vehicle",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.02018",
+      "name": "瑞声科技",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "electronics",
+        "key-components",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.02382",
+      "name": "舜宇光学科技",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "optics",
+        "smart-vehicle",
+        "key-components",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.09888",
+      "name": "百度集团-SW",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "artificial-intelligence",
+        "autonomous-driving",
+        "cloud",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.06160",
+      "name": "百济神州",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "innovative-drug",
+        "biotech",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.01801",
+      "name": "信达生物",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "innovative-drug",
+        "biotech",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.03692",
+      "name": "翰森制药",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "innovative-drug",
+        "biotech",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.02269",
+      "name": "药明生物",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 70,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "national-tech",
+        "cxo",
+        "biotech",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.09961",
+      "name": "携程集团-S",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "internet",
+        "travel",
+        "consumer",
+        "growth",
+        "hk-focus"
+      ]
+    },
+    {
+      "code": "HK.02513",
+      "name": "智谱",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "HK.800700",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "artificial-intelligence",
+        "foundation-model",
+        "high-volatility",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.07709",
+      "name": "XL二南方海力士",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short"
+      ],
+      "asset_type": "leveraged-etf",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800700",
+      "underlying_proxy": "US.SKHY",
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "etf",
+        "leveraged",
+        "semiconductor",
+        "memory",
+        "hbm",
+        "high-volatility"
+      ]
+    },
+    {
+      "code": "SH.563380",
+      "name": "航空航天ETF华泰柏瑞",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 70,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "etf",
+      "valuation_profile": "neutral",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "etf",
+        "aerospace",
+        "defense",
+        "high-volatility",
+        "oversold-watch"
+      ]
+    }
   ]
 }

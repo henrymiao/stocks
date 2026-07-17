@@ -79,9 +79,13 @@ def _explicit_entries(codes: str) -> list[dict[str, Any]]:
 
 def _print_table(result: dict[str, Any], horizon: str) -> None:
     rows = result["candidates"]
-    print(f"{'code':<11} {'tier':<10} {'status':<9} {'phase':<12} {'chg%':>7} {'RS%':>7} {'rank':>5} {'treatment':<14}")
-    print("-" * 88)
+    print(f"{'code':<11} {'tier':<10} {'status':<9} {'phase':<12} {'chg%':>7} {'RS%':>7} {'rank':>5} {'selected':<16} {'treatment':<14}")
+    print("-" * 106)
     rank_by_code = {item["code"]: item["rank"] for item in result["rankings"][horizon]}
+    selection_by_code = {
+        item["code"]: ",".join(item["selection_reasons"])
+        for item in result["selections"][horizon]
+    }
     rows = sorted(
         rows,
         key=lambda row: (
@@ -94,9 +98,11 @@ def _print_table(result: dict[str, Any], horizon: str) -> None:
         change = "-" if row.get("change_pct") is None else f"{row['change_pct']:.2f}"
         relative = "-" if row.get("relative_strength_pct") is None else f"{row['relative_strength_pct']:.2f}"
         rank = rank_by_code.get(row["code"], "-")
+        selected = selection_by_code.get(row["code"], "-")
         print(
             f"{row['code']:<11} {row['tier']:<10} {row['filter_status']:<9} "
-            f"{row['session_phase']:<12} {change:>7} {relative:>7} {str(rank):>5} {row['treatment']:<14}"
+            f"{row['session_phase']:<12} {change:>7} {relative:>7} {str(rank):>5} "
+            f"{selected:<16} {row['treatment']:<14}"
         )
     print(
         f"\nBatch snapshots {result['snapshot_received_count']}/{result['snapshot_request_count']}; "
@@ -114,6 +120,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--codes", help="Comma-separated codes overriding the watchlist")
     parser.add_argument("--bars", type=int, default=60)
     parser.add_argument("--deep-top", type=int, default=10, help="Top thematic names per requested horizon")
+    parser.add_argument(
+        "--deep-bottom",
+        type=int,
+        default=5,
+        help="Largest eligible thematic decliners per requested horizon",
+    )
     parser.add_argument("--horizon", choices=["short", "swing", "both"], default="short")
     parser.add_argument("--snapshot-only", action="store_true")
     parser.add_argument("--event-days", type=int, default=None)
@@ -210,6 +222,7 @@ def main(argv: list[str] | None = None) -> int:
             fetcher,
             analyzer=None if args.snapshot_only else analyze,
             deep_top=args.deep_top,
+            deep_bottom=args.deep_bottom,
             deep_horizons=horizons,
             context_codes=tuple(DEFAULT_MACRO_CODES),
         )

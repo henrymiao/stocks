@@ -201,10 +201,16 @@ def _replayed_strategy_pnl(row: dict[str, Any], weights: dict[str, float]) -> fl
     if _number(evidence.planned_allocation_pct) is None:
         return None
 
-    replayed = evaluate_strategy(
-        replace(profile, cluster_weights={key: float(value) for key, value in numeric_weights.items()}),
-        evidence,
-    )
+    try:
+        replayed = evaluate_strategy(
+            replace(profile, cluster_weights={key: float(value) for key, value in numeric_weights.items()}),
+            evidence,
+        )
+    except (TypeError, ValueError):
+        # A record whose stored decision_inputs no longer satisfy the current
+        # engine (factor drift the policy string did not capture) is skipped,
+        # not allowed to abort the whole optimization run.
+        return None
     if replayed.entry_decision not in {"enter", "probe"}:
         return 0.0
     allocation = _number(replayed.suggested_allocation_pct)

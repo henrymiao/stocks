@@ -25,6 +25,23 @@ def _num(value: Any) -> float | None:
     return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
 
 
+def _is_synthetic(review: dict[str, Any]) -> bool:
+    """Backfilled markdown reviews use approximate close-only note prices, not real OHLC.
+
+    They keep the reporting path alive but must not be blended into realised statistics:
+    their MFE/MAE are undefined and their attribution was defaulted. Old rows predate the
+    `evidence_kind` field, so the `md-*` review-window marker is the fallback signal.
+    """
+    if review.get("evidence_kind") == "synthetic":
+        return True
+    return str(review.get("review_window", "")).startswith("md-")
+
+
+def _is_basis_mismatch(review: dict[str, Any]) -> bool:
+    """Entry price and fetched bars sat on different split-adjustment bases (see review.py)."""
+    return review.get("evidence_kind") == "basis-mismatch"
+
+
 def _directional_pnl(review: dict[str, Any]) -> float | None:
     """Direction-aware P&L in percent.
 
@@ -64,11 +81,36 @@ def summarize_outcomes(reviews: list[dict[str, Any]]) -> dict[str, Any]:
 
     Input is the list of records written by `review` (review.evaluate_recommendation).
     This makes the system's accuracy a measured number instead of an assumption.
+    Synthetic backfilled reviews are summarised separately, never blended into the
+    realised numbers.
     """
-    usable = [r for r in reviews if _num(r.get("final_return_pct")) is not None]
-    if not usable:
+    all_usable = [r for r in reviews if _num(r.get("final_return_pct")) is not None]
+    if not all_usable:
         return {"reviewed": 0, "notes": ["No reviews with a usable final_return_pct."]}
+    synthetic = [r for r in all_usable if _is_synthetic(r)]
+    basis_mismatch = [r for r in all_usable if _is_basis_mismatch(r)]
+    realized = [r for r in all_usable if not _is_synthetic(r) and not _is_basis_mismatch(r)]
 
+    if realized:
+        summary = _outcome_stats(realized)
+    else:
+        summary = {"reviewed": 0, "notes": ["No realised-OHLC reviews; only synthetic backfill available."]}
+    if synthetic:
+        summary["synthetic_excluded"] = len(synthetic)
+        summary["synthetic_summary"] = _outcome_stats(synthetic)
+        summary.setdefault("notes", []).append(
+            "synthetic_summary uses approximate close-only backfill prices; do not treat it as realised evidence."
+        )
+    if basis_mismatch:
+        summary["basis_mismatch_excluded"] = len(basis_mismatch)
+        summary.setdefault("notes", []).append(
+            "basis-mismatch rows (entry price and fetched bars on different split-adjustment bases) are excluded; "
+            "their return arithmetic is meaningless."
+        )
+    return summary
+
+
+def _outcome_stats(usable: list[dict[str, Any]]) -> dict[str, Any]:
     n = len(usable)
     wins = [r for r in usable if r.get("directional_success") is True]
     losses = [r for r in usable if r.get("directional_success") is False]
@@ -125,13 +167,26 @@ def component_edge(
             index[(str(code), str(ts))] = rec
 
     joined: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    synthetic_excluded = 0
+    basis_mismatch_excluded = 0
     for review in reviews:
+        if _is_synthetic(review):
+            synthetic_excluded += 1
+            continue
+        if _is_basis_mismatch(review):
+            basis_mismatch_excluded += 1
+            continue
         key = (str(review.get("code")), str(review.get("source_timestamp")))
         rec = index.get(key)
         if rec is not None and _num(review.get("final_return_pct")) is not None:
             joined.append((rec, review))
 
-    result: dict[str, Any] = {"joined": len(joined), "components": {}}
+    result: dict[str, Any] = {
+        "joined": len(joined),
+        "synthetic_excluded": synthetic_excluded,
+        "basis_mismatch_excluded": basis_mismatch_excluded,
+        "components": {},
+    }
     if not joined:
         result["notes"] = ["No recommendation/review pairs could be joined (need matching code+timestamp)."]
         return result

@@ -3170,8 +3170,8 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
-      "scan_policy": "ranked",
+      "position_status": "active",
+      "scan_policy": "always",
       "tags": [
         "a-share",
         "etf",

@@ -823,6 +823,34 @@ class CliTests(unittest.TestCase):
         self.assertEqual(weights_after_apply, weights_after_suggest)
         self.assertFalse(backup_exists)
 
+    def test_review_is_idempotent_for_a_reviewed_window(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            recommendations = Path(tmpdir) / "recommendations.jsonl"
+            reviews = Path(tmpdir) / "reviews.jsonl"
+            weights = Path(tmpdir) / "signal_weights.json"
+            weights.write_text(json.dumps(DEFAULT_WEIGHTS), encoding="utf-8")
+            append_record(
+                recommendations,
+                {
+                    "code": "SZ.002463",
+                    "label": "hold",
+                    "timestamp": "2026-06-18T15:00:00+08:00",
+                    "entry_price": 147.9,
+                    "invalidation_level": 142.0,
+                },
+            )
+            argv = ["review", "--window", "3d", "--recommendations", str(recommendations), "--reviews", str(reviews), "--weights", str(weights)]
+
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                first = main(argv)
+                second = main(argv)
+            rows = read_records(reviews)
+
+        self.assertEqual(first, 0)
+        self.assertEqual(second, 0)
+        # The second run must not duplicate the already-reviewed (code, timestamp, window).
+        self.assertEqual(len(rows), 1)
+
     def test_review_creates_empty_file_when_no_row_is_reviewable(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             recommendations = Path(tmpdir) / "recommendations.jsonl"
@@ -901,16 +929,20 @@ class CliTests(unittest.TestCase):
             reviews = Path(tmpdir) / "reviews.jsonl"
             weights = Path(tmpdir) / "signal_weights.json"
             weights.write_text(json.dumps(DEFAULT_WEIGHTS), encoding="utf-8")
-            recommendation = {
-                "code": "SZ.002463",
-                "label": "hold",
-                "timestamp": "2026-06-18T15:00:00+08:00",
-                "entry_price": 147.9,
-                "invalidation_level": 142.0,
-                "component_scores": {"trend": 70, "capital_flow": 65, "sector": 60, "cross_market": 38, "macro_risk": 55, "market_regime": 50, "fundamental": 48, "position_fit": 75},
-            }
-            for _ in range(60):
-                append_record(recommendations, recommendation)
+            # Distinct timestamps: review dedups repeated (code, timestamp, window) calls,
+            # so reaching the 60-sample threshold needs 60 genuinely separate calls.
+            for i in range(60):
+                append_record(
+                    recommendations,
+                    {
+                        "code": "SZ.002463",
+                        "label": "hold",
+                        "timestamp": f"2026-06-18T15:00:{i:02d}+08:00",
+                        "entry_price": 147.9,
+                        "invalidation_level": 142.0,
+                        "component_scores": {"trend": 70, "capital_flow": 65, "sector": 60, "cross_market": 38, "macro_risk": 55, "market_regime": 50, "fundamental": 48, "position_fit": 75},
+                    },
+                )
 
             with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
                 exit_code = main([

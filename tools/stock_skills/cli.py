@@ -746,17 +746,38 @@ def _cmd_review(args: argparse.Namespace) -> int:
         print("No reviewable recommendations (need a timestamp, positive entry_price, and available future bars).")
         return 0
 
+    # Idempotency: a (code, timestamp, window) triple is reviewed at most once, so the
+    # command can run on a schedule without duplicating rows and skewing backtest stats.
+    already_reviewed = {
+        (str(row.get("code")), str(row.get("source_timestamp")), str(row.get("review_window")))
+        for row in read_records(args.reviews)
+    }
+    skipped = 0
+    fetch_failures: list[str] = []
+
     fetcher = FutuFetcher()
     window_days = REVIEW_WINDOW_DAYS[args.window]
     reviews: list[dict] = []
     for rec in candidates:
         timestamp = rec["timestamp"]
+        review_key = (str(rec["code"]), str(timestamp), args.window)
+        if review_key in already_reviewed:
+            skipped += 1
+            continue
+        already_reviewed.add(review_key)
         entry_price = rec["entry_price"]
         entry = _entry_date(str(timestamp))
         # Pull a generous calendar span so weekends/holidays still yield enough trading bars.
         start = (entry + timedelta(days=1)).isoformat()
         end = (entry + timedelta(days=window_days * 2 + 7)).isoformat()
-        future_bars = fetcher.get_history_bars(rec["code"], start=start, end=end)
+        # One transient fetch failure must not abort the whole run: rows already appended
+        # stay, the failed call is reported, and the idempotent re-run picks it up later.
+        try:
+            future_bars = fetcher.get_history_bars(rec["code"], start=start, end=end)
+        except Exception as exc:  # noqa: BLE001 - the fetch layer raises heterogeneous errors
+            fetch_failures.append(f"{rec['code']}@{timestamp}: {exc}")
+            already_reviewed.discard(review_key)
+            continue
         if len(future_bars) < window_days:
             continue
         future_bars = future_bars[:window_days]
@@ -764,13 +785,18 @@ def _cmd_review(args: argparse.Namespace) -> int:
         reviews.append(outcome)
         append_record(args.reviews, outcome)
 
+    if fetch_failures:
+        print(f"WARNING: {len(fetch_failures)} fetch failure(s); re-run review to retry them:", *fetch_failures, sep="\n  ")
     if not reviews:
-        print("No reviewable recommendations (need a timestamp, positive entry_price, and available future bars).")
+        if skipped:
+            print(f"No new recommendations to review for window {args.window}: {skipped} already reviewed.")
+        else:
+            print("No reviewable recommendations (need a timestamp, positive entry_price, and available future bars).")
         return 0
 
     current = load_weights(args.weights)
     suggestion = suggest_weight_adjustments(current, reviews)
-    print(json.dumps({"reviewed": len(reviews), "suggestion": suggestion}, ensure_ascii=False, indent=2))
+    print(json.dumps({"reviewed": len(reviews), "skipped_already_reviewed": skipped, "fetch_failures": len(fetch_failures), "suggestion": suggestion}, ensure_ascii=False, indent=2))
 
     if args.apply and suggestion["eligible"]:
         reason = f"Auto-adjust from {len(reviews)} review(s) over {args.window}: " + "; ".join(suggestion["notes"])

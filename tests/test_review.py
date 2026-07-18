@@ -34,6 +34,22 @@ class ReviewTests(unittest.TestCase):
         self.assertEqual(outcome["strategy_id"], "short-balanced-v1")
         self.assertEqual(outcome["evidence_kind"], "realized-ohlc")
 
+    def test_evaluate_recommendation_flags_split_basis_mismatch(self):
+        # Reverse split between the call and the fetch: entry recorded at 6.84, bars
+        # returned on the post-split basis (~10x). The fake +470% return must be
+        # flagged, not blended into realised evidence.
+        recommendation = {"code": "US.SOXS", "label": "hold", "timestamp": "2026-06-08T16:00:00-04:00"}
+        future_bars = [
+            KLineBar("2026-06-09", 68.0, 70.0, 66.0, 69.0, 1_000_000, 68_000_000.0),
+            KLineBar("2026-06-10", 69.0, 71.0, 67.0, 70.0, 1_000_000, 69_000_000.0),
+        ]
+
+        outcome = evaluate_recommendation(recommendation, entry_price=6.84, future_bars=future_bars, review_window="2d")
+
+        self.assertEqual(outcome["evidence_kind"], "basis-mismatch")
+        self.assertFalse(outcome["review_complete"])
+        self.assertGreater(outcome["basis_ratio"], 2.0)
+
     def test_evaluate_recommendation_detects_invalidation(self):
         recommendation = {
             "code": "SZ.002463",

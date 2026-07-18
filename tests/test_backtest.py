@@ -52,6 +52,31 @@ class BacktestTests(unittest.TestCase):
         self.assertIn("summary", report)
         self.assertIn("component_edge", report)
 
+    def test_synthetic_backfill_is_separated_from_realized_stats(self):
+        excluded = [
+            {"code": "C", "source_timestamp": "t9", "label": "hold", "final_return_pct": -8.0,
+             "directional_success": False, "review_window": "md-3pt", "invalidated": False},
+            {"code": "D", "source_timestamp": "t8", "label": "hold", "final_return_pct": 4.0,
+             "directional_success": True, "evidence_kind": "synthetic", "review_window": "5d", "invalidated": False},
+            # Split-basis mismatch: a fake +470% that must never enter the stats.
+            {"code": "A", "source_timestamp": "t1", "label": "hold", "final_return_pct": 470.9,
+             "directional_success": True, "evidence_kind": "basis-mismatch", "review_window": "5d", "invalidated": False},
+        ]
+
+        summary = summarize_outcomes(self.reviews + excluded)
+        # Realised stats are identical to an exclusion-free run...
+        self.assertEqual(summary["reviewed"], 3)
+        self.assertEqual(summary["win_rate"], round(2 / 3, 4))
+        # ...while the backfill is counted and summarised on the side.
+        self.assertEqual(summary["synthetic_excluded"], 2)
+        self.assertEqual(summary["synthetic_summary"]["reviewed"], 2)
+        self.assertEqual(summary["basis_mismatch_excluded"], 1)
+
+        edge = component_edge(self.recommendations, self.reviews + excluded)
+        self.assertEqual(edge["joined"], 2)
+        self.assertEqual(edge["synthetic_excluded"], 2)
+        self.assertEqual(edge["basis_mismatch_excluded"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

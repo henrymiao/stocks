@@ -59,6 +59,15 @@ def evaluate_recommendation(
     required_bar_count = _required_bar_count(review_window)
     evaluation_bars = future_bars if required_bar_count is None else future_bars[:required_bar_count]
 
+    # A first bar at more than double or below half the recorded entry price is a
+    # price-basis mismatch — usually a split/reverse-split between the call and this
+    # fetch (leveraged ETFs reverse-split routinely). The return arithmetic is then
+    # meaningless, so the row is flagged and kept out of realised evidence.
+    first_bar = evaluation_bars[0]
+    first_reference = first_bar.open if first_bar.open > 0 else first_bar.close
+    basis_ratio = round(first_reference / entry_price, 4)
+    basis_mismatch = required_bar_count is not None and not (0.5 < basis_ratio < 2.0)
+
     highest = max(bar.high for bar in evaluation_bars)
     lowest = min(bar.low for bar in evaluation_bars)
     final_close = evaluation_bars[-1].close
@@ -98,8 +107,9 @@ def evaluate_recommendation(
         "maximum_adverse_pct": maximum_adverse_pct,
         "final_return_pct": final_return_pct,
         "observed_bar_count": len(future_bars),
-        "review_complete": required_bar_count is not None and len(future_bars) >= required_bar_count,
-        "evidence_kind": "synthetic" if required_bar_count is None else "realized-ohlc",
+        "review_complete": required_bar_count is not None and len(future_bars) >= required_bar_count and not basis_mismatch,
+        "evidence_kind": "synthetic" if required_bar_count is None else ("basis-mismatch" if basis_mismatch else "realized-ohlc"),
+        "basis_ratio": basis_ratio,
         "invalidated": invalidated,
         "directional_success": directional_success,
         "dominant_failure": dominant_failure,

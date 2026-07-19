@@ -9,6 +9,11 @@ _MARKET_WEIGHTS = {
     "SZ.399001": 8,   # SZSE Component
     "US.QQQ": 12,
     "US.SPY": 8,
+    # HK backdrop: the CLI fetches these for HK.* instruments (see HK_INDEX_CODES);
+    # without weights here their snapshots were silently ignored and every HK
+    # analysis scored a fake-neutral market regime.
+    "HK.800000": 12,  # Hang Seng Index
+    "HK.800700": 10,  # Hang Seng TECH
 }
 
 

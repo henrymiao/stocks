@@ -426,11 +426,11 @@ class CliTests(unittest.TestCase):
                         "--journal",
                         str(journal),
                         "--cross",
-                        "HK.800700",
+                        "XX.NOCROSS",
                         "--indices",
-                        "HK.800000",
+                        "XX.NOIDX",
                         "--macro-codes",
-                        "HK.800000",
+                        "XX.NOMACRO",
                     ]
                 )
             payload = json.loads(output.read_text(encoding="utf-8"))
@@ -447,9 +447,9 @@ class CliTests(unittest.TestCase):
         self.assertIn("cross_market: neutral default", refs)
         self.assertIn("macro: neutral default", refs)
         self.assertIn("market_regime: neutral default", refs)
-        self.assertNotIn("cross_market:HK.800700", refs)
-        self.assertNotIn("macro:proxies:HK.800000", refs)
-        self.assertNotIn("market:HK.800000", refs)
+        self.assertNotIn("cross_market:XX.NOCROSS", refs)
+        self.assertNotIn("macro:proxies:XX.NOMACRO", refs)
+        self.assertNotIn("market:XX.NOIDX", refs)
 
     def test_analyze_source_refs_include_only_consumed_snapshots(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -467,13 +467,13 @@ class CliTests(unittest.TestCase):
                         str(journal),
                         "--cross",
                         "US.QQQ",
-                        "HK.800700",
+                        "XX.NOCROSS",
                         "--indices",
                         "US.SPY",
-                        "HK.800000",
+                        "XX.NOIDX",
                         "--macro-codes",
                         "US.VIXY",
-                        "HK.800000",
+                        "XX.NOMACRO",
                     ]
                 )
             payload = json.loads(output.read_text(encoding="utf-8"))
@@ -483,7 +483,7 @@ class CliTests(unittest.TestCase):
         self.assertIn("cross_market:US.QQQ", refs)
         self.assertIn("market:US.SPY", refs)
         self.assertIn("macro:proxies:US.VIXY", refs)
-        self.assertFalse(any("HK.800700" in ref or "HK.800000" in ref for ref in refs))
+        self.assertFalse(any("XX.NO" in ref for ref in refs))
 
     def test_analyze_unknown_manual_macro_input_records_only_fallback(self):
         with tempfile.TemporaryDirectory() as tmpdir:

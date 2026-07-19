@@ -142,8 +142,8 @@
       "benchmark": "US.SPY",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
-      "scan_policy": "ranked",
+      "position_status": "holding",
+      "scan_policy": "always",
       "tags": [
         "us",
         "crypto-equity",
@@ -673,8 +673,8 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
-      "scan_policy": "ranked",
+      "position_status": "holding",
+      "scan_policy": "always",
       "tags": [
         "a-share",
         "chemicals",
@@ -3170,7 +3170,7 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "active",
+      "position_status": "holding",
       "scan_policy": "always",
       "tags": [
         "a-share",

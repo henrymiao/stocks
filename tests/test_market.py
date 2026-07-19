@@ -11,9 +11,22 @@ def index(code, last, prev):
 
 class MarketTests(unittest.TestCase):
     def test_market_evidence_requires_recognized_code(self):
-        snapshots = {"HK.800000": index("HK.800000", 25_000.0, 24_900.0)}
+        snapshots = {"XX.UNKNOWN": index("XX.UNKNOWN", 25_000.0, 24_900.0)}
 
         self.assertFalse(market.has_market_evidence(snapshots))
+
+    def test_hk_indices_are_recognized_market_evidence(self):
+        # Regression: HK.800000/800700 were fetched for HK.* instruments but absent
+        # from _MARKET_WEIGHTS, so every HK analysis scored a fake-neutral regime.
+        snapshots = {
+            "HK.800000": index("HK.800000", 24_562.0, 25_008.0),  # -1.78%
+            "HK.800700": index("HK.800700", 4_623.0, 4_834.0),    # -4.37%
+        }
+
+        self.assertTrue(market.has_market_evidence(snapshots))
+        analysis = analyze_market(snapshots)
+        self.assertEqual(analysis.regime, "risk-off")
+        self.assertLess(analysis.score, 42.0)
 
     def test_market_evidence_requires_usable_previous_close(self):
         snapshots = {"US.SPY": index("US.SPY", 750.0, 0.0)}

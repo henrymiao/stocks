@@ -1,0 +1,22 @@
+---
+name: portfolio-positions
+description: "Portfolio as reported 2026-07-18: total ~1.34M CNY; GOOGL 170@$290 ~31% (over 25% cap), Tencent 600@412HKD 19%, aerospace ETF 563380 54600@1.098 probe 3.8%, XPeng see xiaopeng-position; cash unknown"
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: d5010ffd-636f-48ca-b6d4-05178ed91ed8
+---
+
+Positions the user reported on 2026-07-18 (all journaled with trade-ids):
+
+- **GOOGL** 170 shares @ $290 cost (`googl-core-290`, core). At 346.77 → +19.6%, ≈42万 CNY ≈ **31-33% of portfolio — breaches the 25% single-position cap**. Tactical state broken (six gates failed, below its own June 358 转弱线); mid-term thesis intact (fundamental 72). Levels: invalidation 341.36, trim zone 348-352, repair 363/374-378.
+- **Tencent HK.00700** 600 shares @ 412 HKD (`tencent-00700-core412`, core). At 461.6 → +12%, ≈25.5万 CNY = 19%, compliant. Framework split: thesis cluster 100 (PE 15.8, EPS +22.4%) vs market behavior 22. Borderline hold (setup 56); invalidation 458 (0.8% below price), second line 447.4.
+- **Aerospace ETF SH.563380** 54,600 @ 1.098 (`hangtian-563380-20260718`, probe 3.8%). At 0.882 → **-19.7%**, sitting on 30-day low 0.876 = invalidation. Thesis = 星枢计划 space-compute constellation (formally档案 in repo `563380/2026-07-18-thesis.md`); Monday 2026-07-21 is the event test day after the 7-18 WAIC 首发星座 launch. No averaging down; add only on `enter`.
+- **XPeng HK.09868** 5,200 shares @ 83 (`xpeng-09868-core83`, core). At 51.65 → **-37.8%**, ≈24.7万 CNY ≈ 18-19% (de-risk target reached). Only position where the thesis cluster is also broken (22/100, Q1 rev -17.6% auto-fetched — gate ② verification pending, see [[xiaopeng-position]]). Tactical invalidation 50.7; mid-term gate 45.32.
+
+- **Circle US.CRCL** 80 shares @ $71 (`circle-crcl-20260718`, probe). At 60.46 → **-14.8%**, ≈3.5万 CNY ≈ 2.6%. Second "double-broken" position (setup 40 < 45 full-exit signal, thesis 34, PE negative); 30-day high 95.18 → -36% collapse; invalidation 58.68 (2.9% below price); cost 71 sits under the 72.86 resistance. Most-journaled name (n=14 realized, wr 64% — its risk-reduce calls were mostly right on the way down).
+
+- **Alibaba HK.09988** 1,000 shares, **cost unknown (ask)** (`baba-09988-20260718`). At 112.6 ≈ 10.4万 CNY ≈ 7.8%. Setup 44.9 (just below the 45 full-exit band once cost registers), thesis 57 (PE 18, EPS -17.3%), invalidation 110.7 (1.7% below). Watchlist already core/reduced-holding/always.
+- **Wanhua Chemical SH.600309** 800 shares @ 70.3 (`wanhua-600309-core70.3`, core). At 70.04 → -0.4% (≈5.6万 CNY ≈ 4.2%). **Healthiest chart in the book**: setup 55.8 hold, capital_flow 91, relative strength positive, Friday +2.5% AGAINST the falling A-share tape, basing 65.9-76.8. Capped by resistance 70.8/70.91 right overhead (cost 70.3 sits at it); invalidation 68.1, stop 66.5. Cyclical → per docs/valuation-notes-a-share-cyclical.md treat fundamental (61.5, PE 16.7) as reference only. Watchlist upgraded to holding/always.
+
+Full audit 2026-07-18 FINAL (seven positions, **cash confirmed 40万**): total ≈ **156.6万 CNY** = equities 116.6万 (**74.5%**) + cash 40万 (**25.5%**). Weights vs total: GOOGL **26.9%** (over 25% cap → trim ≈12-15 shares), Tencent 16.3%, XPeng 15.8%, BABA 6.6%, Wanhua 3.6%, 563380 3.1%, CRCL 2.2%. Portfolio heat to engine stops ≈ 2.8% — **within the 6% budget** provided stops execute. The user's earlier stated weights (Tencent 19%, ETF 3.8%) were against a smaller/stale total — hard share counts + cash are authoritative. Only missing datum: BABA cost basis. **All six positions closed Friday within 3% of their invalidation lines simultaneously** in a global risk-off tape — Monday 2026-07-21 is a synchronized decision day (also the 星枢 event test). GOOGL over-cap (~31%) is the top concentration issue; equity exposure at 83% with only ~16% cash is the second. **HK market-regime bug fixed 2026-07-18** (HK.800000/800700 were missing from market.py _MARKET_WEIGHTS → every HK analysis ever scored fake-neutral regime): with the true Friday tape (HSI -1.79%, HSTECH -4.37% → regime 34.6 risk-off), Tencent's position decision flipped hold → **partial-exit** (setup 54.98), XPeng full-exit deepened (33.6), BABA slipped below 45. Historical HK journal rows still carry the fake-neutral bias — see [[backtest-evidence-hygiene]].

@@ -1,0 +1,84 @@
+{
+  "schema_version": "opportunity-universe-v1",
+  "market": "CN",
+  "as_of": "2026-07-21T16:00:00+08:00",
+  "source": "configured-initial-universe",
+  "expires_at": "2026-10-31T23:59:59+08:00",
+  "sectors": [
+    {
+      "key": "semiconductor-ai-hardware",
+      "name": "半导体、算力、PCB与AI硬件",
+      "representative": "SH.512480",
+      "benchmark": "SH.000688",
+      "members": [
+        {"code": "SH.512480", "name": "半导体ETF", "role": "etf"},
+        {"code": "SH.688981", "name": "中芯国际", "role": "leader"},
+        {"code": "SH.688256", "name": "寒武纪", "role": "leader"},
+        {"code": "SH.600584", "name": "长电科技", "role": "constituent"},
+        {"code": "SZ.002463", "name": "沪电股份", "role": "constituent"},
+        {"code": "SZ.002938", "name": "鹏鼎控股", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "ev-battery",
+      "name": "新能源汽车与动力电池",
+      "representative": "SH.515030",
+      "benchmark": "SZ.399006",
+      "members": [
+        {"code": "SH.515030", "name": "新能源车ETF", "role": "etf"},
+        {"code": "SZ.300750", "name": "宁德时代", "role": "leader"},
+        {"code": "SZ.002594", "name": "比亚迪", "role": "leader"},
+        {"code": "SH.601633", "name": "长城汽车", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "innovative-medicine",
+      "name": "创新药与医疗器械",
+      "representative": "SH.512290",
+      "benchmark": "SH.000300",
+      "members": [
+        {"code": "SH.512290", "name": "生物医药ETF", "role": "etf"},
+        {"code": "SH.600276", "name": "恒瑞医药", "role": "leader"},
+        {"code": "SH.688180", "name": "君实生物", "role": "constituent"},
+        {"code": "SZ.300760", "name": "迈瑞医疗", "role": "leader"}
+      ]
+    },
+    {
+      "key": "financials",
+      "name": "券商、银行与保险",
+      "representative": "SH.512000",
+      "benchmark": "SH.000300",
+      "members": [
+        {"code": "SH.512000", "name": "券商ETF", "role": "etf"},
+        {"code": "SH.600036", "name": "招商银行", "role": "leader"},
+        {"code": "SH.601318", "name": "中国平安", "role": "leader"},
+        {"code": "SH.601398", "name": "工商银行", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "resources-defence",
+      "name": "有色、黄金、化工与军工",
+      "representative": "SH.512400",
+      "benchmark": "SH.000905",
+      "members": [
+        {"code": "SH.512400", "name": "有色金属ETF", "role": "etf"},
+        {"code": "SH.601899", "name": "紫金矿业", "role": "leader"},
+        {"code": "SH.603993", "name": "洛阳钼业", "role": "leader"},
+        {"code": "SH.600547", "name": "山东黄金", "role": "constituent"},
+        {"code": "SH.600760", "name": "中航沈飞", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "power-grid-equipment",
+      "name": "电力、电网设备与高端装备",
+      "representative": "SH.600406",
+      "benchmark": "SH.000905",
+      "members": [
+        {"code": "SH.600406", "name": "国电南瑞", "role": "leader"},
+        {"code": "SH.601012", "name": "隆基绿能", "role": "constituent"},
+        {"code": "SZ.300124", "name": "汇川技术", "role": "leader"},
+        {"code": "SH.601100", "name": "恒立液压", "role": "constituent"}
+      ]
+    }
+  ]
+}

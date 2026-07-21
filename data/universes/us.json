@@ -1,0 +1,101 @@
+{
+  "schema_version": "opportunity-universe-v1",
+  "market": "US",
+  "as_of": "2026-07-21T16:00:00-04:00",
+  "source": "configured-initial-universe",
+  "expires_at": "2026-10-31T23:59:59-04:00",
+  "sectors": [
+    {
+      "key": "semiconductors",
+      "name": "Semiconductors",
+      "representative": "US.SMH",
+      "benchmark": "US.QQQ",
+      "members": [
+        {"code": "US.SMH", "name": "VanEck Semiconductor ETF", "role": "etf"},
+        {"code": "US.NVDA", "name": "NVIDIA", "role": "leader"},
+        {"code": "US.AVGO", "name": "Broadcom", "role": "leader"},
+        {"code": "US.MU", "name": "Micron", "role": "constituent"},
+        {"code": "US.AMD", "name": "AMD", "role": "constituent"},
+        {"code": "US.MRVL", "name": "Marvell", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "software-cloud",
+      "name": "Software and Cloud",
+      "representative": "US.IGV",
+      "benchmark": "US.QQQ",
+      "members": [
+        {"code": "US.IGV", "name": "iShares Expanded Tech-Software ETF", "role": "etf"},
+        {"code": "US.MSFT", "name": "Microsoft", "role": "leader"},
+        {"code": "US.GOOGL", "name": "Alphabet", "role": "leader"},
+        {"code": "US.AMZN", "name": "Amazon", "role": "constituent"},
+        {"code": "US.ORCL", "name": "Oracle", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "financials",
+      "name": "Financials",
+      "representative": "US.XLF",
+      "benchmark": "US.SPY",
+      "members": [
+        {"code": "US.XLF", "name": "Financial Select Sector SPDR", "role": "etf"},
+        {"code": "US.JPM", "name": "JPMorgan", "role": "leader"},
+        {"code": "US.BAC", "name": "Bank of America", "role": "constituent"},
+        {"code": "US.GS", "name": "Goldman Sachs", "role": "leader"},
+        {"code": "US.MS", "name": "Morgan Stanley", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "energy",
+      "name": "Energy",
+      "representative": "US.XLE",
+      "benchmark": "US.SPY",
+      "members": [
+        {"code": "US.XLE", "name": "Energy Select Sector SPDR", "role": "etf"},
+        {"code": "US.XOM", "name": "Exxon Mobil", "role": "leader"},
+        {"code": "US.CVX", "name": "Chevron", "role": "leader"},
+        {"code": "US.COP", "name": "ConocoPhillips", "role": "constituent"},
+        {"code": "US.SLB", "name": "SLB", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "industrials",
+      "name": "Industrials",
+      "representative": "US.XLI",
+      "benchmark": "US.SPY",
+      "members": [
+        {"code": "US.XLI", "name": "Industrial Select Sector SPDR", "role": "etf"},
+        {"code": "US.CAT", "name": "Caterpillar", "role": "leader"},
+        {"code": "US.GE", "name": "GE Aerospace", "role": "leader"},
+        {"code": "US.HON", "name": "Honeywell", "role": "constituent"},
+        {"code": "US.ETN", "name": "Eaton", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "healthcare",
+      "name": "Healthcare",
+      "representative": "US.XLV",
+      "benchmark": "US.SPY",
+      "members": [
+        {"code": "US.XLV", "name": "Health Care Select Sector SPDR", "role": "etf"},
+        {"code": "US.LLY", "name": "Eli Lilly", "role": "leader"},
+        {"code": "US.UNH", "name": "UnitedHealth", "role": "leader"},
+        {"code": "US.JNJ", "name": "Johnson & Johnson", "role": "constituent"},
+        {"code": "US.ABBV", "name": "AbbVie", "role": "constituent"}
+      ]
+    },
+    {
+      "key": "consumer",
+      "name": "Consumer Discretionary",
+      "representative": "US.XLY",
+      "benchmark": "US.SPY",
+      "members": [
+        {"code": "US.XLY", "name": "Consumer Discretionary Select Sector SPDR", "role": "etf"},
+        {"code": "US.AMZN", "name": "Amazon", "role": "leader"},
+        {"code": "US.TSLA", "name": "Tesla", "role": "leader"},
+        {"code": "US.HD", "name": "Home Depot", "role": "constituent"},
+        {"code": "US.MCD", "name": "McDonald's", "role": "constituent"}
+      ]
+    }
+  ]
+}

@@ -1499,6 +1499,257 @@ def _cmd_monitor(args: argparse.Namespace) -> int:
     return 0
 
 
+def _write_discovery_payload(payload: dict[str, object], output: str | None) -> None:
+    text = json.dumps(payload, ensure_ascii=False, indent=2)
+    if output:
+        target = Path(output)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8")
+    print(text)
+
+
+def _default_discovery_universe(market: str) -> Path:
+    return Path("data") / "universes" / f"{market.lower()}.json"
+
+
+def _discovery_deep_analyzer(candidate):
+    """Hand a triggered discovery to the existing authoritative strategy CLI."""
+
+    import tempfile
+
+    with tempfile.TemporaryDirectory(prefix="stock-discovery-analysis-") as tmpdir:
+        output = Path(tmpdir) / "recommendation.json"
+        command = [
+            sys.executable,
+            "-m",
+            "tools.stock_skills.cli",
+            "analyze",
+            "--code",
+            candidate.code,
+            "--horizon",
+            candidate.horizon,
+            "--no-journal",
+            "--output",
+            str(output),
+        ]
+        completed = subprocess.run(command, capture_output=True, text=True, timeout=240)
+        if completed.returncode != 0 or not output.is_file():
+            return {
+                "entry_decision": "defer",
+                "error": (completed.stderr or completed.stdout or "deep analysis failed").strip(),
+            }
+        return json.loads(output.read_text(encoding="utf-8"))
+
+
+def _resolve_discovery_inputs(args: argparse.Namespace):
+    from .discovery_runtime import load_discovery_fixture
+    from .universe import resolve_universe
+
+    fixture = load_discovery_fixture(args.fixture) if args.fixture else None
+    if fixture is not None:
+        if fixture["universe"].market != args.market:
+            raise ValueError(
+                f"Fixture market is {fixture['universe'].market}, expected {args.market}"
+            )
+        return fixture["universe"], fixture
+    configured = Path(args.universe) if args.universe else _default_discovery_universe(args.market)
+    cache = Path(args.membership_cache) if args.membership_cache else (
+        Path("data") / "cache" / f"discovery-membership-{args.market.lower()}.json"
+    )
+    universe = resolve_universe(
+        args.market,
+        configured_path=configured,
+        cache_path=cache,
+        at=args.as_of,
+    )
+    return universe, None
+
+
+def _cmd_discover(args: argparse.Namespace) -> int:
+    from .discovery_engine import candidate_from_record, discover_universe
+    from .discovery_runtime import default_evaluated_at, run_live_discovery
+    from .discovery_store import DiscoveryStore
+    from .store import MarketStore
+
+    universe, fixture = _resolve_discovery_inputs(args)
+    evaluated_at = args.as_of or default_evaluated_at(universe)
+    with DiscoveryStore(args.db) as discovery_store:
+        before = discovery_store.latest_by_key(universe.market)
+        if fixture is not None:
+            report = discover_universe(
+                universe,
+                fixture["bars"],
+                evaluated_at=evaluated_at,
+                capital_improvement=fixture["capital_improvement"],
+                horizon=args.horizon,
+                existing=before,
+            )
+            discovery_store.upsert_many(
+                [candidate_from_record(row) for row in report["candidates"]]
+            )
+        else:
+            with MarketStore(args.market_db) as market_store:
+                report = run_live_discovery(
+                    universe,
+                    evaluated_at=evaluated_at,
+                    discovery_store=discovery_store,
+                    market_store=market_store,
+                    horizon=args.horizon,
+                    backfill=args.backfill,
+                )
+        updated = [candidate_from_record(row) for row in report["candidates"]]
+        notifications: list[dict[str, object]] = []
+        for candidate in updated:
+            previous = before.get((candidate.sector, candidate.code, candidate.track))
+            previous_state = None if previous is None else previous.state
+            material = (
+                candidate.state == "armed"
+                and (
+                    previous_state != "armed"
+                    or previous is None
+                    or previous.discovery_id != candidate.discovery_id
+                )
+            ) or (
+                candidate.state in {"invalidated", "expired"}
+                and previous_state in {"forming", "armed", "triggered"}
+            )
+            if material and discovery_store.should_notify(
+                candidate, no_notify=args.no_notify
+            ):
+                notifications.append(
+                    {
+                        "discovery_id": candidate.discovery_id,
+                        "code": candidate.code,
+                        "from": previous_state,
+                        "to": candidate.state,
+                        "score": candidate.score,
+                    }
+                )
+        report["notifications"] = notifications
+        report["no_notify"] = bool(args.no_notify)
+    _write_discovery_payload(report, args.output)
+    return 0
+
+
+def _cmd_confirm_discoveries(args: argparse.Namespace) -> int:
+    from .discovery_engine import candidate_from_record, confirm_discoveries
+    from .discovery_runtime import default_evaluated_at, run_live_confirmation
+    from .discovery_store import DiscoveryStore
+    from .store import MarketStore
+
+    universe, fixture = _resolve_discovery_inputs(args)
+    evaluated_at = args.as_of or default_evaluated_at(universe)
+    with DiscoveryStore(args.db) as discovery_store:
+        before = {
+            candidate.discovery_id: candidate
+            for candidate in discovery_store.list_candidates(
+                market=universe.market, states=("armed", "triggered")
+            )
+        }
+        if fixture is not None:
+            report = confirm_discoveries(
+                list(before.values()),
+                fixture["intraday_bars"],
+                fixture["sector_confirmation"],
+                evaluated_at=evaluated_at,
+                instrument_confirmation=fixture["instrument_confirmation"],
+                analyzer=None,
+            )
+            updated = [candidate_from_record(row) for row in report["candidates"]]
+            discovery_store.upsert_many(updated)
+        else:
+            with MarketStore(args.market_db) as market_store:
+                report = run_live_confirmation(
+                    universe,
+                    evaluated_at=evaluated_at,
+                    discovery_store=discovery_store,
+                    market_store=market_store,
+                    analyzer=None if args.no_deep_analysis else _discovery_deep_analyzer,
+                )
+            updated = [candidate_from_record(row) for row in report["candidates"]]
+
+        notifications: list[dict[str, object]] = []
+        for candidate in updated:
+            previous = before.get(candidate.discovery_id)
+            if previous is None or previous.state == candidate.state:
+                continue
+            if discovery_store.should_notify(candidate, no_notify=args.no_notify):
+                notification: dict[str, object] = {
+                    "discovery_id": candidate.discovery_id,
+                    "code": candidate.code,
+                    "from": previous.state,
+                    "to": candidate.state,
+                    "score": candidate.score,
+                }
+                if candidate.deep_analysis:
+                    assessment = candidate.deep_analysis.get("strategy_assessment", {})
+                    decision = (
+                        assessment.get("entry_decision")
+                        if isinstance(assessment, dict)
+                        else None
+                    ) or candidate.deep_analysis.get("entry_decision")
+                    if decision in {"probe", "enter"}:
+                        notification["entry_decision"] = decision
+                notifications.append(notification)
+        report["notifications"] = notifications
+        report["no_notify"] = bool(args.no_notify)
+    _write_discovery_payload(report, args.output)
+    return 0
+
+
+def _cmd_review_discoveries(args: argparse.Namespace) -> int:
+    from .discovery_engine import review_discovery
+    from .discovery_runtime import load_discovery_fixture
+    from .discovery_store import DiscoveryStore
+    from .futu_fetcher import FutuFetcher
+
+    fixture = load_discovery_fixture(args.fixture) if args.fixture else None
+    with DiscoveryStore(args.db) as store:
+        candidates = store.list_candidates(market=args.market, states=("triggered",))
+        reviews: list[dict[str, object]] = []
+        fetcher = None if fixture is not None else FutuFetcher()
+        for candidate in candidates:
+            if fixture is not None:
+                future = fixture["future_bars"].get(candidate.code, [])
+            else:
+                triggered = date.fromisoformat(candidate.triggered_at[:10])
+                start = (triggered + timedelta(days=1)).isoformat()
+                end = datetime.now().date().isoformat()
+                future = fetcher.get_history_bars(candidate.code, start=start, end=end)
+            if not future:
+                continue
+            review = review_discovery(candidate, future)
+            store.save_review(review)
+            reviews.append(review)
+        payload = {
+            "schema_version": "opportunity-discovery-review-report-v1",
+            "market": args.market,
+            "reviewed": len(reviews),
+            "reviews": reviews,
+        }
+    _write_discovery_payload(payload, args.output)
+    return 0
+
+
+def _add_discovery_arguments(parser: argparse.ArgumentParser, *, confirmation: bool = False) -> None:
+    parser.add_argument("--market", choices=["CN", "HK", "US"], required=True)
+    parser.add_argument("--universe", default=None, help="Explicit market-universe JSON")
+    parser.add_argument("--membership-cache", default=None)
+    parser.add_argument("--fixture", default=None, help="Offline deterministic fixture JSON")
+    parser.add_argument("--db", default="data/discovery.db")
+    parser.add_argument("--as-of", default=None, help="Evaluation timestamp in market time")
+    parser.add_argument("--output", default=None)
+    parser.add_argument("--json", action="store_true", help="Compatibility flag; output is always JSON")
+    parser.add_argument("--no-notify", action="store_true")
+    if confirmation:
+        parser.add_argument("--no-deep-analysis", action="store_true")
+        parser.add_argument("--market-db", default="data/market.db")
+    else:
+        parser.add_argument("--market-db", default="data/market.db")
+        parser.add_argument("--horizon", choices=["short", "swing"], default="short")
+        parser.add_argument("--backfill", type=int, choices=[60, 260], default=260)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Self-evolving stock skill tools")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -1641,6 +1892,28 @@ def main(argv: list[str] | None = None) -> int:
     monitor.add_argument("--earnings-window", type=int, default=14, help="Days ahead to surface earnings (default: 14)")
     monitor.add_argument("--output", default=None, help="Optional JSON report path")
 
+    discover = subparsers.add_parser(
+        "discover",
+        help="Find forming/armed opportunities without producing an entry recommendation",
+    )
+    _add_discovery_arguments(discover)
+
+    confirm = subparsers.add_parser(
+        "confirm-discoveries",
+        help="Refresh armed discoveries with completed five-minute local evidence",
+    )
+    _add_discovery_arguments(confirm, confirmation=True)
+
+    discovery_review = subparsers.add_parser(
+        "review-discoveries",
+        help="Measure discovery lead quality separately from trading P&L",
+    )
+    discovery_review.add_argument("--market", choices=["CN", "HK", "US"], required=True)
+    discovery_review.add_argument("--db", default="data/discovery.db")
+    discovery_review.add_argument("--fixture", default=None)
+    discovery_review.add_argument("--output", default=None)
+    discovery_review.add_argument("--json", action="store_true", help="Compatibility flag; output is always JSON")
+
     args = parser.parse_args(argv)
 
     if args.command in {"analyze", "analyze-offline"} and args.cost_basis is not None and not args.trade_id:
@@ -1666,6 +1939,12 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_prepost(args)
     if args.command == "monitor":
         return _cmd_monitor(args)
+    if args.command == "discover":
+        return _cmd_discover(args)
+    if args.command == "confirm-discoveries":
+        return _cmd_confirm_discoveries(args)
+    if args.command == "review-discoveries":
+        return _cmd_review_discoveries(args)
     return 2
 
 

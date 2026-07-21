@@ -233,6 +233,21 @@ class FutuFetcherTests(unittest.TestCase):
         self.assertIn("--ktype", runner.commands[0])
         self.assertIn("1d", runner.commands[0])
 
+    def test_get_intraday_bars_requests_five_minute_records(self):
+        runner = FakeRunner({"get_kline.py": KLINE_PAYLOAD})
+        bars = _fetcher(runner).get_intraday_bars("US.SMH", num=12)
+
+        self.assertEqual(len(bars), 2)
+        command = runner.commands[0]
+        self.assertIn("--ktype", command)
+        self.assertIn("5m", command)
+        self.assertIn("--num", command)
+        self.assertIn("12", command)
+
+    def test_get_intraday_bars_rejects_daily_interval(self):
+        with self.assertRaisesRegex(ValueError, "Unsupported intraday ktype"):
+            _fetcher(FakeRunner()).get_intraday_bars("US.SMH", ktype="1d")
+
     def test_get_history_bars_passes_date_range(self):
         runner = FakeRunner({"get_kline.py": KLINE_PAYLOAD})
         bars = _fetcher(runner).get_history_bars("SZ.002463", start="2026-06-19", end="2026-06-30")

@@ -59,6 +59,29 @@ python3 tools/stock_skills/scan_watchlist.py \
 
 The scanner always produces separate `short` and `swing` rankings. `scan_policy: always` keeps active/reduced holdings in deep analysis; `--deep-top` captures leaders and `--deep-bottom` captures the largest eligible decliners. The JSON result records `always`, `top`, and `bottom` selection reasons. Use `--snapshot-only` to stop after filtering, and `--tag`, `--market`, or `--tier` to narrow the pool. Promotion is not an entry decision, and the scanner never executes a trade. Rejected, proxy, and discovery rows contain no recommendation. Deep analyses run with unique temporary outputs and `--no-journal`, reusing the batch macro/index snapshot.
 
+## Opportunity discovery
+
+Opportunity discovery runs before the watchlist/deep-analysis decision path. It scans the configured CN, HK, or US sector universe on two separate tracks: trend buildup and oversold reversal. A discovery score only controls `forming` and `armed` states; it is never an entry score.
+
+```bash
+# Run after the local close. Writes durable state to data/discovery.db.
+python3 -m tools.stock_skills.cli discover --market CN --output /tmp/cn-discovery.json
+python3 -m tools.stock_skills.cli discover --market HK --output /tmp/hk-discovery.json
+python3 -m tools.stock_skills.cli discover --market US --output /tmp/us-discovery.json
+
+# Run during the next local session. Only armed names receive completed 5-minute checks.
+python3 -m tools.stock_skills.cli confirm-discoveries --market CN \
+  --output /tmp/cn-confirmation.json
+
+# Measure alert quality independently from trade P&L.
+python3 -m tools.stock_skills.cli review-discoveries --market CN \
+  --output /tmp/cn-discovery-review.json
+```
+
+The default universes are `data/universes/cn.json`, `hk.json`, and `us.json`; use `--universe` to override one. Daily bars and capital history use `data/market.db`, while discovery state, transitions, notification deduplication, and 1/3/5/10-day MFE/MAE reviews use `data/discovery.db`. `--fixture` replays an offline deterministic input and `--no-notify` suppresses transition notifications for tests.
+
+`armed` requires a score of at least 65, at least two independent evidence groups, supportive breadth, at least 70% feature and constituent coverage, and no hard veto. A next-session `triggered` transition additionally requires a completed local five-minute candle, breadth, and leader confirmation. Stale snapshots, incomplete candles, low coverage, one leader without breadth, and high-volume declines closing near the low cannot upgrade a state. A material capital divergence, structural break, breadth collapse, or expired validity window invalidates or expires it. Only `triggered` invokes the existing authoritative deep analysis, which may still return `watch` or `reject` instead of `probe` or `enter`.
+
 ## Review and evidence accumulation
 
 Replay past recommendations against the price action that followed:

@@ -289,6 +289,36 @@ class FutuFetcher:
         payload = self._run_json(command)
         return self._parse_bars(payload)
 
+    def get_intraday_bars(
+        self,
+        code: str,
+        *,
+        num: int = 30,
+        ktype: str = "5m",
+    ) -> list[KLineBar]:
+        """Fetch quote-only intraday bars for discovery confirmation.
+
+        OpenD may include the currently forming final bar.  The discovery engine
+        filters it against the evaluation timestamp before any state transition.
+        """
+
+        if ktype not in {"1m", "3m", "5m", "10m", "15m", "30m", "60m"}:
+            raise ValueError(f"Unsupported intraday ktype: {ktype!r}")
+        if num <= 0:
+            raise ValueError("num must be positive")
+        command = [
+            self.python_bin,
+            self._script("quote", "get_kline.py"),
+            code,
+            "--ktype",
+            ktype,
+            "--num",
+            str(num),
+            "--json",
+        ]
+        payload = self._run_json(command)
+        return self._parse_bars(payload)
+
     def get_history_bars(self, code: str, start: str, end: str) -> list[KLineBar]:
         """Daily bars over [start, end] (YYYY-MM-DD), used to review past recommendations."""
         command = [

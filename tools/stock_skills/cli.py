@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from collections.abc import Callable
 from dataclasses import replace
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from typing import TypeVar
 
 from .backtest import run_backtest
 from .capital import analyze_capital
@@ -24,6 +26,16 @@ from .macro import (
     has_macro_proxy_evidence,
 )
 from .market import analyze_market, has_market_evidence
+from .linkage import analyze_linkage
+from .market_profiles import resolve_market_profile
+from .method_models import (
+    EvidenceValue,
+    LinkageAnalysis,
+    SwingStructureAnalysis,
+    ThesisAnalysis,
+    ValuationScenarioAnalysis,
+)
+from .method_policy import apply_method_restrictions, build_method_assessment
 from .models import (
     SCHEMA_VERSION,
     CapitalSnapshot,
@@ -35,6 +47,7 @@ from .models import (
     Recommendation,
 )
 from .position import analyze_position, analyze_structured_position, compute_atr
+from .provenance import resolve_evidence
 from .path_backtest import assess_portfolio_heat
 from .review import evaluate_recommendation, suggest_weight_adjustments
 from .sector import analyze_sector
@@ -45,7 +58,10 @@ from .strategy import (
     evaluate_strategy,
     get_strategy_profile,
 )
+from .swing_structure import analyze_swing_structure
+from .thesis import analyze_thesis
 from .trend import analyze_trend
+from .valuation_scenarios import analyze_valuation_scenarios
 
 FIXTURE_CODE = "SZ.002463"
 # Backdrop factors (cross_market/macro_risk/market_regime) are de-duplicated in the
@@ -85,6 +101,105 @@ DEFAULT_REVIEWS = "data/journal/reviews.jsonl"
 DEFAULT_WEIGHTS_PATH = "data/models/signal_weights.json"
 DEFAULT_WATCHLIST_PATH = "data/watchlists/core.json"
 REVIEW_WINDOW_DAYS = {"1d": 1, "3d": 3, "5d": 5, "10d": 10}
+T = TypeVar("T")
+_LIVE_ONLY_EVIDENCE = {"last_price", "volume", "turnover", "capital_flow"}
+
+
+def _bars_for_horizon(horizon: str, requested: int | None) -> int:
+    if requested is not None:
+        if requested <= 0:
+            raise ValueError("bars must be positive")
+        return requested
+    return 260 if horizon == "swing" else 30
+
+
+def _completed_daily_bars(
+    bars: list[KLineBar],
+    session_phase: str,
+) -> list[KLineBar]:
+    return bars[:-1] if session_phase == "intraday" and bars else list(bars)
+
+
+def _load_method_inputs(raw: str | None) -> dict[str, object]:
+    if raw is None:
+        return {}
+    payload = json.loads(raw)
+    if not isinstance(payload, dict):
+        raise ValueError("method inputs must be a JSON object")
+    allowed = {"thesis", "valuation", "evidence"}
+    unknown = set(payload) - allowed
+    if unknown:
+        raise ValueError(f"unknown method input sections: {sorted(unknown)}")
+    for section in allowed & set(payload):
+        if not isinstance(payload[section], dict):
+            raise ValueError(f"method input section {section} must be an object")
+    return payload
+
+
+def _manual_evidence(payload: dict[str, object]) -> dict[str, EvidenceValue]:
+    section = payload.get("evidence", {})
+    if not isinstance(section, dict):
+        raise ValueError("method evidence must be an object")
+    result: dict[str, EvidenceValue] = {}
+    for key, record in section.items():
+        if not isinstance(record, dict):
+            raise ValueError(f"method evidence {key} must be an object")
+        if record.get("source") != "official-manual":
+            raise ValueError(f"method evidence {key} must use official-manual")
+        if not record.get("as_of") or not record.get("source_ref"):
+            raise ValueError(f"method evidence {key} requires as_of and source_ref")
+        result[str(key)] = EvidenceValue(
+            value=record.get("value"),
+            source="official-manual",
+            as_of=str(record["as_of"]),
+            freshness=str(record.get("freshness", "current")),
+            confidence=float(record.get("confidence", 0.8)),
+            source_ref=str(record["source_ref"]),
+        )
+    return result
+
+
+def _method_reference_codes(
+    code: str,
+    index_codes: list[str],
+    cross_codes: list[str],
+) -> list[str]:
+    selected: list[str] = []
+    for candidate in [*index_codes, *cross_codes]:
+        if candidate != code and candidate not in selected:
+            selected.append(candidate)
+    return selected[:4]
+
+
+def _reference_history(fetcher, codes: list[str]) -> dict[str, list[KLineBar]]:
+    result: dict[str, list[KLineBar]] = {}
+    for code in codes:
+        try:
+            bars = fetcher.get_daily_bars(code, num=80)
+        except (
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ValueError,
+            subprocess.SubprocessError,
+        ):
+            continue
+        if bars:
+            result[code] = bars
+    return result
+
+
+def _safe_method(
+    name: str,
+    calculate: Callable[[], T],
+    fallback: T,
+    errors: dict[str, str],
+) -> T:
+    try:
+        return calculate()
+    except Exception as exc:  # method isolation boundary; exact error is journaled
+        errors[name] = f"{type(exc).__name__}: {exc}"
+        return fallback
 
 
 def _evidence_codes(
@@ -243,6 +358,190 @@ def _default_cross_codes_for(code: str, tags: list[str]) -> list[str]:
     return unique
 
 
+def _unknown_structure(note: str) -> SwingStructureAnalysis:
+    return SwingStructureAnalysis(
+        stage="unknown",
+        ma50=None,
+        ma150=None,
+        ma200=None,
+        checklist={},
+        pivot=None,
+        buy_zone=None,
+        contraction_count=None,
+        breakout_volume_ratio=None,
+        gate_effect="none",
+        coverage=0.0,
+        confidence=0.0,
+        notes=(note,),
+    )
+
+
+def _unknown_thesis(note: str) -> ThesisAnalysis:
+    return ThesisAnalysis(
+        state="unknown",
+        upside_drivers=(),
+        downside_drivers=(),
+        bull_path=None,
+        base_path=None,
+        bear_path=None,
+        rival_hypothesis=None,
+        invalidations=(),
+        unresolved=(note,),
+        technical_confirmation="unknown",
+        coverage=0.0,
+        confidence=0.0,
+        notes=(note,),
+    )
+
+
+def _unavailable_valuation(note: str) -> ValuationScenarioAnalysis:
+    return ValuationScenarioAnalysis(
+        status="unavailable",
+        methods_used=(),
+        cases=(),
+        sensitivity={},
+        method_disagreement_pct=None,
+        coverage=0.0,
+        confidence=0.0,
+        notes=(note,),
+    )
+
+
+def _unknown_linkage(note: str) -> LinkageAnalysis:
+    return LinkageAnalysis(
+        references=(),
+        coverage=0.0,
+        confidence=0.0,
+        notes=(note,),
+    )
+
+
+def _opend_method_evidence(
+    state: InstrumentState,
+    fundamentals: FundamentalSnapshot | None,
+) -> dict[str, EvidenceValue]:
+    snapshot = state.snapshot
+    records: dict[str, EvidenceValue] = {
+        "last_price": EvidenceValue(
+            snapshot.last_price,
+            "opend",
+            snapshot.timestamp,
+            "live",
+            1.0,
+            f"futu:snapshot:{snapshot.code}",
+        ),
+        "volume": EvidenceValue(
+            snapshot.volume,
+            "opend",
+            snapshot.timestamp,
+            "live",
+            1.0,
+            f"futu:snapshot:{snapshot.code}",
+        ),
+        "turnover": EvidenceValue(
+            snapshot.turnover,
+            "opend",
+            snapshot.timestamp,
+            "live",
+            1.0,
+            f"futu:snapshot:{snapshot.code}",
+        ),
+    }
+    if state.capital is not None:
+        records["capital_flow"] = EvidenceValue(
+            state.capital.net_inflow,
+            "opend",
+            state.capital.timestamp,
+            "live",
+            1.0,
+            f"futu:capital:{snapshot.code}",
+        )
+    if fundamentals is not None:
+        for key in (
+            "pe_ttm",
+            "pb",
+            "eps_growth",
+            "revenue_growth",
+            "gross_margin",
+            "net_margin",
+            "roe",
+        ):
+            value = getattr(fundamentals, key)
+            if value is not None:
+                records[key] = EvidenceValue(
+                    value,
+                    "opend",
+                    snapshot.timestamp,
+                    "current",
+                    0.9,
+                    f"futu:fundamental:{snapshot.code}",
+                )
+    return records
+
+
+def _resolve_method_metrics(
+    state: InstrumentState,
+    fundamentals: FundamentalSnapshot | None,
+    method_inputs: dict[str, object],
+) -> tuple[dict[str, float], tuple[str, ...], tuple[str, ...]]:
+    opend = _opend_method_evidence(state, fundamentals)
+    manual = _manual_evidence(method_inputs)
+    metrics: dict[str, float] = {}
+    conflicts: list[str] = []
+    source_refs: list[str] = []
+    for key in sorted(set(opend) | set(manual)):
+        supplemental = manual.get(key)
+        if key in _LIVE_ONLY_EVIDENCE and key not in opend:
+            supplemental = None
+        resolved, conflict = resolve_evidence(key, opend.get(key), supplemental)
+        if conflict:
+            conflicts.append(conflict)
+        if resolved is None:
+            continue
+        value = resolved.value
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            metrics[key] = float(value)
+        if resolved.source_ref and resolved.source_ref not in source_refs:
+            source_refs.append(resolved.source_ref)
+    if "last_price" in metrics:
+        metrics["current_price"] = metrics["last_price"]
+    return metrics, tuple(conflicts), tuple(source_refs)
+
+
+def _technical_confirmation(
+    structure: SwingStructureAnalysis,
+    linkage: LinkageAnalysis,
+) -> str:
+    stable_divergence = any(
+        reference.stability == "stable" and reference.stance == "diverging"
+        for reference in linkage.references
+    )
+    if structure.stage in {"stage-3", "stage-4"} or stable_divergence:
+        return "contradicting"
+    if structure.stage == "stage-2" and any(
+        reference.stance == "confirming" for reference in linkage.references
+    ):
+        return "confirming"
+    return "unknown"
+
+
+def _format_analyst_hypothesis(thesis: ThesisAnalysis) -> str:
+    observed = "; ".join(thesis.upside_drivers) or "none"
+    rival = (
+        thesis.rival_hypothesis
+        or (thesis.downside_drivers[0] if thesis.downside_drivers else "none observed")
+    )
+    base_path = thesis.base_path or "not established"
+    invalidations = "; ".join(thesis.invalidations) or "none triggered"
+    unresolved = "; ".join(thesis.unresolved) or "none"
+    return (
+        "Structured investment hypothesis (logic-first): "
+        f"observed upside={observed}; strongest rival={rival}; "
+        f"Base path={base_path}; invalidations={invalidations}; "
+        f"unresolved evidence={unresolved}; technical confirmation={thesis.technical_confirmation}."
+    )
+
+
 def _recommend(
     state: InstrumentState,
     weights: dict[str, float],
@@ -266,6 +565,10 @@ def _recommend(
     theme_open_risk_pct: float | None = None,
     trade_id: str | None = None,
     position_stage: str | None = None,
+    *,
+    reference_bars: dict[str, list[KLineBar]] | None = None,
+    asset_type: str = "equity",
+    method_inputs: dict[str, object] | None = None,
 ) -> Recommendation:
     """Run every analyzer over `state`. Missing components score a neutral 50 and are flagged in source_refs."""
     trend = analyze_trend(state.snapshot, state.daily_bars)
@@ -379,7 +682,86 @@ def _recommend(
         stale_components=detect_stale_components(state.snapshot, state.capital, session_phase),
     )
 
+    method_payload = {} if method_inputs is None else dict(method_inputs)
+    market_profile = resolve_market_profile(state.snapshot.code, asset_type=asset_type)
+    observed_metrics, source_conflicts, method_source_refs = _resolve_method_metrics(
+        state,
+        fundamentals,
+        method_payload,
+    )
+    method_errors: dict[str, str] = {}
+    valuation_input = method_payload.get("valuation")
+    valuation_assumptions = valuation_input if isinstance(valuation_input, dict) else None
+    valuation = _safe_method(
+        "valuation",
+        lambda: analyze_valuation_scenarios(valuation_assumptions, market_profile),
+        _unavailable_valuation("valuation method failed"),
+        method_errors,
+    )
+    thesis_input = method_payload.get("thesis")
+    thesis_manual = thesis_input if isinstance(thesis_input, dict) else {}
+    thesis = _safe_method(
+        "thesis",
+        lambda: analyze_thesis(
+            fundamental,
+            sector.stance,
+            market.regime,
+            valuation,
+            thesis_manual,
+            observed_metrics,
+        ),
+        _unknown_thesis("thesis method failed"),
+        method_errors,
+    )
+    completed_target_bars = _completed_daily_bars(state.daily_bars, session_phase)
+    structure = _safe_method(
+        "swing_structure",
+        lambda: analyze_swing_structure(
+            completed_target_bars,
+            state.snapshot.last_price,
+            market_profile,
+        ),
+        _unknown_structure("swing structure method failed"),
+        method_errors,
+    )
+    completed_reference_bars: dict[str, list[KLineBar]] = {}
+    for reference_code, bars in (reference_bars or {}).items():
+        try:
+            reference_phase = classify_session_phase(
+                reference_code,
+                state.snapshot.captured_at or state.snapshot.timestamp,
+            )
+        except ValueError:
+            reference_phase = "unknown"
+        completed_reference_bars[reference_code] = _completed_daily_bars(
+            bars,
+            reference_phase,
+        )
+    linkage = _safe_method(
+        "linkage",
+        lambda: analyze_linkage(completed_target_bars, completed_reference_bars),
+        _unknown_linkage("linkage method failed"),
+        method_errors,
+    )
+    thesis = replace(
+        thesis,
+        technical_confirmation=_technical_confirmation(structure, linkage),
+    )
+    methods = build_method_assessment(
+        market_profile.profile_id,
+        structure,
+        thesis,
+        valuation,
+        linkage,
+        valuation_critical=thesis_manual.get("valuation_critical") is True,
+        source_conflicts=source_conflicts,
+        errors=method_errors,
+    )
+
     refs = list(source_refs)
+    for method_source_ref in method_source_refs:
+        if method_source_ref not in refs:
+            refs.append(method_source_ref)
     if heat_note:
         refs.append(heat_note)
     if not availability["trend"]:
@@ -523,12 +905,18 @@ def _recommend(
             None if exit_plan is None else exit_plan.risk_sizing.suggested_size_pct
         ),
     )
-    strategy_assessment = evaluate_strategy(
+    base_strategy_assessment = evaluate_strategy(
         strategy_profile,
         evidence,
         has_position=cost_basis is not None,
         legacy_label=recommendation.label,
         position_stage=position_stage,
+    )
+    strategy_assessment = apply_method_restrictions(
+        base_strategy_assessment,
+        methods,
+        strategy_profile,
+        has_position=cost_basis is not None,
     )
     missing_text = (
         f" missing={','.join(strategy_assessment.gates_missing)}"
@@ -541,9 +929,17 @@ def _recommend(
         f"allocation={strategy_assessment.suggested_allocation_pct}. "
         f"Legacy action label is retained for historical compatibility only.{missing_text}"
     )
+    method_text = (
+        f" Method evidence ({methods.method_policy}): profile={methods.market_profile_id}, "
+        f"stage={methods.swing_structure.stage}, thesis={methods.thesis.state}, "
+        f"valuation={methods.valuation.status}, linkage_coverage={methods.linkage.coverage}, "
+        "restrictions="
+        f"{','.join(item.code for item in methods.restrictions) or 'none'}."
+    )
     return replace(
         recommendation,
-        trader_plan=recommendation.trader_plan + strategy_text,
+        analyst_hypothesis=_format_analyst_hypothesis(methods.thesis),
+        trader_plan=recommendation.trader_plan + method_text + strategy_text,
         schema_version=SCHEMA_VERSION,
         strategy_assessment=strategy_assessment,
         strategy_id=strategy_assessment.strategy_id,
@@ -551,6 +947,7 @@ def _recommend(
         horizon=horizon,
         trade_id=effective_trade_id,
         leveraged=leveraged,
+        method_assessment=methods,
     )
 
 
@@ -583,6 +980,8 @@ def _cmd_dry_run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> i
         trade_id="fixture-trade",
         horizon=args.horizon,
         event_days=args.event_days,
+        reference_bars={},
+        method_inputs={},
     )
     _write(args.output, recommendation)
     return 0
@@ -593,9 +992,14 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     from .futu_fetcher import FutuFetcher
 
     fetcher = FutuFetcher()
+    method_inputs = _load_method_inputs(args.method_inputs_json)
     shared_snapshots = _load_shared_snapshots(args.shared_context)
     user_context = {"last_trim_price": args.last_trim_price} if args.last_trim_price is not None else {}
-    state = fetcher.build_state(args.code, num_bars=args.bars, user_context=user_context)
+    state = fetcher.build_state(
+        args.code,
+        num_bars=_bars_for_horizon(args.horizon, args.bars),
+        user_context=user_context,
+    )
 
     tags = _tags_for_code(args.code, args.watchlist)
     cross_codes = args.cross if args.cross is not None else _default_cross_codes_for(args.code, tags)
@@ -618,6 +1022,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
             if sector_changes:
                 refs.append(f"sector:{core_plate.get('plate_name')}({core_plate['plate_code']}) x{len(sector_changes)}")
 
+    index_codes: list[str] = []
     index_snapshots: dict[str, MarketSnapshot] | None = None
     if not args.no_market:
         index_codes = args.indices or _default_index_codes_for(args.code)
@@ -689,6 +1094,18 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
 
     inverse = args.inverse if args.inverse is not None else is_inverse_instrument(state.snapshot.name, tags)
     leveraged = _is_leveraged(state.snapshot.name, tags)
+    lowered_tags = {str(tag).lower() for tag in tags}
+    asset_type = (
+        "etf"
+        if leveraged or any("etf" in tag or tag == "leveraged" for tag in lowered_tags)
+        else "equity"
+    )
+    method_reference_codes = _method_reference_codes(
+        args.code,
+        index_codes,
+        list(cross_codes),
+    )
+    reference_bars = _reference_history(fetcher, method_reference_codes)
     weights = load_weights(args.weights) if args.weights else DEFAULT_WEIGHTS
     recommendation = _recommend(
         state=state,
@@ -713,6 +1130,9 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         theme_open_risk_pct=args.theme_open_risk_pct,
         trade_id=args.trade_id,
         position_stage=args.position_stage,
+        reference_bars=reference_bars,
+        asset_type=asset_type,
+        method_inputs=method_inputs,
     )
     _write(args.output, recommendation)
     if not args.no_journal:
@@ -869,6 +1289,13 @@ def _cmd_analyze_offline(args: argparse.Namespace) -> int:
         theme_open_risk_pct=args.theme_open_risk_pct,
         trade_id=args.trade_id,
         position_stage=args.position_stage,
+        reference_bars={},
+        asset_type=(
+            "etf"
+            if leveraged or any("etf" in str(tag).lower() for tag in tags)
+            else "equity"
+        ),
+        method_inputs={},
     )
     _write(args.output, recommendation)
     if not args.no_journal:
@@ -1085,7 +1512,12 @@ def main(argv: list[str] | None = None) -> int:
     analyze = subparsers.add_parser("analyze", help="Analyze a real instrument via Futu OpenD (snapshot + daily K-line + capital flow)")
     analyze.add_argument("--code", required=True, help="Instrument code, e.g. SZ.002463, US.NVDA, CC.BTC")
     analyze.add_argument("--output", required=True)
-    analyze.add_argument("--bars", type=int, default=30, help="Number of daily bars to fetch (default: 30)")
+    analyze.add_argument(
+        "--bars",
+        type=int,
+        default=None,
+        help="Number of daily bars to fetch (default: short 30, swing 260)",
+    )
     analyze.add_argument("--cross", nargs="*", default=None, help="Cross-market reference codes to fetch, e.g. US.QQQ US.NVDA")
     analyze.add_argument("--last-trim-price", type=float, default=None, help="Prior partial-trim price for position context")
     analyze.add_argument("--weights", default=None, help="Path to a signal_weights.json; defaults to built-in weights")
@@ -1098,6 +1530,11 @@ def main(argv: list[str] | None = None) -> int:
     analyze.add_argument("--macro-codes", nargs="*", default=None, help=f"Macro proxy codes for the macro-risk score (default: {' '.join(DEFAULT_MACRO_CODES)})")
     analyze.add_argument("--no-macro", action="store_true", help="Skip the macro-proxy fetch (scores neutral)")
     analyze.add_argument("--macro-json", default=None, help='Hand-typed macro override, e.g. \'{"fed_bias":"hike"}\' (bypasses proxy fetch)')
+    analyze.add_argument(
+        "--method-inputs-json",
+        default=None,
+        help="Explicit official/manual thesis, valuation, and evidence JSON; never used as a live-market fallback",
+    )
     analyze.add_argument("--no-fundamental", action="store_true", help="Skip the fundamental fetch (scores neutral)")
     analyze.add_argument("--no-financials", action="store_true", help="Skip auto-fetching financial statements (growth/margins/ROE); valuation multiples only")
     analyze.add_argument("--eps-growth", type=float, default=None, help="YoY EPS growth %% for PEG (e.g. 40 = +40%%); enables PEG scoring")

@@ -7,6 +7,10 @@ from unittest import mock
 from tools.stock_skills.cli import (
     DEFAULT_MACRO_CODES,
     DEFAULT_WEIGHTS,
+    FIXTURE_CODE,
+    _bars_for_horizon,
+    _completed_daily_bars,
+    _manual_evidence,
     _recommend,
     _snapshots_for_codes,
     main,
@@ -78,6 +82,36 @@ class FakeFetcher:
 
     def get_financials(self, code):
         return None  # no statement feed in the fake; analyze falls back to valuation-only
+
+
+def _method_bars(count):
+    return [
+        KLineBar(
+            f"{index:03d}",
+            100.0 + index,
+            101.0 + index,
+            99.0 + index,
+            100.0 + index,
+            1_000,
+            100_000.0,
+        )
+        for index in range(count)
+    ]
+
+
+class RecordingMethodFetcher(FakeFetcher):
+    target_bar_requests = []
+    reference_bar_requests = []
+
+    def build_state(self, code, num_bars=30, user_context=None):
+        self.__class__.target_bar_requests.append((code, num_bars))
+        return super().build_state(code, num_bars=num_bars, user_context=user_context)
+
+    def get_daily_bars(self, code, num=30):
+        self.__class__.reference_bar_requests.append((code, num))
+        if code == "US.BAD":
+            raise RuntimeError("fixture reference failure")
+        return _method_bars(num)
 
 
 class BreakdownFetcher(FakeFetcher):
@@ -168,6 +202,223 @@ class PartialHistoryFetcher(FakeFetcher):
 
 
 class CliTests(unittest.TestCase):
+    def test_default_bar_depth_is_horizon_specific(self):
+        self.assertEqual(_bars_for_horizon("short", None), 30)
+        self.assertEqual(_bars_for_horizon("swing", None), 260)
+        self.assertEqual(_bars_for_horizon("swing", 80), 80)
+
+    def test_completed_daily_bars_excludes_live_partial_bar(self):
+        bars = _method_bars(220)
+
+        completed = _completed_daily_bars(bars, session_phase="intraday")
+
+        self.assertEqual(completed, bars[:-1])
+
+    def test_dry_run_serializes_method_evidence_and_new_policy(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "recommendation.json"
+            exit_code = main(
+                [
+                    "dry-run",
+                    "--code",
+                    FIXTURE_CODE,
+                    "--horizon",
+                    "swing",
+                    "--event-days",
+                    "10",
+                    "--output",
+                    str(output),
+                ]
+            )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["schema_version"], "recommendation-v6")
+        self.assertEqual(
+            payload["strategy_assessment"]["decision_policy"],
+            "logic-first-method-evidence-v6",
+        )
+        self.assertIn("method_assessment", payload)
+        self.assertEqual(
+            payload["entry_decision"],
+            payload["strategy_assessment"]["entry_decision"],
+        )
+
+    def test_no_yfinance_or_trade_module_is_imported(self):
+        import sys
+
+        self.assertNotIn("yfinance", sys.modules)
+        self.assertFalse(any(name.startswith("futu.trade") for name in sys.modules))
+
+    def test_live_swing_uses_long_target_history_and_bounded_reference_history(self):
+        RecordingMethodFetcher.target_bar_requests.clear()
+        RecordingMethodFetcher.reference_bar_requests.clear()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "recommendation.json"
+            with mock.patch(
+                "tools.stock_skills.futu_fetcher.FutuFetcher",
+                RecordingMethodFetcher,
+            ):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "US.NVDA",
+                        "--horizon",
+                        "swing",
+                        "--cross",
+                        "US.QQQ",
+                        "US.BAD",
+                        "--no-sector",
+                        "--no-market",
+                        "--no-macro",
+                        "--no-fundamental",
+                        "--event-days",
+                        "10",
+                        "--no-journal",
+                        "--output",
+                        str(output),
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(
+            RecordingMethodFetcher.target_bar_requests,
+            [("US.NVDA", 260)],
+        )
+        self.assertLessEqual(len(RecordingMethodFetcher.reference_bar_requests), 4)
+        self.assertTrue(
+            all(num == 80 for _, num in RecordingMethodFetcher.reference_bar_requests)
+        )
+        self.assertNotIn(
+            "US.BAD",
+            [
+                row["code"]
+                for row in payload["method_assessment"]["linkage"]["references"]
+            ],
+        )
+
+    def test_manual_method_evidence_requires_official_source_and_reference(self):
+        valid = _manual_evidence(
+            {
+                "evidence": {
+                    "revenue_growth": {
+                        "value": 20.0,
+                        "source": "official-manual",
+                        "as_of": "2026-06-30",
+                        "source_ref": "exchange:report",
+                        "confidence": 0.9,
+                    }
+                }
+            }
+        )
+        self.assertEqual(valid["revenue_growth"].value, 20.0)
+        with self.assertRaises(ValueError):
+            _manual_evidence(
+                {
+                    "evidence": {
+                        "revenue_growth": {
+                            "value": 20.0,
+                            "source": "yahoo",
+                            "as_of": "2026-06-30",
+                            "source_ref": "x",
+                        }
+                    }
+                }
+            )
+        with self.assertRaises(ValueError):
+            _manual_evidence(
+                {
+                    "evidence": {
+                        "revenue_growth": {
+                            "value": 20.0,
+                            "source": "official-manual",
+                            "as_of": "2026-06-30",
+                        }
+                    }
+                }
+            )
+
+    def test_conflicting_manual_live_price_is_reported_but_never_replaces_opend(self):
+        manual = json.dumps(
+            {
+                "evidence": {
+                    "last_price": {
+                        "value": 0.01,
+                        "source": "official-manual",
+                        "as_of": "2026-07-21",
+                        "source_ref": "exchange:notice",
+                        "confidence": 0.9,
+                    }
+                }
+            }
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "recommendation.json"
+            with mock.patch("tools.stock_skills.futu_fetcher.FutuFetcher", FakeFetcher):
+                exit_code = main(
+                    [
+                        "analyze",
+                        "--code",
+                        "SZ.002463",
+                        "--horizon",
+                        "swing",
+                        "--method-inputs-json",
+                        manual,
+                        "--no-sector",
+                        "--no-market",
+                        "--no-macro",
+                        "--no-fundamental",
+                        "--event-days",
+                        "10",
+                        "--no-journal",
+                        "--output",
+                        str(output),
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertNotEqual(payload["entry_price"], 0.01)
+        self.assertIn(
+            "last_price:opend!=official-manual",
+            payload["method_assessment"]["source_conflicts"],
+        )
+        self.assertIn(
+            "source-conflict",
+            [item["code"] for item in payload["method_assessment"]["restrictions"]],
+        )
+
+    def test_one_method_failure_is_journaled_without_aborting_recommendation(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "recommendation.json"
+            with mock.patch(
+                "tools.stock_skills.cli.analyze_linkage",
+                side_effect=RuntimeError("fixture"),
+            ):
+                exit_code = main(
+                    [
+                        "dry-run",
+                        "--code",
+                        FIXTURE_CODE,
+                        "--horizon",
+                        "swing",
+                        "--event-days",
+                        "10",
+                        "--output",
+                        str(output),
+                    ]
+                )
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn(
+            "RuntimeError: fixture",
+            payload["method_assessment"]["errors"]["linkage"],
+        )
+        self.assertEqual(payload["method_assessment"]["linkage"]["coverage"], 0.0)
+
     def test_default_macro_context_includes_yen_and_credit_transmission(self):
         self.assertIn("US.FXY", DEFAULT_MACRO_CODES)
         self.assertIn("US.HYG", DEFAULT_MACRO_CODES)
@@ -344,7 +595,7 @@ class CliTests(unittest.TestCase):
         self.assertIn("fundamental:profile=", refs)
         self.assertIsNotNone(payload["data_quality"])
         self.assertEqual(payload["data_quality"]["session_phase"], "after-close")
-        self.assertEqual(payload["schema_version"], "recommendation-v5")
+        self.assertEqual(payload["schema_version"], "recommendation-v6")
         self.assertEqual(payload["strategy_id"], "short-balanced-v1")
         self.assertEqual(payload["strategy_version"], "v1")
         self.assertEqual(payload["horizon"], "short")

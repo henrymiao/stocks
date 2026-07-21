@@ -91,7 +91,7 @@ class StrategyGateTests(unittest.TestCase):
         self.assertEqual(short.suggested_allocation_pct, 20.0)
         self.assertGreater(short.setup_score, 65.0)
         self.assertGreater(swing.setup_score, 65.0)
-        self.assertEqual(short.decision_policy, "logic-first-correlation-aware-v5")
+        self.assertEqual(short.decision_policy, "logic-first-method-evidence-v6")
         self.assertIn("market_behavior", short.factor_clusters)
 
     def test_correlated_tape_factors_are_aggregated_once(self):

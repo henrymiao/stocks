@@ -60,7 +60,7 @@ def _pair(
                 "environment": 50,
                 "risk_fit": 60,
             }
-            assessment["decision_policy"] = policy or "logic-first-correlation-aware-v5"
+            assessment["decision_policy"] = policy or "logic-first-method-evidence-v6"
             assessment["decision_inputs"] = {
                 "factor_scores": {
                     "fundamental": 80 if winning else 20,
@@ -193,7 +193,7 @@ class EvidenceOptimizationTests(unittest.TestCase):
         )
 
         bucket = report["buckets"][
-            "short-balanced-v1|logic-first-correlation-aware-v5|ordinary"
+            "short-balanced-v1|logic-first-method-evidence-v6|ordinary"
         ]
         self.assertEqual(len(bucket["cluster_walk_forward_folds"]), 1)
         advisory = bucket["latest_advisory_cluster_weights"]
@@ -265,7 +265,7 @@ class EvidenceOptimizationTests(unittest.TestCase):
         )
 
         bucket = report["buckets"][
-            "short-balanced-v1|logic-first-correlation-aware-v5|ordinary"
+            "short-balanced-v1|logic-first-method-evidence-v6|ordinary"
         ]
         self.assertEqual(bucket["cluster_walk_forward_folds"], [])
         self.assertTrue(any("decision_inputs" in note for note in bucket["notes"]))

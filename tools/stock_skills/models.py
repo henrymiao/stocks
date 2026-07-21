@@ -8,13 +8,13 @@ from .method_models import MethodAssessment
 
 # Single source of truth for the record schema every writer emits. Readers keep
 # accepting older versions found in stored journals.
-SCHEMA_VERSION = "recommendation-v5"
+SCHEMA_VERSION = "recommendation-v6"
 
 # Single source of truth for the decision policy label. Evidence optimization
 # buckets samples by this string, so it must be bumped whenever gate/veto/probe
 # logic changes, and every StrategyAssessment must carry the value current at
 # the time it was produced.
-DECISION_POLICY = "logic-first-correlation-aware-v5"
+DECISION_POLICY = "logic-first-method-evidence-v6"
 
 
 @dataclass(frozen=True)

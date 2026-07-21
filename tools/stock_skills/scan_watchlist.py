@@ -77,6 +77,39 @@ def _explicit_entries(codes: str) -> list[dict[str, Any]]:
     return entries
 
 
+def _analysis_command(
+    entry: dict[str, Any],
+    horizon: str,
+    output: str | Path,
+    shared_context: str | Path,
+    watchlist: str | Path,
+    bars: int | None,
+) -> list[str]:
+    command = [
+        sys.executable,
+        "-m",
+        "tools.stock_skills.cli",
+        "analyze",
+        "--code",
+        entry["code"],
+        "--horizon",
+        horizon,
+        "--profile",
+        entry["valuation_profile"],
+        "--watchlist",
+        str(watchlist),
+        "--shared-context",
+        str(shared_context),
+        "--no-journal",
+        "--output",
+        str(output),
+    ]
+    effective_bars = bars if bars is not None else (60 if horizon == "short" else None)
+    if effective_bars is not None:
+        command.extend(["--bars", str(effective_bars)])
+    return command
+
+
 def _print_table(result: dict[str, Any], horizon: str) -> None:
     rows = result["candidates"]
     print(f"{'code':<11} {'tier':<10} {'status':<9} {'phase':<12} {'chg%':>7} {'RS%':>7} {'rank':>5} {'selected':<16} {'treatment':<14}")
@@ -118,7 +151,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--market", choices=["HK", "US", "SH", "SZ", "CC"])
     parser.add_argument("--tier", choices=["core", "thematic", "proxy", "discovery"])
     parser.add_argument("--codes", help="Comma-separated codes overriding the watchlist")
-    parser.add_argument("--bars", type=int, default=60)
+    parser.add_argument("--bars", type=int, default=None)
     parser.add_argument("--deep-top", type=int, default=10, help="Top thematic names per requested horizon")
     parser.add_argument(
         "--deep-bottom",
@@ -164,27 +197,14 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 shared_written = True
             output = temp_dir / f"{entry['code'].replace('.', '_')}-{horizon}.json"
-            command = [
-                sys.executable,
-                "-m",
-                "tools.stock_skills.cli",
-                "analyze",
-                "--code",
-                entry["code"],
-                "--bars",
-                str(args.bars),
-                "--horizon",
+            command = _analysis_command(
+                entry,
                 horizon,
-                "--profile",
-                entry["valuation_profile"],
-                "--watchlist",
+                output,
+                shared_path,
                 args.watchlist,
-                "--shared-context",
-                str(shared_path),
-                "--no-journal",
-                "--output",
-                str(output),
-            ]
+                args.bars,
+            )
             if args.event_days is not None:
                 command.extend(["--event-days", str(args.event_days)])
             if args.portfolio_open_risk_pct is not None:

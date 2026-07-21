@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -120,7 +121,7 @@ class FutuFetcher:
         skill_dir: str | None = None,
         runner: Runner = _default_runner,
     ) -> None:
-        self.python_bin = python_bin or os.environ.get("FUTU_PYTHON_BIN", "python3")
+        self.python_bin = python_bin or os.environ.get("FUTU_PYTHON_BIN") or sys.executable
         self.skill_dir = Path(
             skill_dir
             or os.environ.get("FUTUAPI_SKILL_DIR")

@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from datetime import datetime
@@ -187,6 +188,24 @@ class FutuSkillPathTests(unittest.TestCase):
 
         self.assertEqual(fetcher.skill_dir, Path("/environment/futuapi"))
         default_discovery.assert_not_called()
+
+
+class FutuPythonBinTests(unittest.TestCase):
+    def test_python_bin_precedence_is_explicit_then_environment_then_current_interpreter(self):
+        with patch.dict(os.environ, {}, clear=True):
+            default_fetcher = FutuFetcher(skill_dir="/fake/futuapi", runner=FakeRunner())
+
+        with patch.dict(os.environ, {"FUTU_PYTHON_BIN": "/environment/python"}, clear=True):
+            environment_fetcher = FutuFetcher(skill_dir="/fake/futuapi", runner=FakeRunner())
+            explicit_fetcher = FutuFetcher(
+                python_bin="/explicit/python",
+                skill_dir="/fake/futuapi",
+                runner=FakeRunner(),
+            )
+
+        self.assertEqual(default_fetcher.python_bin, sys.executable)
+        self.assertEqual(environment_fetcher.python_bin, "/environment/python")
+        self.assertEqual(explicit_fetcher.python_bin, "/explicit/python")
 
 
 class FutuFetcherTests(unittest.TestCase):

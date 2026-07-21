@@ -91,6 +91,19 @@ def evaluate_recommendation(
     else:
         dominant_failure, attribution_reason = _attribute_failure(recommendation, invalidated)
 
+    methods = recommendation.get("method_assessment")
+    methods = methods if isinstance(methods, dict) else {}
+    structure = methods.get("swing_structure")
+    structure = structure if isinstance(structure, dict) else {}
+    thesis = methods.get("thesis")
+    thesis = thesis if isinstance(thesis, dict) else {}
+    valuation = methods.get("valuation")
+    valuation = valuation if isinstance(valuation, dict) else {}
+    linkage = methods.get("linkage")
+    linkage = linkage if isinstance(linkage, dict) else {}
+    raw_restrictions = methods.get("restrictions")
+    restrictions = raw_restrictions if isinstance(raw_restrictions, list) else []
+
     return {
         "code": recommendation.get("code"),
         "source_timestamp": recommendation.get("timestamp"),
@@ -114,6 +127,15 @@ def evaluate_recommendation(
         "directional_success": directional_success,
         "dominant_failure": dominant_failure,
         "attribution_reason": attribution_reason,
+        "method_policy": methods.get("method_policy"),
+        "method_profile": methods.get("market_profile_id"),
+        "method_stage": structure.get("stage"),
+        "thesis_state": thesis.get("state"),
+        "valuation_status": valuation.get("status"),
+        "linkage_coverage": linkage.get("coverage"),
+        "method_restrictions": [
+            item.get("code") for item in restrictions if isinstance(item, dict)
+        ],
     }
 
 

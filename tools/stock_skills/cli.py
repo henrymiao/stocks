@@ -100,7 +100,7 @@ DEFAULT_RECOMMENDATIONS = "data/journal/recommendations.jsonl"
 DEFAULT_REVIEWS = "data/journal/reviews.jsonl"
 DEFAULT_WEIGHTS_PATH = "data/models/signal_weights.json"
 DEFAULT_WATCHLIST_PATH = "data/watchlists/core.json"
-REVIEW_WINDOW_DAYS = {"1d": 1, "3d": 3, "5d": 5, "10d": 10}
+REVIEW_WINDOW_DAYS = {"1d": 1, "3d": 3, "5d": 5, "10d": 10, "20d": 20}
 T = TypeVar("T")
 _LIVE_ONLY_EVIDENCE = {"last_price", "volume", "turnover", "capital_flow"}
 

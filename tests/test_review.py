@@ -5,6 +5,39 @@ from tools.stock_skills.review import evaluate_recommendation, suggest_weight_ad
 
 
 class ReviewTests(unittest.TestCase):
+    def test_review_retains_shadow_method_state_for_calibration(self):
+        recommendation = {
+            "code": "HK.00700",
+            "timestamp": "2026-07-21T16:00:00+08:00",
+            "label": "hold",
+            "method_assessment": {
+                "method_policy": "finance-method-evidence-v1",
+                "market_profile_id": "hk-equity-v1",
+                "swing_structure": {"stage": "stage-2"},
+                "thesis": {"state": "supported"},
+                "valuation": {"status": "unavailable"},
+                "linkage": {"coverage": 0.5},
+                "restrictions": [],
+            },
+        }
+        bars = [
+            KLineBar(
+                "2026-07-22",
+                500.0,
+                510.0,
+                495.0,
+                508.0,
+                1_000,
+                500_000.0,
+            )
+        ]
+
+        outcome = evaluate_recommendation(recommendation, 500.0, bars, "1d")
+
+        self.assertEqual(outcome["method_policy"], "finance-method-evidence-v1")
+        self.assertEqual(outcome["method_stage"], "stage-2")
+        self.assertEqual(outcome["method_restrictions"], [])
+
     def test_evaluate_recommendation_records_successful_hold(self):
         recommendation = {
             "code": "SZ.002463",

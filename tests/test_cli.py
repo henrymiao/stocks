@@ -202,6 +202,26 @@ class PartialHistoryFetcher(FakeFetcher):
 
 
 class CliTests(unittest.TestCase):
+    def test_review_accepts_twenty_day_shadow_window(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            recommendations = Path(tmpdir) / "recommendations.jsonl"
+            reviews = Path(tmpdir) / "reviews.jsonl"
+            recommendations.write_text("", encoding="utf-8")
+
+            exit_code = main(
+                [
+                    "review",
+                    "--window",
+                    "20d",
+                    "--recommendations",
+                    str(recommendations),
+                    "--reviews",
+                    str(reviews),
+                ]
+            )
+
+        self.assertEqual(exit_code, 0)
+
     def test_default_bar_depth_is_horizon_specific(self):
         self.assertEqual(_bars_for_horizon("short", None), 30)
         self.assertEqual(_bars_for_horizon("swing", None), 260)

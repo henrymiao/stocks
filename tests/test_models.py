@@ -84,6 +84,7 @@ class ModelTests(unittest.TestCase):
         self.assertIsNone(compatibility_payload["position_state"])
         self.assertIsNone(compatibility_payload["exit_plan"])
         self.assertIsNone(compatibility_payload["strategy_assessment"])
+        self.assertIsNone(compatibility_payload["method_assessment"])
         self.assertIsNone(compatibility_payload["strategy_id"])
         self.assertIsNone(compatibility_payload["trade_id"])
         self.assertFalse(compatibility_payload["leveraged"])

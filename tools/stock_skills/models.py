@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from .method_models import MethodAssessment
+
 
 # Single source of truth for the record schema every writer emits. Readers keep
 # accepting older versions found in stored journals.
@@ -341,6 +343,7 @@ class Recommendation:
     horizon: str | None = None
     trade_id: str | None = None
     leveraged: bool = False
+    method_assessment: MethodAssessment | None = None
 
     def to_record(self) -> dict[str, Any]:
         payload = asdict(self)

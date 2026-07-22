@@ -1,6 +1,6 @@
 # Opportunity Discovery Layer Design
 
-Date: 2026-07-21  
+Date: 2026-07-21
 Status: Approved for implementation planning
 
 ## 1. Goal

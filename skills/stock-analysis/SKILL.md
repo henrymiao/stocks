@@ -80,6 +80,22 @@ python3 tools/stock_skills/scan_watchlist.py \
 
 The four tiers are `core`, `thematic`, `proxy`, and `discovery`. `position_status` distinguishes active, reduced, exited, and watch-only names; `scan_policy` controls always/ranked/snapshot-only treatment. The loader validates the canonical source and resolves one-level compatibility views without copying instrument records. The scanner ranks thematic candidates separately for short and swing profiles using cheap liquidity, daily momentum, and benchmark-relative-strength evidence, while `--deep-bottom` prevents the largest declines from disappearing behind a momentum-only Top N. Selection reasons are recorded as `always`, `top`, or `bottom`. These scores are promotion scores only, never trade recommendations. Proxy/discovery and rejected rows remain snapshot-only. `--snapshot-only` performs no deep analysis, shared macro/index snapshots are reused, and deep analysis uses `--no-journal`.
 
+Discover forming opportunities across a whole market universe, before any name reaches the watchlist:
+
+```bash
+python3 -m tools.stock_skills.cli discover --market CN --horizon swing --output /tmp/discovery.json
+python3 -m tools.stock_skills.cli confirm-discoveries --market CN --output /tmp/confirm.json
+python3 -m tools.stock_skills.cli review-discoveries --market CN --output /tmp/discovery-review.json
+```
+
+`discover` scans the market universe (`data/universes/{cn,hk,us}.json`, manually versioned membership) for sector-led setups and records each candidate in the SQLite store `data/discovery.db` under schema `opportunity-discovery-v1`. Candidates move through an explicit state machine — `forming` → `armed` → `triggered`, or `invalidated` / `expired` — and every transition is appended to an audit table. **A discovery is an alert, never an entry recommendation**: promotion requires at least two supporting evidence groups plus sector coverage, and an armed candidate still has to clear the ordinary `analyze` gates before any risk is taken. Features are computed from **completed bars only**, so a forming score never reads a partial session. Short candidates stay valid 3 sessions and swing candidates 10 before expiring. Notifications fire only on material transitions (a new arming, or a fall to invalidated/expired) and are de-duplicated in the store; `--no-notify` suppresses them.
+
+`confirm-discoveries` re-checks armed candidates intraday against the latest **completed five-minute bar**, rejecting evidence older than 10 minutes so a frozen feed cannot confirm a trigger, and optionally runs deep analysis on the confirmed names (`--no-deep-analysis` skips it).
+
+`review-discoveries` measures **alert quality, deliberately separate from trade P&L**: for each triggered candidate it reports MFE/MAE/return over fixed 1/3/5/10-session windows measured from `trigger_level`, and returns `null` for any window that has not fully elapsed. These reviews live in the discovery store, not in `reviews.jsonl`, and are not inputs to legacy component or cluster weight optimisation.
+
+Shared flags: `--market CN|HK|US` (required), `--horizon short|swing` (discover; default short), `--backfill 60|260`, `--universe`, `--membership-cache`, `--db` (default `data/discovery.db`), `--market-db`, `--as-of`, `--output`. `--fixture` runs the whole pipeline deterministically offline with no OpenD, which is how the discovery tests exercise it.
+
 To populate the journals immediately from the repo's existing 复盘 notes (so `backtest` has data without waiting for live calls), run the backfill importer:
 
 ```bash
@@ -148,6 +164,11 @@ python3 -c "import json; p=json.load(open('/tmp/hudian-recommendation.json')); p
    - `path_backtest.py`: chronological OHLC execution simulator, costs, R metrics, aggregation, and portfolio/theme heat checks. It is offline-only and never calls trade APIs.
    - `evidence_optimization.py`: versioned evidence joins, synthetic/incomplete exclusion, trade-id deduplication, ordinary/leveraged buckets, and advisory chronological walk-forward evaluation.
    - `watchlist_scan.py`: tier-aware snapshot filters, separate short/swing promotion rankings, and bounded always/Top-N/Bottom-N deep-analysis selection. The command wrapper is `scan_watchlist.py`.
+   - `universe.py`: market universes and sector membership (manually versioned), market timezones, and code normalization — the input to discovery.
+   - `discovery_features.py`: completed-bar feature tracks and sector context used to score a candidate; it never reads a partial session.
+   - `discovery_engine.py`: candidate construction, the `forming`/`armed`/`triggered`/`invalidated`/`expired` state machine with session-based expiry, intraday confirmation against completed five-minute bars, and `review_discovery` fixed-window alert scoring. Discovery output is an alert queue, not a recommendation.
+   - `discovery_runtime.py`: live wiring (universe → OpenD bars → engine) plus deterministic offline fixture loading.
+   - `discovery_store.py`: SQLite persistence for candidates, transitions, notification de-duplication, and discovery reviews.
    - `position.py`: ATR (`compute_atr`) plus structured-plan position description (`analyze_structured_position`). The old `analyze_position` remains only to preserve the frozen `position_fit` component score for baseline comparisons; its stop and sizing are not used as execution guidance by new live/offline recommendations.
    - `engine.py`: total score, action label, analyst hypothesis, trader plan. `backdrop_blend` de-duplicates the three correlated backdrop factors so an agreeing tape is not triple-counted.
    - `backtest.py`: offline aggregation of `reviews.jsonl` into win rate, expectancy, MFE/MAE, label/code breakdowns, and per-component predictive edge. Driven by the `backtest` command.

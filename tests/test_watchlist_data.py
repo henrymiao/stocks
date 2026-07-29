@@ -19,8 +19,11 @@ class WatchlistDataTests(unittest.TestCase):
         entries = load_watchlist(CORE)
         by_code = {entry["code"]: entry for entry in entries}
 
-        self.assertEqual(len(entries), 128)
-        self.assertEqual(len(by_code), 128)
+        # The canonical store grows whenever an instrument is added, so assert the
+        # invariants (not truncated, no duplicate codes) instead of an exact count
+        # that every watchlist edit would have to bump by hand.
+        self.assertGreater(len(entries), 100)
+        self.assertEqual(len(by_code), len(entries))
         self.assertEqual(by_code["HK.00700"]["position_status"], "reduced-holding")
         self.assertEqual(by_code["HK.09988"]["position_status"], "reduced-holding")
         self.assertEqual(by_code["SZ.000021"]["position_status"], "holding")

@@ -128,6 +128,33 @@
       ]
     },
     {
+      "code": "US.LNG",
+      "name": "Cheniere Energy",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 60,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "holding",
+      "scan_policy": "always",
+      "tags": [
+        "us",
+        "energy",
+        "lng",
+        "natural-gas",
+        "energy-infrastructure",
+        "cyclical",
+        "holding"
+      ]
+    },
+    {
       "code": "US.CRCL",
       "name": "Circle",
       "enabled": true,
@@ -673,8 +700,8 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "holding",
-      "scan_policy": "always",
+      "position_status": "exited-watch",
+      "scan_policy": "ranked",
       "tags": [
         "a-share",
         "chemicals",

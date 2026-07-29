@@ -75,6 +75,16 @@ CAPITAL_PAYLOAD = {
         {"last_valid_time": "2026-06-18 15:00:00", "in_flow": 24492584.5, "super_in_flow": 744236606.14, "big_in_flow": -411741404.48, "mid_in_flow": -210842830.36, "sml_in_flow": -97159786.8, "main_in_flow": "N/A", "capital_flow_item_time": "2026-06-18 15:00:00"},
     ],
 }
+TRADING_DAYS_PAYLOAD = {
+    "market": "US",
+    "data": ["2026-07-20", {"time": "2026-07-21"}, {"trade_date": "2026-07-22"}],
+}
+MARKET_STATE_PAYLOAD = {
+    "data": [
+        {"code": "US.SMH", "stock_name": "SMH", "market_state": "MORNING"},
+        {"code": "US.NVDA", "stock_name": "NVIDIA", "market_state": "CLOSED"},
+    ]
+}
 
 
 STATEMENTS_PAYLOAD = {
@@ -248,6 +258,25 @@ class FutuFetcherTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unsupported intraday ktype"):
             _fetcher(FakeRunner()).get_intraday_bars("US.SMH", ktype="1d")
 
+    def test_get_trading_days_parses_string_and_record_payloads(self):
+        runner = FakeRunner({"get_trading_days.py": TRADING_DAYS_PAYLOAD})
+        days = _fetcher(runner).get_trading_days(
+            "US", start="2026-07-20", end="2026-07-22"
+        )
+
+        self.assertEqual(days, ["2026-07-20", "2026-07-21", "2026-07-22"])
+        command = runner.commands[0]
+        self.assertIn("get_trading_days.py", command[1])
+        self.assertIn("--start", command)
+        self.assertIn("--end", command)
+
+    def test_get_market_states_preserves_regular_and_closed_states(self):
+        runner = FakeRunner({"get_market_state.py": MARKET_STATE_PAYLOAD})
+        states = _fetcher(runner).get_market_states(["US.SMH", "US.NVDA"])
+
+        self.assertEqual(states, {"US.SMH": "MORNING", "US.NVDA": "CLOSED"})
+        self.assertIn("get_market_state.py", runner.commands[0][1])
+
     def test_get_history_bars_passes_date_range(self):
         runner = FakeRunner({"get_kline.py": KLINE_PAYLOAD})
         bars = _fetcher(runner).get_history_bars("SZ.002463", start="2026-06-19", end="2026-06-30")
@@ -404,6 +433,17 @@ class FutuFetcherTests(unittest.TestCase):
         }
         runner = FakeRunner({"get_owner_plate.py": etf_error})
         self.assertIsNone(_fetcher(runner).pick_core_plate("US.SOXL"))
+
+    def test_pick_core_plate_returns_none_for_localized_etf_error(self):
+        # Regression: OpenD returns this message in Chinese, which the English-only
+        # match missed — every ETF analysis crashed instead of falling back to neutral.
+        etf_error = {
+            "ret": -1,
+            "action": "获取所属板块",
+            "error": "获取股票所属板块接口不支持ETFs类型",
+        }
+        runner = FakeRunner({"get_owner_plate.py": etf_error})
+        self.assertIsNone(_fetcher(runner).pick_core_plate("SH.563380"))
 
     def test_get_owner_plates_surfaces_non_etf_error(self):
         runner = FakeRunner({"get_owner_plate.py": {"error": "OpenD not connected"}})

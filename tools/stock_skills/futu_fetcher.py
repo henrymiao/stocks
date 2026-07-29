@@ -111,7 +111,10 @@ def _is_unsupported_sector_error(exc: Exception) -> bool:
     else:
         text = str(exc)
     text = text.lower()
-    return "etf" in text and "support" in text
+    # Futu localizes this message, so accept the Chinese wording too: matching only
+    # the English "support" turned every ETF analysis into a hard crash once OpenD
+    # started answering in Chinese.
+    return "etf" in text and ("support" in text or "不支持" in text)
 
 
 class FutuFetcher:
@@ -318,6 +321,62 @@ class FutuFetcher:
         ]
         payload = self._run_json(command)
         return self._parse_bars(payload)
+
+    def get_trading_days(self, market: str, *, start: str, end: str) -> list[str]:
+        """Return OpenD's exchange-session dates for CN, HK, or US."""
+
+        normalized = market.upper()
+        if normalized not in {"CN", "HK", "US"}:
+            raise ValueError(f"Unsupported trading-calendar market: {market!r}")
+        command = [
+            self.python_bin,
+            self._script("quote", "get_trading_days.py"),
+            normalized,
+            "--start",
+            start,
+            "--end",
+            end,
+            "--json",
+        ]
+        payload = self._run_json(command)
+        sessions: set[str] = set()
+        for row in payload.get("data", []):
+            if isinstance(row, str):
+                value = row
+            elif isinstance(row, dict):
+                value = next(
+                    (
+                        str(row[key])
+                        for key in ("time", "trade_date", "date")
+                        if row.get(key)
+                    ),
+                    "",
+                )
+            else:
+                continue
+            try:
+                sessions.add(datetime.fromisoformat(value).date().isoformat())
+            except ValueError:
+                continue
+        return sorted(sessions)
+
+    def get_market_states(self, codes: list[str]) -> dict[str, str]:
+        """Return OpenD regular/closed state names without touching trade APIs."""
+
+        if not codes:
+            return {}
+        command = [
+            self.python_bin,
+            self._script("quote", "get_market_state.py"),
+            *codes,
+            "--json",
+        ]
+        payload = self._run_json(command)
+        return {
+            str(row["code"]): str(row["market_state"]).upper()
+            for row in payload.get("data", [])
+            if row.get("code") and row.get("market_state")
+        }
 
     def get_history_bars(self, code: str, start: str, end: str) -> list[KLineBar]:
         """Daily bars over [start, end] (YYYY-MM-DD), used to review past recommendations."""

@@ -10,7 +10,7 @@ metadata:
 ## 2026-07-30 FULL RECONCILIATION — supersedes every earlier figure
 
 **Two brokers.** Risk/concentration limits apply to the COMBINED book; buying power and execution are per-account.
-**Combined 260.9万 CNY = US $190k (135.8万) + HK/A 125万. Equities 163.6万 (62.7%), cash+small ~97.2万 (37.3%). Total unrealized -17.11万.**
+**Combined 260.9万 CNY = US $190k (135.8万) + HK/A 125万. Equities 163.6万 (62.7%), cash+small ~97.2万 (37.3%). Total unrealized **-18.81万** (incl. SOXL).**
 
 | Position | Acct | Shares | Cost | 7/30 px | Value万 | % combined | P&L% | P&L万 | setup | band |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -23,6 +23,7 @@ metadata:
 | ASMPT 00522 | HK | 600 | 153 | 136.9 | 7.56 | 2.9% | -10.5% | -0.89 | 60.3 | hold |
 | 工业富联 601138 | A | 1,300 | 60.6 | 57.75 | 7.51 | 2.9% | -4.7% | -0.37 | 57.0 | hold |
 | CATL 300750 | A | 100 | 396 | 396.84 | 3.97 | 1.5% | +0.2% | +0.01 | 64.7 | hold |
+| SOXL (3x lev) | US | 100 | $130 | 106.26 | 7.60 | 2.9% | -18.3% | -1.70 | 48.9 | partial-exit |
 | CRCL | US | 80 | $71 | 61.36 | 3.51 | 1.3% | -13.6% | -0.55 | 31.9 | **avoid** |
 
 - **All earlier over-cap warnings are VOID** (GOOGL "26.9%/31%", tech "71.7%"): they used a denominator missing ~100万. Truth: GOOGL 15.7% is the largest, nothing breaches 25%. Growth/tech = 153.9万 = **59.0%** — high but not an emergency.
@@ -30,7 +31,8 @@ metadata:
 - **Two wounds are 93% of the loss**: XPeng -15.82万 and COIN -8.00万 = -23.8万. Both stage-4. COIN invalidation 158.58 sits just 0.9% under price.
 - **563380 was doubled by averaging down**: 54,600 @1.098 → **109,200 @0.998** (added ~54,600 near 0.898). Third averaging-down instance after XPeng +1,500@52.5 on 7/20 — and it was never volunteered.
 - **The measured behavioral loop** (95 realized reviews: win rate 60.0%, expectancy -0.53%, avg win +5.98%, avg loss -10.30%, payoff 0.58): sells winners at ~+6% (Wanhua +6.0%), doubles down on losers (XPeng, 563380). That loop, not stock selection, explains the -17.1万.
-- Costs/shares for the US "其他小股个位数" names remain unknown; US cash is roughly $77-96k.
+- **SOXL 100sh @ $130 confirmed 2026-07-30** (one of the US "其他小股"): -18.3%, 5.6% of the US account, 2.9% combined — inside the 15% leveraged cap, but the framework's own sizing for it is 5.22%. It fell 161→92 in six sessions (-43%) and bounced to 106 (+15.5% on 7/30). **Breakeven needs SMH ≈ 575-577 vs 526 today** (7.4% raw / more with volatility decay); SMH 15-day high is 615, the lost shelf is 548-561. Framework: setup 48.9 → partial-exit band, label trim-on-strength, capital flow only 31.9 (bounce unconfirmed), invalidation 91.5, leveraged stop 85.55. Note SOXL/SOXS reverse-split regularly — the basis-mismatch guard exists because of this family.
+- Remaining unknown: any other US small names; US cash roughly $70-90k.
 
 ## Earlier history (denominators VOID, per-name levels still valid)
 

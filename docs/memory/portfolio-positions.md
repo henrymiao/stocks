@@ -1,6 +1,6 @@
 ---
 name: portfolio-positions
-description: "Two-broker portfolio reconciled 2026-07-30: total ~265万 CNY = US account $190k (135.9万) + HK/A account ~128.9万. NO position breaches the 25% cap on a combined basis (GOOGL 15.5% top); Tencent 26.4% and XPeng 24.7% do breach WITHIN the HK/A account."
+description: "Two-broker portfolio CONFIRMED 2026-07-30: 260.9万 CNY = US $190k (135.8万) + HK/A 125万. Max position GOOGL 15.9% — no 25% breach combined; Tencent 26.37% / XPeng 24.70% breach only within the HK/A account. Growth/tech 57.9% (61.7% incl 563380). Large cash: HK/A 18.5万 + US ~40-60万 of the unconfirmed 81.4万."
 metadata:
   node_type: memory
   type: project
@@ -12,8 +12,8 @@ metadata:
 **Two separate brokers.** Risk/concentration limits apply to the COMBINED book (that is where the risk lives); buying power and order execution are per-account.
 
 - **US account = $190k ≈ 135.9万 CNY**: GOOGL 170sh (30.52%, 40.9万), COIN ~83sh (6.96%, 9.4万), CRCL 80sh @71 (2.6%, 3.5万), other small single-digit names, rest cash.
-- **HK/A account ≈ 128.9万 CNY** (reverse-derived from Tencent 26.37% and XPeng 24.70%, which agree within 4.5%): Tencent 800sh @422 (26.37%), XPeng 6,700sh @76.17 (24.70%), BABA (11.72%), 航天ETF 563380 (7.87%), 工业富联 601138 (5.66%), ASMPT 00522 (5.66%), CATL 300750 (3.25%), cash ~14.8% (~19万).
-- **Combined ≈ 265万. GOOGL is the largest at 15.5% — NOTHING breaches the 25% cap.** All the 7/18-7/29 over-cap warnings (GOOGL "26.9%/31%", tech "71.7%") were computed on a denominator that was missing ~100万 and are **VOID**. True growth/tech concentration ≈ 58% (62% incl. 航天ETF) — still high, but not the emergency previously reported.
+- **HK/A account = 125万 CNY (user-confirmed 2026-07-30)**. Position values from the user's stated percentages: Tencent 32.96万, XPeng 30.88万, BABA 14.65万, 563380 9.84万, 工业富联 7.08万, ASMPT 7.08万, CATL 4.06万, cash 18.46万 (14.77%). Share-count cross-check: XPeng 6,700sh matches within 0.8%; Tencent 800sh implies 34.72万 vs 32.96万 stated (+5.3% — either ~760sh, or the percentage was an intraday snapshot). Detail: Tencent 800sh @422 (26.37%), XPeng 6,700sh @76.17 (24.70%), BABA (11.72%), 航天ETF 563380 (7.87%), 工业富联 601138 (5.66%), ASMPT 00522 (5.66%), CATL 300750 (3.25%), cash ~14.8% (~19万).
+- **Combined = 260.9万. GOOGL is the largest at 15.9% — NOTHING breaches the 25% cap.** US account: only GOOGL + COIN are meaningful; the remaining **81.4万 (59.9%) is small single-digit names plus cash and is still unsplit** — total portfolio cash is therefore roughly 60-80万 (23-31%), i.e. substantial dry powder. Growth/tech = 151.1万 = **57.9%** (61.7% incl. 563380). All the 7/18-7/29 over-cap warnings (GOOGL "26.9%/31%", tech "71.7%") were computed on a denominator that was missing ~100万 and are **VOID**. True growth/tech concentration ≈ 58% (62% incl. 航天ETF) — still high, but not the emergency previously reported.
 - **Within the HK/A account** Tencent 26.4% breaches 25% and XPeng 24.7% sits on it. Per-account is the right lens for buying power, not for risk limits.
 
 **Three names I wrongly analyzed as candidates are actually HOLDINGS** (2026-07-29/30 sessions): CATL 300750, 工业富联 601138, ASMPT 00522. Reported entry_decision (reject/watch) was the wrong track; for holdings the framework gives position_decision. Corrected reads at 7/30 close: CATL setup 64.7 hold, 工业富联 57.0 hold, ASMPT 60.3 hold, Tencent 72.1 hold, **BABA 54.3 → partial-exit band**, **航天ETF 45.6 → partial-exit band**, **XPeng 43.3 → full-exit band**.

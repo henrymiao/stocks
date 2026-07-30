@@ -23,7 +23,8 @@ metadata:
 | ASMPT 00522 | HK | 600 | 153 | 136.9 | 7.56 | 2.9% | -10.5% | -0.89 | 60.3 | hold |
 | 工业富联 601138 | A | 1,300 | 60.6 | 57.75 | 7.51 | 2.9% | -4.7% | -0.37 | 57.0 | hold |
 | CATL 300750 | A | 100 | 396 | 396.84 | 3.97 | 1.5% | +0.2% | +0.01 | 64.7 | hold |
-| SOXL (3x lev) | US | 100 | $130 | 106.26 | 7.60 | 2.9% | -18.3% | -1.70 | 48.9 | partial-exit |
+| SOXL (3x lev) | US | **70** (sold 30 on 7/30) | $130 | 114.72 | 5.74 | 2.2% | -11.8% | -0.76 | ~52 | partial-exit |
+| SMH | US | 20 | $536 | 538.9 | 7.70 | 3.0% | +0.5% | +0.04 | 57.8 | hold |
 | CRCL | US | 80 | $71 | 61.36 | 3.51 | 1.3% | -13.6% | -0.55 | 31.9 | **avoid** |
 
 - **All earlier over-cap warnings are VOID** (GOOGL "26.9%/31%", tech "71.7%"): they used a denominator missing ~100万. Truth: GOOGL 15.7% is the largest, nothing breaches 25%. Growth/tech = 153.9万 = **59.0%** — high but not an emergency.
@@ -32,6 +33,9 @@ metadata:
 - **563380 was doubled by averaging down**: 54,600 @1.098 → **109,200 @0.998** (added ~54,600 near 0.898). Third averaging-down instance after XPeng +1,500@52.5 on 7/20 — and it was never volunteered.
 - **The measured behavioral loop** (95 realized reviews: win rate 60.0%, expectancy -0.53%, avg win +5.98%, avg loss -10.30%, payoff 0.58): sells winners at ~+6% (Wanhua +6.0%), doubles down on losers (XPeng, 563380). That loop, not stock selection, explains the -17.1万.
 - **SOXL 100sh @ $130 confirmed 2026-07-30** (one of the US "其他小股"): -18.3%, 5.6% of the US account, 2.9% combined — inside the 15% leveraged cap, but the framework's own sizing for it is 5.22%. It fell 161→92 in six sessions (-43%) and bounced to 106 (+15.5% on 7/30). **Breakeven needs SMH ≈ 575-577 vs 526 today** (7.4% raw / more with volatility decay); SMH 15-day high is 615, the lost shelf is 548-561. Framework: setup 48.9 → partial-exit band, label trim-on-strength, capital flow only 31.9 (bounce unconfirmed), invalidation 91.5, leveraged stop 85.55. Note SOXL/SOXS reverse-split regularly — the basis-mismatch guard exists because of this family.
+- **2026-07-30 SOXL→SMH partial switch executed**: sold 30 SOXL near 116.5 (realized ~-$405), bought 20 SMH @ $536 (`smh-us-core539` journaled at 539, actual cost 536). SOXL day: open 107.38, **high 118.00**, close **114.72** (+24.7%) — it spiked (user saw 122 intraday on a quote that did not hold) then **closed BELOW the 114.78 breakout level, so the breakout failed on a closing basis and the add-condition was never met**. Honest scoreboard for the day: holding all 100 SOXL would have been -$1,528; the partial sale left -$1,475, i.e. **the switch was $53 BETTER**, not worse. SMH gave back only -1.05% from its high vs SOXL -2.78%.
+- **Net semiconductor exposure barely changed (-0.3%)**: SOXL 70sh×3 = $24,091 effective + SMH 20sh = $10,778 → $34,869 vs $34,965 before. Because 20 SMH ($10.8k) cost far more than the 30 SOXL sold ($3.5k), this was a restructuring funded with new money, NOT a de-risking. Semi theme ≈ 24.9万 = 9.5% of the 260.9万 book, plus ASMPT + 工业富联 → ~15.3%.
+- SMH protocol: invalidation **503.63**, pullback add zone 524-532, trend-verdict line **596.38 (MA50)**, TP1 613.2. SOXL protocol: it closed under 114.78, so that level is now the line — a close back below it with the 91.5 backstop unchanged.
 - Remaining unknown: any other US small names; US cash roughly $70-90k.
 
 ## Earlier history (denominators VOID, per-name levels still valid)

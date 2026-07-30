@@ -201,6 +201,31 @@
       ]
     },
     {
+      "code": "US.SMH",
+      "name": "VanEck Semiconductor ETF",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "etf",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "always",
+      "tags": [
+        "us",
+        "etf",
+        "semiconductor",
+        "ai-hardware",
+        "growth"
+      ]
+    },
+    {
       "code": "US.SOXL",
       "name": "Direxion Daily Semiconductor Bull 3X",
       "enabled": true,

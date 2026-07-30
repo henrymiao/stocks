@@ -1,16 +1,32 @@
 ---
 name: portfolio-positions
-description: "Portfolio as reported 2026-07-18: total ~1.34M CNY; GOOGL 170@$290 ~31% (over 25% cap), Tencent 600@412HKD 19%, aerospace ETF 563380 54600@1.098 probe 3.8%, XPeng see xiaopeng-position; cash unknown"
-metadata: 
+description: "Two-broker portfolio reconciled 2026-07-30: total ~265万 CNY = US account $190k (135.9万) + HK/A account ~128.9万. NO position breaches the 25% cap on a combined basis (GOOGL 15.5% top); Tencent 26.4% and XPeng 24.7% do breach WITHIN the HK/A account."
+metadata:
   node_type: memory
   type: project
   originSessionId: d5010ffd-636f-48ca-b6d4-05178ed91ed8
 ---
 
+## 2026-07-30 RECONCILIATION — supersedes every earlier concentration figure
+
+**Two separate brokers.** Risk/concentration limits apply to the COMBINED book (that is where the risk lives); buying power and order execution are per-account.
+
+- **US account = $190k ≈ 135.9万 CNY**: GOOGL 170sh (30.52%, 40.9万), COIN ~83sh (6.96%, 9.4万), CRCL 80sh @71 (2.6%, 3.5万), other small single-digit names, rest cash.
+- **HK/A account ≈ 128.9万 CNY** (reverse-derived from Tencent 26.37% and XPeng 24.70%, which agree within 4.5%): Tencent 800sh @422 (26.37%), XPeng 6,700sh @76.17 (24.70%), BABA (11.72%), 航天ETF 563380 (7.87%), 工业富联 601138 (5.66%), ASMPT 00522 (5.66%), CATL 300750 (3.25%), cash ~14.8% (~19万).
+- **Combined ≈ 265万. GOOGL is the largest at 15.5% — NOTHING breaches the 25% cap.** All the 7/18-7/29 over-cap warnings (GOOGL "26.9%/31%", tech "71.7%") were computed on a denominator that was missing ~100万 and are **VOID**. True growth/tech concentration ≈ 58% (62% incl. 航天ETF) — still high, but not the emergency previously reported.
+- **Within the HK/A account** Tencent 26.4% breaches 25% and XPeng 24.7% sits on it. Per-account is the right lens for buying power, not for risk limits.
+
+**Three names I wrongly analyzed as candidates are actually HOLDINGS** (2026-07-29/30 sessions): CATL 300750, 工业富联 601138, ASMPT 00522. Reported entry_decision (reject/watch) was the wrong track; for holdings the framework gives position_decision. Corrected reads at 7/30 close: CATL setup 64.7 hold, 工业富联 57.0 hold, ASMPT 60.3 hold, Tencent 72.1 hold, **BABA 54.3 → partial-exit band**, **航天ETF 45.6 → partial-exit band**, **XPeng 43.3 → full-exit band**.
+
+**Share counts still to confirm** (percentages imply larger holdings than journaled): BABA ~1,470sh (journaled 1,000), 航天ETF ~114,000sh (journaled 54,600 — 2.09x), CATL ~106sh, 工业富联 ~1,263sh, ASMPT ~579sh, COIN ~83sh. Costs unknown for CATL/工业富联/ASMPT/COIN.
+
+## Earlier history (denominators VOID, per-name levels still valid)
+
+
 Positions the user reported on 2026-07-18 (all journaled with trade-ids):
 
 - **GOOGL** 170 shares @ $290 cost (`googl-core-290`, core). At 346.77 → +19.6%, ≈42万 CNY ≈ **31-33% of portfolio — breaches the 25% single-position cap**. Tactical state broken (six gates failed, below its own June 358 转弱线); mid-term thesis intact (fundamental 72). Levels: invalidation 341.36, trim zone 348-352, repair 363/374-378.
-- **Tencent HK.00700** 600 shares @ 412 HKD (`tencent-00700-core412`, core). At 461.6 → +12%, ≈25.5万 CNY = 19%, compliant. Framework split: thesis cluster 100 (PE 15.8, EPS +22.4%) vs market behavior 22. Borderline hold (setup 56); invalidation 458 (0.8% below price), second line 447.4.
+- **Tencent HK.00700 — 800 shares @ blended 422 HKD as of 2026-07-29** (was 600 @ 412; +200 added near 452 on the pullback from 477.8). At 466.4 → +10.5%, 34.3万 CNY = **21.0%**, second-largest position. This add WAS framework-aligned (setup 77.8, the highest score in the book, entry_decision probe, thesis cluster 100) — unlike the XPeng add. Note it is a dip-buy, not the documented 482 breakout trigger. (`tencent-00700-core412`, core). At 461.6 → +12%, ≈25.5万 CNY = 19%, compliant. Framework split: thesis cluster 100 (PE 15.8, EPS +22.4%) vs market behavior 22. Borderline hold (setup 56); invalidation 458 (0.8% below price), second line 447.4.
 - **Aerospace ETF SH.563380** 54,600 @ 1.098 (`hangtian-563380-20260718`, probe 3.8%). At 0.882 → **-19.7%**, sitting on 30-day low 0.876 = invalidation. Thesis = 星枢计划 space-compute constellation (formally档案 in repo `563380/2026-07-18-thesis.md`); Monday 2026-07-21 is the event test day after the 7-18 WAIC 首发星座 launch. No averaging down; add only on `enter`.
 - **XPeng HK.09868** 5,200 shares @ 83 (`xpeng-09868-core83`, core). At 51.65 → **-37.8%**, ≈24.7万 CNY ≈ 18-19% (de-risk target reached). Only position where the thesis cluster is also broken (22/100, Q1 rev -17.6% auto-fetched — gate ② verification pending, see [[xiaopeng-position]]). Tactical invalidation 50.7; mid-term gate 45.32.
 
@@ -19,7 +35,7 @@ Positions the user reported on 2026-07-18 (all journaled with trade-ids):
 - **Alibaba HK.09988** 1,000 shares **@ 102 HKD** (`baba-09988-20260718`, core, journaled with cost 2026-07-20). At 116.8 → **+14.5%**. At 112.6 ≈ 10.4万 CNY ≈ 7.8%. Setup 44.9 (just below the 45 full-exit band once cost registers), thesis 57 (PE 18, EPS -17.3%), invalidation 110.7 (1.7% below). Watchlist already core/reduced-holding/always.
 - **Wanhua Chemical SH.600309 — CLOSED 2026-07-29** (was 800 @ 70.3, `wanhua-600309-core70.3`). Sold near 74.49 → realized roughly **+0.34万 CNY (+6.0%)**; exact fill price still to be confirmed. It was the healthiest chart in the book when sold (stage-1, setup 67-70, thesis 72, behavior 71.5, had just broken 71 on 1.31x volume with 75.9/76.8 overhead). **Disposition-effect flag**: the only winner cut while XPeng (-32%, stage-4, entry reject) is still held — ask for the reason and journal it. Watchlist set to exited-watch/ranked.
 
-**2026-07-29 close update**: portfolio 163.2万 = equities 117.3万 (71.8%) + cash 46.0万 (28.2%) after the Wanhua exit. GOOGL back INSIDE the 25% cap at 24.9% — not by trimming but because it fell 356.67→333.71 post-earnings (+23%→+15.1%): the over-cap risk showed up as forfeited profit, not loss. 563380 RECOVERED above its 0.876 trigger (0.902) after the user chose not to execute the 7/20 exit — one deviation that paid off, noted without changing the rule. XPeng is the only double-broken position left (stage-4, thesis 22, entry reject, -15.05万); **2026-08-01 July delivery report is its documented thesis checkpoint (needs ≥33k/month)**. Framework authorized ZERO new entries market-wide on 7/29.
+**2026-07-29 close update (final)**: portfolio 163.5万 = equities 125.8万 (77.0%) + cash 37.7万 (23.0%) after the Wanhua exit AND the Tencent +200 add. **Growth/tech four (GOOGL+Tencent+XPeng+BABA) = 117.2万 = 71.7% of total, 93.2% of the equity book** — concentration rose today, it did not fall. Scorecard refreshed with 14 new reviews: 95 samples, win rate 60.0%, expectancy **-0.53%**, avg win **+5.98%** vs avg loss **-10.30%**, payoff 0.58, avg MFE +10.90% (only ~55% of favorable excursion captured). Wanhua was sold at +6.0% — i.e. exactly at the average-win figure — while XPeng is held at -32%: the disposition pattern is now measured, not theoretical. GOOGL back INSIDE the 25% cap at 24.9% — not by trimming but because it fell 356.67→333.71 post-earnings (+23%→+15.1%): the over-cap risk showed up as forfeited profit, not loss. 563380 RECOVERED above its 0.876 trigger (0.902) after the user chose not to execute the 7/20 exit — one deviation that paid off, noted without changing the rule. XPeng is the only double-broken position left (stage-4, thesis 22, entry reject, -15.05万); **2026-08-01 July delivery report is its documented thesis checkpoint (needs ≥33k/month)**. Framework authorized ZERO new entries market-wide on 7/29.
 
 **2026-07-20 Monday close update**: HK/A rebounded hard (HK regime 63.2 risk-on, A 56.5): Tencent 477.8 setup 70 (Friday partial-exit read superseded), BABA 116.8, Wanhua **broke out above 71 at 1.31x volume** (71.99, next 73/76.8), XPeng 53.1. **563380 closed 0.874 < 0.876 trigger on its own catalyst day (-0.9% against a rising tape) — Monday-plan action: halve/exit the probe.** XPeng add: +1500@52.5 → 6,700 @ blended 76.17 (-30.3%), weight ~20.6%, setup 48.5 partial-exit band, cash now ~32.8万 (20.6%), total ~158.7万. GOOGL still ~26.5% over cap, earnings window opens tonight US time.
 

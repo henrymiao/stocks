@@ -19,7 +19,7 @@ metadata:
 | XPeng 09868 | HK | 6,700 | 76.17 | 50.5 | 31.13 | 11.9% | **-33.7%** | **-15.82** | 43.3 | **full-exit** |
 | BABA 09988 | HK | 1,500 | 109.2 | 111.8 | 15.43 | 5.9% | +2.4% | +0.36 | 54.3 | partial-exit |
 | 563380 ETF | A | 109,200 | 0.998 | 0.89 | 9.72 | 3.7% | -10.8% | -1.18 | 45.6 | partial-exit |
-| COIN | US | 80 | $300 | 160.09 | 9.16 | 3.5% | **-46.6%** | **-8.00** | 51.7 | partial-exit |
+| ~~COIN~~ | US | **CLOSED 7/31** | $300 | sold ~$150 | — | — | **-50%** | **realized -8.58万** | 40.5 | **full-exit executed** |
 | ASMPT 00522 | HK | 600 | 153 | 136.9 | 7.56 | 2.9% | -10.5% | -0.89 | 60.3 | hold |
 | 工业富联 601138 | A | 1,300 | 60.6 | 57.75 | 7.51 | 2.9% | -4.7% | -0.37 | 57.0 | hold |
 | CATL 300750 | A | 100 | 396 | 396.84 | 3.97 | 1.5% | +0.2% | +0.01 | 64.7 | hold |
@@ -29,7 +29,8 @@ metadata:
 
 - **All earlier over-cap warnings are VOID** (GOOGL "26.9%/31%", tech "71.7%"): they used a denominator missing ~100万. Truth: GOOGL 15.7% is the largest, nothing breaches 25%. Growth/tech = 153.9万 = **59.0%** — high but not an emergency.
 - **Within the HK/A account** Tencent is 27.8% and XPeng 24.9% — breaches there, but per-account is the lens for buying power, not risk limits.
-- **Two wounds are 93% of the loss**: XPeng -15.82万 and COIN -8.00万 = -23.8万. Both stage-4. COIN invalidation 158.58 sits just 0.9% under price.
+- **COIN CLOSED 2026-07-31 — first framework exit signal executed the same day it fired.** Q2 earnings published 7/30 16:00 ET; stock gapped to 153 pre-market (through the 158.68 invalidation), opened 153.01, fell to 144.4. Framework read collapsed within two hours: setup 52.75 → **40.49 (full-exit band)**, label trim-on-strength → **risk-reduce**, trend 66 → 24, capital 60 → 24.5. User sold all 80 shares near $150, **realized -$12,000 = -8.58万 CNY (-50%)**. This is the first time a full-exit signal was acted on rather than waited out — contrast with XPeng (-33.7%, still held, averaged down on 7/20) and 563380 (doubled at -18%).
+- **Remaining wound**: XPeng -15.82万 unrealized, still the largest.
 - **563380 was doubled by averaging down**: 54,600 @1.098 → **109,200 @0.998** (added ~54,600 near 0.898). Third averaging-down instance after XPeng +1,500@52.5 on 7/20 — and it was never volunteered.
 - **The measured behavioral loop** (95 realized reviews: win rate 60.0%, expectancy -0.53%, avg win +5.98%, avg loss -10.30%, payoff 0.58): sells winners at ~+6% (Wanhua +6.0%), doubles down on losers (XPeng, 563380). That loop, not stock selection, explains the -17.1万.
 - **SOXL 100sh @ $130 confirmed 2026-07-30** (one of the US "其他小股"): -18.3%, 5.6% of the US account, 2.9% combined — inside the 15% leveraged cap, but the framework's own sizing for it is 5.22%. It fell 161→92 in six sessions (-43%) and bounced to 106 (+15.5% on 7/30). **Breakeven needs SMH ≈ 575-577 vs 526 today** (7.4% raw / more with volatility decay); SMH 15-day high is 615, the lost shelf is 548-561. Framework: setup 48.9 → partial-exit band, label trim-on-strength, capital flow only 31.9 (bounce unconfirmed), invalidation 91.5, leveraged stop 85.55. Note SOXL/SOXS reverse-split regularly — the basis-mismatch guard exists because of this family.

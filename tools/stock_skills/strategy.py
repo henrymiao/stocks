@@ -148,11 +148,61 @@ SWING_PROFILE = StrategyProfile(
 )
 
 
+# Multi-quarter thesis holdings. SKILL.md has always said these sit outside both
+# tactical profiles, but until now there was no track for them, so they were run as
+# `swing` and every add was vetoed by one-to-four-week timing gates while the
+# business thesis was intact. Core weights the thesis heavily, keeps the structural
+# guards (exit plan, liquidity, portfolio heat, position cap) and drops the timing
+# gates. Its exits are wider because a core position is not managed off a daily bar.
+CORE_PROFILE = StrategyProfile(
+    strategy_id="core-thesis-v1",
+    horizon="core",
+    factor_weights={
+        "fundamental": 1.00,
+        "trend_quality": 0.35,
+        "relative_strength": 0.35,
+        "volume_accumulation": 0.30,
+        "backdrop": 1.00,
+        "position_fit": 1.00,
+    },
+    factor_clusters={
+        "thesis": ("fundamental",),
+        "market_behavior": ("trend_quality", "relative_strength", "volume_accumulation"),
+        "environment": ("backdrop",),
+        "risk_fit": ("position_fit",),
+    },
+    cluster_weights={
+        "thesis": 0.50,          # the reason you own it dominates
+        "market_behavior": 0.15,  # price action informs, it does not decide
+        "environment": 0.15,
+        "risk_fit": 0.20,
+    },
+    stop_buffer_atr=1.0,
+    target_specs=(("tp1", 2.5, 0.15), ("tp2", 4.0, 0.15)),
+    trailing_atr_multiple=4.0,
+    trailing_activation_r=4.0,
+    # A core position is not on a two-day clock, but "hold forever" is not a plan
+    # either: the time stop becomes a thesis-review trigger. If roughly two quarters
+    # pass without 0.5R of progress, the thesis gets re-argued rather than assumed.
+    time_stop_progress_r=0.5,
+    time_stop_sessions=120,
+    maximum_holding_days=750,
+    minimum_resistance_r=0.0,     # gate skipped for core
+    minimum_volume_ratio=0.0,     # gate skipped for core
+    allocation_cap_pct=25.0,
+    probe_score_threshold=55.0,
+    probe_allocation_fraction=0.30,
+    probe_allocation_cap_pct=8.0,
+)
+
+
 def get_strategy_profile(horizon: str, leveraged: bool = False) -> StrategyProfile:
     if horizon == "short":
         profile = SHORT_PROFILE
     elif horizon == "swing":
         profile = SWING_PROFILE
+    elif horizon == "core":
+        profile = CORE_PROFILE
     else:
         raise ValueError(f"Unknown strategy horizon: {horizon}")
     if not leveraged:
@@ -282,19 +332,24 @@ def evaluate_strategy(
     else:
         gate("session-ready", True)
 
-    gate("trend-regime", evidence.trend_regime == "uptrend")
-    gate("relative-strength", evidence.relative_strength_positive)
-    gate(
-        "volume-confirmation",
-        None if evidence.volume_ratio is None else evidence.volume_ratio >= profile.minimum_volume_ratio,
-    )
-    gate("entry-trigger", evidence.trigger_confirmed)
-    gate(
-        "resistance-room",
-        None
-        if evidence.resistance_room_r is None
-        else evidence.resistance_room_r >= profile.minimum_resistance_r,
-    )
+    # Tactical timing gates. A multi-quarter core holding is not timed off a
+    # one-to-four-week chart, so the core track skips them: judging a thesis-driven
+    # position by today's resistance is a category error that blocks every add
+    # while the thesis and the valuation are still intact.
+    if profile.horizon != "core":
+        gate("trend-regime", evidence.trend_regime == "uptrend")
+        gate("relative-strength", evidence.relative_strength_positive)
+        gate(
+            "volume-confirmation",
+            None if evidence.volume_ratio is None else evidence.volume_ratio >= profile.minimum_volume_ratio,
+        )
+        gate("entry-trigger", evidence.trigger_confirmed)
+        gate(
+            "resistance-room",
+            None
+            if evidence.resistance_room_r is None
+            else evidence.resistance_room_r >= profile.minimum_resistance_r,
+        )
     gate("market-regime", evidence.market_regime != "risk-off")
     gate("liquidity", evidence.liquidity_ok)
     gate("portfolio-heat", evidence.portfolio_heat_allowed)
@@ -309,6 +364,9 @@ def evaluate_strategy(
 
     if profile.horizon == "swing":
         gate("weekly-alignment", evidence.weekly_aligned)
+    if profile.horizon in {"swing", "core"}:
+        # Core adds still respect a known event: sizing into an earnings gap is a
+        # variance decision, not an edge decision, whatever the holding period.
         gate(
             "event-window",
             None if evidence.event_days is None else evidence.event_days >= 5,
@@ -336,17 +394,23 @@ def evaluate_strategy(
         evidence.market_regime != "risk-off"
         or (setup_score >= RISK_OFF_PROBE_MIN_SETUP and capital_score >= RISK_OFF_PROBE_MIN_CAPITAL)
     )
-    horizon_probe_ok = profile.horizon == "short" or evidence.weekly_aligned is True
+    horizon_probe_ok = profile.horizon in {"short", "core"} or evidence.weekly_aligned is True
+    # The core track drops the tactical timing gates, so its probe path must drop the
+    # same conditions — otherwise relative strength and price/volume would veto through
+    # the back door what the gate list deliberately stopped asking about.
+    tactical_probe_ok = profile.horizon == "core" or (
+        evidence.relative_strength_positive is True
+        and evidence.trigger_confirmed is not False
+        and capital_score >= PROBE_MIN_CAPITAL_SCORE
+        and price_volume_score >= PROBE_MIN_PRICE_VOLUME_SCORE
+    )
     probe_qualifies = (
         not hard_failed
         and evidence.data_probe_eligible
         and evidence.exit_plan_valid
         and evidence.liquidity_ok is True
         and evidence.portfolio_heat_allowed is not False
-        and evidence.relative_strength_positive is True
-        and evidence.trigger_confirmed is not False
-        and capital_score >= PROBE_MIN_CAPITAL_SCORE
-        and price_volume_score >= PROBE_MIN_PRICE_VOLUME_SCORE
+        and tactical_probe_ok
         and len(supporting_clusters) >= PROBE_MIN_SUPPORTING_CLUSTERS
         and setup_score >= profile.probe_score_threshold
         and risk_off_probe_ok

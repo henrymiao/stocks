@@ -1855,7 +1855,7 @@ def main(argv: list[str] | None = None) -> int:
         "--stop-buffer-atr", "--atr-multiple", dest="stop_buffer_atr", type=float, default=None,
         help="Override the profile ATR buffer beyond structural invalidation (short 0.25, swing 0.5; --atr-multiple is a compatibility alias)",
     )
-    analyze.add_argument("--horizon", choices=["short", "swing"], default="short", help="Strategy horizon (default: short, 1-3 trading days)")
+    analyze.add_argument("--horizon", choices=["short", "swing", "core"], default="short", help="Strategy horizon (default: short, 1-3 trading days; core = multi-quarter thesis holding)")
     analyze.add_argument("--event-days", type=int, default=None, help="Trading days until the next known major event; required to clear the swing event gate")
     analyze.add_argument("--underlying-confirmed", action=argparse.BooleanOptionalAction, default=None, help="Whether a leveraged ETF is confirmed by its underlying proxy")
     analyze.add_argument("--portfolio-open-risk-pct", type=float, default=None, help="Current total open portfolio risk %% for the 6%% heat gate")
@@ -1895,7 +1895,7 @@ def main(argv: list[str] | None = None) -> int:
         "--stop-buffer-atr", "--atr-multiple", dest="stop_buffer_atr", type=float, default=None,
         help="Override the profile ATR buffer beyond structural invalidation (short 0.25, swing 0.5; --atr-multiple is a compatibility alias)",
     )
-    offline.add_argument("--horizon", choices=["short", "swing"], default="short", help="Strategy horizon (default: short, 1-3 trading days)")
+    offline.add_argument("--horizon", choices=["short", "swing", "core"], default="short", help="Strategy horizon (default: short, 1-3 trading days; core = multi-quarter thesis holding)")
     offline.add_argument("--event-days", type=int, default=None, help="Trading days until the next known major event; required to clear the swing event gate")
     offline.add_argument("--underlying-confirmed", action=argparse.BooleanOptionalAction, default=None, help="Whether a leveraged ETF is confirmed by its underlying proxy")
     offline.add_argument("--portfolio-open-risk-pct", type=float, default=None, help="Current total open portfolio risk %% for the 6%% heat gate")

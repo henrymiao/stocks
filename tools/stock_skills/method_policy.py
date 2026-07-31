@@ -28,7 +28,7 @@ def build_method_assessment(
             MethodRestriction(
                 "source-conflict",
                 "reject-new-risk",
-                ("short", "swing"),
+                ("short", "swing", "core"),
                 "material source conflict",
             )
         )

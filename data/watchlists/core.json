@@ -70,7 +70,7 @@
       "underlying_proxy": null,
       "event_policy": "standard",
       "position_status": "watch",
-      "scan_policy": "ranked",
+      "scan_policy": "always",
       "tags": [
         "a-share",
         "semiconductor",
@@ -936,7 +936,7 @@
       "underlying_proxy": null,
       "event_policy": "standard",
       "position_status": "watch",
-      "scan_policy": "ranked",
+      "scan_policy": "always",
       "tags": [
         "a-share",
         "consumer",
@@ -1922,7 +1922,7 @@
       "underlying_proxy": null,
       "event_policy": "standard",
       "position_status": "watch",
-      "scan_policy": "ranked",
+      "scan_policy": "always",
       "tags": [
         "a-share",
         "broad-screen",
@@ -2316,8 +2316,8 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
-      "scan_policy": "ranked",
+      "position_status": "holding",
+      "scan_policy": "always",
       "tags": [
         "a-share",
         "national-tech",
@@ -3146,7 +3146,7 @@
       "underlying_proxy": null,
       "event_policy": "standard",
       "position_status": "watch",
-      "scan_policy": "ranked",
+      "scan_policy": "always",
       "tags": [
         "hk",
         "internet",

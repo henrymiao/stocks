@@ -96,6 +96,25 @@ python3 -m tools.stock_skills.cli review-discoveries --market CN --output /tmp/d
 
 Shared flags: `--market CN|HK|US` (required), `--horizon short|swing` (discover; default short), `--backfill 60|260`, `--universe`, `--membership-cache`, `--db` (default `data/discovery.db`), `--market-db`, `--as-of`, `--output`. `--fixture` runs the whole pipeline deterministically offline with no OpenD, which is how the discovery tests exercise it.
 
+Turn a rejection into a waiting price with `entry_zone.py`:
+
+```python
+from tools.stock_skills.entry_zone import entry_zone_from_recommendation
+zone = entry_zone_from_recommendation(recommendation_payload)   # any analyze/scan output
+zone.entry_ceiling   # highest price at which resistance-room passes
+zone.distance_pct    # how far that sits below the current price
+zone.actionable      # True only when price is the ONLY thing blocking it
+```
+
+`resistance-room` is the one gate that is a function of price, so it is the one gate that can be
+solved: `P <= (resistance + m*stop) / (1 + m)` where `m` is the horizon's `minimum_resistance_r`
+(1.8 short / 2.5 swing). The result answers "at what price would this be buyable" instead of only
+"not now" — a rejection at 1% away and one at 30% away otherwise look identical. Gates that price
+cannot fix (trend regime, volume, market regime, weekly alignment) are returned separately in
+`non_price_gates`, and `actionable` is False whenever any remain: **a price alert is never a licence
+to skip the other gates**. A name with no overhead resistance yields no zone — it needs a confirmed
+breakout, not a pullback.
+
 To populate the journals immediately from the repo's existing 复盘 notes (so `backtest` has data without waiting for live calls), run the backfill importer:
 
 ```bash
@@ -149,7 +168,8 @@ python3 -c "import json; p=json.load(open('/tmp/hudian-recommendation.json')); p
    - `trend.py`: breakout, failed breakout, support/resistance, invalidation, plus an MA10/20/50 multi-timeframe overlay (`trend_regime`) that demotes counter-trend breakouts and rewards trend-aligned ones.
    - `capital.py`: order-size flow confirmation/divergence (denoised — uses the full-day cumulative flow plus the intraday direction, not a single mid-session reading).
    - `sector.py`: sector strength from peer constituents (median move, breadth) and the instrument's relative strength (leading / in-line / lagging / sector-weak).
-   - `market.py`: market regime from market-aware broad indices (A-share: 上证 SH.000001 / 创业板 SZ.399006; US: QQQ/SPY; HK: 恒指 HK.800000 / 恒生科技 HK.800700) → risk-on / neutral / risk-off.
+   - `market.py`: market regime from market-aware broad indices (A-share: 上证 SH.000001 / 创业板 SZ.399006; US: QQQ/SPY; HK: 恒指 HK.800000 / 恒生科技 HK.800700) → risk-on / neutral / risk-off. `analyze_market(..., profile=...)` re-mixes each market's broad vs growth index by the instrument's valuation profile while **preserving that market's total weight**, so a rotation (growth index down hard, broad index flat) no longer vetoes the value names that are winning it. The tilt changes the mix only — a genuine broad selloff still reads risk-off for every profile.
+   - `entry_zone.py`: solves the resistance-room gate for the entry price that would clear it, so a blocked candidate produces a waiting price instead of a bare "no". Non-price gates are reported separately and keep `actionable` False.
    - `macro.py`: macro risk from live proxy ETFs (VIXY fear, TLT yields, UUP dollar, USO oil, GLD gold, FXY yen, and HYG/LQD credit transmission) via `analyze_macro_from_proxies`; simultaneous yen appreciation plus fear or credit deterioration receives a carry-unwind penalty. `analyze_macro_risk` accepts `jgb_stress`, `yen_carry_stress`, and `credit_stress` manual overrides in addition to the original macro inputs. Raw JP10Y/JP30Y/JP40Y, USDJPY, MOVE, MOF overseas-security flows, and Treasury TIC are confirmation evidence when available externally; do not silently treat a missing raw feed as a neutral observation, and never use `US.MOVE` because Futu resolves it to an unrelated listed equity. Plus `analyze_cross_market` for the US/global tape.
    - `fundamental.py`: profile-aware valuation (growth/value/neutral) from PE-TTM/PB/EPS/dividend, with PEG when EPS growth is supplied, plus a business-quality sub-score from revenue growth / gross margin / net margin / ROE (strong quality can lift an otherwise "expensive" multiple to "fair"). Profile is inferred from watchlist tags. The quality inputs are auto-fetched: `analyze` calls `futu_fetcher.get_financials` (latest income statement → revenue/EPS YoY, gross/net margin) and derives ROE from PB/PE; the `--revenue-growth/--gross-margin/--net-margin/--eps-growth/--roe` flags override per-field, and `--no-financials` skips the statement fetch (valuation multiples only). The latest revenue breakdown (主营构成) is added to `source_refs`.
    - `method_models.py`: immutable method-evidence contracts, coverage/confidence, source conflicts, and restrictions serialized in every v6 recommendation.

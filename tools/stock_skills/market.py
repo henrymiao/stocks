@@ -17,6 +17,60 @@ _MARKET_WEIGHTS = {
 }
 
 
+# Every market here has a broad/value index and a growth index. Weighting them
+# equally makes the regime unable to tell a broad selloff from a rotation: on
+# 2026-07-30 ChiNext fell 3.97% while the SSE fell only 0.62%, and the blended
+# regime (37.4, risk-off) vetoed new risk in bank and resource names that were
+# rising *because of* that rotation. Tilting the blend toward the index that
+# actually describes the instrument's cohort fixes that without inventing a new
+# factor: a value name is judged mainly by the broad index, a growth name mainly
+# by the growth index. The tilt is deliberately mild so a genuine broad selloff
+# still reads risk-off for everyone.
+_BROAD_INDICES = {"SH.000001", "SZ.399001", "US.SPY", "HK.800000"}
+_GROWTH_INDICES = {"SZ.399006", "US.QQQ", "HK.800700"}
+_MARKET_GROUPS = {
+    "A": ("SH.000001", "SZ.399001", "SZ.399006"),
+    "US": ("US.SPY", "US.QQQ"),
+    "HK": ("HK.800000", "HK.800700"),
+}
+_PROFILE_TILTS = {
+    "value": {"broad": 1.4, "growth": 0.4},
+    "growth": {"broad": 0.6, "growth": 1.4},
+    "neutral": {"broad": 1.0, "growth": 1.0},
+}
+
+
+def _tilted_weights(profile: str) -> dict[str, float]:
+    """Re-mix each market's indices by profile while preserving its total weight.
+
+    Only the *mix* moves: a market that contributes 26 points of influence still
+    contributes 26 after tilting, so the regime's overall sensitivity is unchanged
+    and a genuine broad selloff still reads risk-off for every profile. Without
+    this normalization, tilting would also amplify how hard the regime swings.
+    """
+    tilt = _PROFILE_TILTS.get(profile, _PROFILE_TILTS["neutral"])
+    weights = {code: float(weight) for code, weight in _MARKET_WEIGHTS.items()}
+    if profile not in {"value", "growth"}:
+        return weights
+
+    for codes in _MARKET_GROUPS.values():
+        members = [code for code in codes if code in weights]
+        original_total = sum(weights[code] for code in members)
+        if original_total <= 0:
+            continue
+        tilted = {
+            code: weights[code] * (tilt["broad"] if code in _BROAD_INDICES else tilt["growth"])
+            for code in members
+        }
+        tilted_total = sum(tilted.values())
+        if tilted_total <= 0:
+            continue
+        scale = original_total / tilted_total
+        for code in members:
+            weights[code] = tilted[code] * scale
+    return weights
+
+
 def _pct_change(snapshot: MarketSnapshot) -> float | None:
     if snapshot.prev_close <= 0:
         return None
@@ -31,18 +85,28 @@ def has_market_evidence(index_snapshots: dict[str, MarketSnapshot]) -> bool:
     )
 
 
-def analyze_market(index_snapshots: dict[str, MarketSnapshot]) -> MarketAnalysis:
+def analyze_market(
+    index_snapshots: dict[str, MarketSnapshot],
+    profile: str = "neutral",
+) -> MarketAnalysis:
     """Convert broad-index moves into a market risk regime.
 
     Pass the relevant index snapshots, e.g. SH.000001 (上证综指) and SZ.399006
     (创业板指) for A-shares, or US.QQQ/US.SPY for the US tape. The index trend
     sets the backdrop: a single stock fighting a falling market deserves less
     confidence than the same stock in a rising one.
+
+    `profile` ("value" / "growth" / "neutral") tilts the blend toward the index
+    that describes the instrument's cohort, so a rotation is not misread as a
+    broad selloff for the side that is winning it.
     """
     score = 50.0
     notes: list[str] = []
     used = 0
-    for code, weight in _MARKET_WEIGHTS.items():
+    weights = _tilted_weights(profile)
+    if profile in {"value", "growth"}:
+        notes.append(f"Index blend tilted for a {profile} instrument.")
+    for code, weight in weights.items():
         snapshot = index_snapshots.get(code)
         if snapshot is None:
             continue

@@ -580,7 +580,9 @@ def _recommend(
         macro = analyze_macro_risk(macro_inputs)
     cross = analyze_cross_market(cross_snapshots)
     sector = analyze_sector(_instrument_change(state), sector_changes or [])
-    market = analyze_market(index_snapshots or {})
+    # The same profile that routes valuation also tilts the index blend, so a value
+    # name is not vetoed by a growth-index selloff it is actually benefiting from.
+    market = analyze_market(index_snapshots or {}, profile=profile)
     fundamental = analyze_fundamental(fundamentals, profile=profile)
     session_phase = classify_session_phase(
         state.snapshot.code,
@@ -1532,11 +1534,21 @@ def _discovery_deep_analyzer(candidate):
             "--output",
             str(output),
         ]
-        completed = subprocess.run(command, capture_output=True, text=True, timeout=240)
+        try:
+            completed = subprocess.run(
+                command, capture_output=True, text=True, timeout=240
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            return {
+                "entry_decision": "defer",
+                "error": f"{type(exc).__name__}: {exc}",
+                "retryable": True,
+            }
         if completed.returncode != 0 or not output.is_file():
             return {
                 "entry_decision": "defer",
                 "error": (completed.stderr or completed.stdout or "deep analysis failed").strip(),
+                "retryable": True,
             }
         return json.loads(output.read_text(encoding="utf-8"))
 
@@ -1583,6 +1595,7 @@ def _cmd_discover(args: argparse.Namespace) -> int:
                 capital_improvement=fixture["capital_improvement"],
                 horizon=args.horizon,
                 existing=before,
+                trading_sessions=fixture["trading_sessions"],
             )
             discovery_store.upsert_many(
                 [candidate_from_record(row) for row in report["candidates"]]
@@ -1627,6 +1640,9 @@ def _cmd_discover(args: argparse.Namespace) -> int:
                 )
         report["notifications"] = notifications
         report["no_notify"] = bool(args.no_notify)
+        report["membership_policy"] = (
+            "offline-fixture" if fixture is not None else "manual-versioned-config"
+        )
     _write_discovery_payload(report, args.output)
     return 0
 
@@ -1654,6 +1670,7 @@ def _cmd_confirm_discoveries(args: argparse.Namespace) -> int:
                 evaluated_at=evaluated_at,
                 instrument_confirmation=fixture["instrument_confirmation"],
                 analyzer=None,
+                trading_sessions=fixture["trading_sessions"],
             )
             updated = [candidate_from_record(row) for row in report["candidates"]]
             discovery_store.upsert_many(updated)
@@ -1669,11 +1686,28 @@ def _cmd_confirm_discoveries(args: argparse.Namespace) -> int:
             updated = [candidate_from_record(row) for row in report["candidates"]]
 
         notifications: list[dict[str, object]] = []
+
+        def executable_decision(candidate) -> str | None:
+            if not candidate.deep_analysis:
+                return None
+            assessment = candidate.deep_analysis.get("strategy_assessment", {})
+            decision = (
+                assessment.get("entry_decision")
+                if isinstance(assessment, dict)
+                else None
+            ) or candidate.deep_analysis.get("entry_decision")
+            return decision if decision in {"probe", "enter"} else None
+
         for candidate in updated:
             previous = before.get(candidate.discovery_id)
-            if previous is None or previous.state == candidate.state:
+            if previous is None:
                 continue
-            if discovery_store.should_notify(candidate, no_notify=args.no_notify):
+            decision = executable_decision(candidate)
+            previous_decision = executable_decision(previous)
+            state_changed = previous.state != candidate.state
+            if state_changed and discovery_store.should_notify(
+                candidate, no_notify=args.no_notify
+            ):
                 notification: dict[str, object] = {
                     "discovery_id": candidate.discovery_id,
                     "code": candidate.code,
@@ -1681,18 +1715,34 @@ def _cmd_confirm_discoveries(args: argparse.Namespace) -> int:
                     "to": candidate.state,
                     "score": candidate.score,
                 }
-                if candidate.deep_analysis:
-                    assessment = candidate.deep_analysis.get("strategy_assessment", {})
-                    decision = (
-                        assessment.get("entry_decision")
-                        if isinstance(assessment, dict)
-                        else None
-                    ) or candidate.deep_analysis.get("entry_decision")
-                    if decision in {"probe", "enter"}:
-                        notification["entry_decision"] = decision
+                if decision is not None:
+                    notification["entry_decision"] = decision
                 notifications.append(notification)
+            elif (
+                not state_changed
+                and decision is not None
+                and decision != previous_decision
+                and discovery_store.should_notify(
+                    candidate,
+                    no_notify=args.no_notify,
+                    notification_state=f"entry:{decision}",
+                )
+            ):
+                notifications.append(
+                    {
+                        "discovery_id": candidate.discovery_id,
+                        "code": candidate.code,
+                        "from": "analysis-pending",
+                        "to": decision,
+                        "score": candidate.score,
+                        "entry_decision": decision,
+                    }
+                )
         report["notifications"] = notifications
         report["no_notify"] = bool(args.no_notify)
+        report["membership_policy"] = (
+            "offline-fixture" if fixture is not None else "manual-versioned-config"
+        )
     _write_discovery_payload(report, args.output)
     return 0
 
@@ -1734,7 +1784,11 @@ def _cmd_review_discoveries(args: argparse.Namespace) -> int:
 def _add_discovery_arguments(parser: argparse.ArgumentParser, *, confirmation: bool = False) -> None:
     parser.add_argument("--market", choices=["CN", "HK", "US"], required=True)
     parser.add_argument("--universe", default=None, help="Explicit market-universe JSON")
-    parser.add_argument("--membership-cache", default=None)
+    parser.add_argument(
+        "--membership-cache",
+        default=None,
+        help="Validated fallback cache; v1 membership itself is manually versioned",
+    )
     parser.add_argument("--fixture", default=None, help="Offline deterministic fixture JSON")
     parser.add_argument("--db", default="data/discovery.db")
     parser.add_argument("--as-of", default=None, help="Evaluation timestamp in market time")

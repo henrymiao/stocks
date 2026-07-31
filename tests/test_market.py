@@ -50,6 +50,37 @@ class MarketTests(unittest.TestCase):
         self.assertLess(result.score, 42)
         self.assertEqual(result.regime, "risk-off")
 
+    def test_rotation_does_not_veto_the_side_winning_it(self):
+        # 2026-07-30: ChiNext -3.97% while the SSE fell only 0.62%. The blended
+        # regime read 37.4 (risk-off) and vetoed new risk in banks that were
+        # rallying on exactly that rotation. A value name must not be judged
+        # mainly by the growth index.
+        snapshots = {
+            "SH.000001": index("SH.000001", 3804.69, 3828.43),   # -0.62%
+            "SZ.399006": index("SZ.399006", 3243.62, 3377.72),   # -3.97%
+        }
+
+        neutral = analyze_market(snapshots)
+        value = analyze_market(snapshots, profile="value")
+        growth = analyze_market(snapshots, profile="growth")
+
+        # The tilt reduces how much a value name is punished by the growth index
+        # (37.40 → 41.18 on this tape) and punishes a growth name more. It does
+        # not by itself flip that day's verdict: the SSE was down too, so the
+        # regime stays risk-off — the fix removes a distortion, not the headwind.
+        self.assertGreater(value.score, neutral.score)
+        self.assertLess(growth.score, neutral.score)
+        self.assertGreater(value.score - growth.score, 5.0)
+
+    def test_broad_selloff_still_reads_risk_off_for_value(self):
+        # Both indices down hard: the tilt must not rescue anyone.
+        snapshots = {
+            "SH.000001": index("SH.000001", 3600.0, 3800.0),   # -5.3%
+            "SZ.399006": index("SZ.399006", 3200.0, 3380.0),   # -5.3%
+        }
+
+        self.assertEqual(analyze_market(snapshots, profile="value").regime, "risk-off")
+
     def test_no_indices_is_neutral(self):
         result = analyze_market({})
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import math
 from dataclasses import asdict, dataclass, replace
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from typing import Any, Callable
 
 from .discovery_features import (
@@ -35,6 +35,7 @@ class DiscoveryConfig:
     trigger_leader_breadth: float = 0.50
     invalidation_breadth: float = 0.30
     invalidation_capital_improvement: float = 20.0
+    maximum_intraday_bar_age_minutes: int = 10
 
 
 @dataclass(frozen=True)
@@ -120,8 +121,31 @@ def _parse_local(value: str, market: str) -> datetime:
     return moment.replace(tzinfo=tz) if moment.tzinfo is None else moment.astimezone(tz)
 
 
-def _add_trading_sessions(moment: str, market: str, sessions: int) -> str:
+def _add_trading_sessions(
+    moment: str,
+    market: str,
+    sessions: int,
+    trading_sessions: tuple[str, ...] | None = None,
+) -> str:
     current = _parse_local(moment, market)
+    if trading_sessions is not None:
+        available = sorted(
+            {
+                datetime.fromisoformat(value).date()
+                for value in trading_sessions
+                if datetime.fromisoformat(value).date() > current.date()
+            }
+        )
+        if len(available) < sessions:
+            raise ValueError(
+                f"Trading calendar has {len(available)} future sessions; need {sessions}"
+            )
+        expiry = available[sessions - 1]
+        return current.replace(
+            year=expiry.year,
+            month=expiry.month,
+            day=expiry.day,
+        ).isoformat(timespec="seconds")
     remaining = sessions
     cursor = current
     while remaining > 0:
@@ -217,7 +241,15 @@ def _sector_opportunity_record(
     leader_codes = {
         member.code for member in sector.members if member.role == "leader"
     }
-    leaders = [candidate for candidate in ranked if candidate.code in leader_codes][:3]
+    leaders: list[DiscoveryCandidate] = []
+    seen_leaders: set[str] = set()
+    for candidate in ranked:
+        if candidate.code not in leader_codes or candidate.code in seen_leaders:
+            continue
+        leaders.append(candidate)
+        seen_leaders.add(candidate.code)
+        if len(leaders) == 3:
+            break
     return {
         "sector": sector.key,
         "sector_name": sector.name,
@@ -248,6 +280,7 @@ def _build_candidate(
     horizon: str,
     state: str,
     config: DiscoveryConfig,
+    trading_sessions: tuple[str, ...] | None,
 ) -> DiscoveryCandidate:
     validity = (
         config.short_valid_sessions
@@ -281,7 +314,12 @@ def _build_candidate(
         state=state,
         first_seen_at=evaluated_at,
         updated_at=evaluated_at,
-        expires_at=_add_trading_sessions(evaluated_at, universe.market, validity),
+        expires_at=_add_trading_sessions(
+            evaluated_at,
+            universe.market,
+            validity,
+            trading_sessions,
+        ),
         trigger_level=float(track.trigger_level),
         structural_invalidation=float(track.invalidation_level),
         data_coverage=round(coverage, 4),
@@ -330,6 +368,7 @@ def discover_universe(
     horizon: str = "short",
     existing: dict[tuple[str, str, str], DiscoveryCandidate] | None = None,
     config: DiscoveryConfig | None = None,
+    trading_sessions: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
     """Run deterministic after-close opportunity discovery.
 
@@ -432,6 +471,7 @@ def discover_universe(
                         horizon,
                         state,
                         config,
+                        trading_sessions,
                     )
                     candidates.append(
                         _merge_existing(candidate, previous, evaluated_at)
@@ -473,11 +513,26 @@ def discover_universe(
         ),
         key=lambda row: (-float(row["score"]), str(row["sector"])),
     )
-    armed = [candidate for candidate in candidates if candidate.state == "armed"][:10]
-    forming = sorted(
-        (candidate for candidate in candidates if candidate.state == "forming"),
-        key=lambda candidate: (-candidate.score, candidate.sector, candidate.code),
-    )[:5]
+    def unique_instruments(
+        rows: list[DiscoveryCandidate], limit: int
+    ) -> list[DiscoveryCandidate]:
+        selected: list[DiscoveryCandidate] = []
+        seen: set[str] = set()
+        for row in rows:
+            if row.code in seen:
+                continue
+            selected.append(row)
+            seen.add(row.code)
+            if len(selected) == limit:
+                break
+        return selected
+
+    armed = unique_instruments(
+        [candidate for candidate in candidates if candidate.state == "armed"], 10
+    )
+    forming = unique_instruments(
+        [candidate for candidate in candidates if candidate.state == "forming"], 5
+    )
     return {
         "schema_version": DISCOVERY_SCHEMA,
         "mode": "after-close-discovery",
@@ -500,7 +555,11 @@ def discover_universe(
 
 
 def _latest_completed_five_minute(
-    bars: list[KLineBar], evaluated_at: str, market: str
+    bars: list[KLineBar],
+    evaluated_at: str,
+    market: str,
+    *,
+    maximum_age: timedelta,
 ) -> KLineBar | None:
     if not bars:
         return None
@@ -521,12 +580,71 @@ def _latest_completed_five_minute(
         )
         # OpenD K-line timestamps identify the start of the interval.  A 09:50
         # candle is therefore usable at 09:55, never at 09:52.
-        if valid and moment + timedelta(minutes=5) <= local:
+        completed_at = moment + timedelta(minutes=5)
+        age = local - completed_at
+        if valid and timedelta(0) <= age <= maximum_age:
             usable.append((moment, bar))
     return max(usable, key=lambda item: item[0])[1] if usable else None
 
 
 DeepAnalyzer = Callable[[DiscoveryCandidate], dict[str, Any]]
+
+
+def _inside(value: time, start: time, end: time) -> bool:
+    return start <= value < end
+
+
+def _confirmation_session_is_open(
+    evaluated_at: str,
+    market: str,
+    trading_sessions: tuple[str, ...] | None,
+) -> bool:
+    local = _parse_local(evaluated_at, market)
+    if trading_sessions is None:
+        if local.weekday() >= 5:
+            return False
+    elif local.date().isoformat() not in set(trading_sessions):
+        return False
+    current = local.time()
+    if market == "US":
+        return _inside(current, time(9, 45), time(16))
+    if market == "HK":
+        return _inside(current, time(9, 45), time(12)) or _inside(
+            current, time(13), time(16)
+        )
+    return _inside(current, time(9, 45), time(11, 30)) or _inside(
+        current, time(13), time(15)
+    )
+
+
+def _analysis_needs_retry(candidate: DiscoveryCandidate) -> bool:
+    analysis = candidate.deep_analysis
+    return analysis is None or bool(analysis.get("retryable")) or bool(analysis.get("error"))
+
+
+def _invoke_deep_analysis(
+    candidate: DiscoveryCandidate,
+    analyzer: DeepAnalyzer,
+    *,
+    evaluated_at: str,
+    retry: bool,
+) -> tuple[DiscoveryCandidate, dict[str, Any]]:
+    try:
+        analysis = analyzer(candidate)
+    except Exception as exc:  # isolate transient child-analysis failures
+        analysis = {
+            "entry_decision": "defer",
+            "error": f"{type(exc).__name__}: {exc}",
+            "retryable": True,
+        }
+    changed = replace(candidate, updated_at=evaluated_at, deep_analysis=analysis)
+    return changed, {
+        "discovery_id": changed.discovery_id,
+        "code": changed.code,
+        "deep_analysis_invoked": True,
+        "retry": retry,
+        "strategy_result": analysis,
+    }
 
 
 def confirm_discoveries(
@@ -538,6 +656,8 @@ def confirm_discoveries(
     instrument_confirmation: dict[str, dict[str, float]] | None = None,
     analyzer: DeepAnalyzer | None = None,
     config: DiscoveryConfig | None = None,
+    trading_sessions: tuple[str, ...] | None = None,
+    market_states: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     config = config or DiscoveryConfig()
     instrument_confirmation = instrument_confirmation or {}
@@ -549,7 +669,20 @@ def confirm_discoveries(
         if candidate.state not in {"armed", "triggered"}:
             updated.append(candidate)
             continue
-        if _parse_local(evaluated_at, candidate.market) > _parse_local(
+        if not _confirmation_session_is_open(
+            evaluated_at, candidate.market, trading_sessions
+        ):
+            updated.append(candidate)
+            continue
+        if market_states is not None and market_states.get(candidate.code) not in {
+            "MORNING",
+            "AFTERNOON",
+        }:
+            updated.append(candidate)
+            continue
+        if candidate.state == "armed" and _parse_local(
+            evaluated_at, candidate.market
+        ) > _parse_local(
             candidate.expires_at, candidate.market
         ):
             changed = _transition(candidate, "expired", evaluated_at, "validity-window-ended")
@@ -558,10 +691,28 @@ def confirm_discoveries(
             continue
 
         latest = _latest_completed_five_minute(
-            intraday_bars.get(candidate.code, []), evaluated_at, candidate.market
+            intraday_bars.get(candidate.code, []),
+            evaluated_at,
+            candidate.market,
+            maximum_age=timedelta(
+                minutes=config.maximum_intraday_bar_age_minutes
+            ),
         )
         if latest is None:
-            updated.append(candidate)
+            changed = candidate
+            if (
+                candidate.state == "triggered"
+                and analyzer is not None
+                and _analysis_needs_retry(candidate)
+            ):
+                changed, handoff = _invoke_deep_analysis(
+                    candidate,
+                    analyzer,
+                    evaluated_at=evaluated_at,
+                    retry=True,
+                )
+                handoffs.append(handoff)
+            updated.append(changed)
             continue
         evidence = sector_confirmation.get(candidate.sector, {})
         breadth = evidence.get("breadth")
@@ -610,17 +761,36 @@ def confirm_discoveries(
                 evaluated_at,
                 "local-price-breadth-and-leaders-confirmed",
             )
-            analysis = analyzer(changed) if analyzer is not None else None
-            if analysis is not None:
-                changed = replace(changed, deep_analysis=analysis)
-            handoffs.append(
-                {
-                    "discovery_id": changed.discovery_id,
-                    "code": changed.code,
-                    "deep_analysis_invoked": analyzer is not None,
-                    "strategy_result": analysis,
-                }
+            if analyzer is not None:
+                changed, handoff = _invoke_deep_analysis(
+                    changed,
+                    analyzer,
+                    evaluated_at=evaluated_at,
+                    retry=False,
+                )
+                handoffs.append(handoff)
+            else:
+                handoffs.append(
+                    {
+                        "discovery_id": changed.discovery_id,
+                        "code": changed.code,
+                        "deep_analysis_invoked": False,
+                        "retry": False,
+                        "strategy_result": None,
+                    }
+                )
+        elif (
+            candidate.state == "triggered"
+            and analyzer is not None
+            and _analysis_needs_retry(candidate)
+        ):
+            changed, handoff = _invoke_deep_analysis(
+                candidate,
+                analyzer,
+                evaluated_at=evaluated_at,
+                retry=True,
             )
+            handoffs.append(handoff)
         else:
             changed = replace(candidate, updated_at=evaluated_at)
         updated.append(changed)

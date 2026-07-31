@@ -81,6 +81,11 @@ def load_discovery_fixture(path: str | Path) -> dict[str, Any]:
             code: [bar_from_record(row) for row in rows]
             for code, rows in payload.get("future_bars", {}).items()
         },
+        "trading_sessions": (
+            tuple(str(value) for value in payload["trading_sessions"])
+            if isinstance(payload.get("trading_sessions"), list)
+            else None
+        ),
     }
 
 
@@ -123,6 +128,63 @@ def _sync_daily_cache(
     return bars_by_code, failures
 
 
+def _trading_sessions(
+    fetcher: FutuFetcher,
+    market: str,
+    evaluated_at: str,
+) -> tuple[tuple[str, ...], str | None]:
+    timezone = market_timezone(market)
+    moment = datetime.fromisoformat(evaluated_at)
+    local = moment.replace(tzinfo=timezone) if moment.tzinfo is None else moment.astimezone(timezone)
+    try:
+        sessions = tuple(
+            fetcher.get_trading_days(
+                market,
+                start=(local.date() - timedelta(days=10)).isoformat(),
+                end=(local.date() + timedelta(days=60)).isoformat(),
+            )
+        )
+    except Exception as exc:
+        return (), f"{type(exc).__name__}: {exc}"
+    if not sessions:
+        return (), "OpenD returned no exchange sessions"
+    return sessions, None
+
+
+def _expected_completed_session(
+    market: str,
+    evaluated_at: str,
+    trading_sessions: tuple[str, ...],
+) -> str | None:
+    if not trading_sessions:
+        return None
+    timezone = market_timezone(market)
+    moment = datetime.fromisoformat(evaluated_at)
+    local = moment.replace(tzinfo=timezone) if moment.tzinfo is None else moment.astimezone(timezone)
+    close_hour = 15 if market == "CN" else 16
+    # Full discovery is an after-close job.  Running early preserves existing
+    # state but cannot create or upgrade a candidate.
+    if (
+        local.date().isoformat() not in set(trading_sessions)
+        or (local.hour, local.minute) < (close_hour, 15)
+    ):
+        return None
+    eligible = [day for day in trading_sessions if day <= local.date().isoformat()]
+    return max(eligible) if eligible else None
+
+
+def _latest_bar_session(bars: list[KLineBar]) -> str | None:
+    sessions: list[str] = []
+    for bar in bars:
+        if bar.volume <= 0:
+            continue
+        try:
+            sessions.append(datetime.fromisoformat(bar.time).date().isoformat())
+        except ValueError:
+            continue
+    return max(sessions) if sessions else None
+
+
 def run_live_discovery(
     universe: MarketUniverse,
     *,
@@ -145,14 +207,30 @@ def run_live_discovery(
     bars, bar_failures = _sync_daily_cache(
         universe, fetcher, market_store, backfill=backfill
     )
+    trading_sessions, calendar_failure = _trading_sessions(
+        fetcher, universe.market, evaluated_at
+    )
+    expected_session = _expected_completed_session(
+        universe.market, evaluated_at, trading_sessions
+    )
+    stale_daily_codes = sorted(
+        code
+        for code, code_bars in bars.items()
+        if expected_session is None or _latest_bar_session(code_bars) != expected_session
+    )
+    scoring_bars = {
+        code: ([] if code in stale_daily_codes else code_bars)
+        for code, code_bars in bars.items()
+    }
     existing = discovery_store.latest_by_key(universe.market)
 
     preliminary = discover_universe(
         universe,
-        bars,
+        scoring_bars,
         evaluated_at=evaluated_at,
         horizon=horizon,
         existing=existing,
+        trading_sessions=trading_sessions,
     )
     promoted_codes = {
         row["code"]
@@ -177,11 +255,12 @@ def run_live_discovery(
     report = (
         discover_universe(
             universe,
-            bars,
+            scoring_bars,
             evaluated_at=evaluated_at,
             capital_improvement=capital_scores,
             horizon=horizon,
             existing=existing,
+            trading_sessions=trading_sessions,
         )
         if capital_scores
         else preliminary
@@ -193,8 +272,11 @@ def run_live_discovery(
         "received": len(snapshots),
     }
     report["capital_candidates_refreshed"] = sorted(capital_scores)
+    report["expected_completed_session"] = expected_session
+    report["stale_daily_codes"] = stale_daily_codes
     report["data_failures"] = {
         "snapshots": snapshot_failure,
+        "trading_calendar": calendar_failure,
         "daily_bars": bar_failures,
         "capital": capital_failures,
     }
@@ -277,6 +359,12 @@ def run_live_confirmation(
         market=universe.market, states=("armed", "triggered")
     )
     armed_codes = sorted({candidate.code for candidate in candidates})
+    market_state_failure: str | None = None
+    try:
+        market_states = fetcher.get_market_states(armed_codes)
+    except Exception as exc:
+        market_states = {}
+        market_state_failure = f"{type(exc).__name__}: {exc}"
     intraday: dict[str, list[KLineBar]] = {}
     intraday_failures: dict[str, str] = {}
     for code in armed_codes:
@@ -312,6 +400,9 @@ def run_live_confirmation(
         improvement = _capital_improvement(market_store.capital_history(code, limit=3))
         if improvement is not None:
             instrument_confirmation[code] = {"capital_improvement": improvement}
+    trading_sessions, calendar_failure = _trading_sessions(
+        fetcher, universe.market, evaluated_at
+    )
     report = confirm_discoveries(
         candidates,
         intraday,
@@ -319,11 +410,15 @@ def run_live_confirmation(
         evaluated_at=evaluated_at,
         instrument_confirmation=instrument_confirmation,
         analyzer=analyzer,
+        trading_sessions=trading_sessions,
+        market_states=market_states,
     )
     updated = [candidate_from_record(row) for row in report["candidates"]]
     discovery_store.upsert_many(updated)
     report["data_failures"] = {
         "snapshots": snapshot_failure,
+        "trading_calendar": calendar_failure,
+        "market_state": market_state_failure,
         "intraday_bars": intraday_failures,
         "capital": capital_failures,
     }

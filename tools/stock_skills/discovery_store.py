@@ -64,6 +64,17 @@ class DiscoveryStore:
         self._conn = sqlite3.connect(str(self.path))
         self._conn.row_factory = sqlite3.Row
         self._conn.executescript(_SCHEMA)
+        self._conn.execute(
+            "DELETE FROM discovery_transitions WHERE id NOT IN ("
+            " SELECT MIN(id) FROM discovery_transitions"
+            " GROUP BY discovery_id, COALESCE(from_state, ''), to_state, transition_at, reason"
+            ")"
+        )
+        self._conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS discovery_transitions_deduplicated"
+            " ON discovery_transitions"
+            " (discovery_id, COALESCE(from_state, ''), to_state, transition_at, reason)"
+        )
         self._conn.commit()
 
     def close(self) -> None:
@@ -152,27 +163,50 @@ class DiscoveryStore:
     ) -> dict[tuple[str, str, str], DiscoveryCandidate]:
         candidates = self.list_candidates(market=market)
         result: dict[tuple[str, str, str], DiscoveryCandidate] = {}
+
+        def generation_key(candidate: DiscoveryCandidate) -> tuple[float, float, int, str]:
+            def timestamp(value: str) -> float:
+                moment = datetime.fromisoformat(value)
+                if moment.tzinfo is None:
+                    moment = moment.replace(tzinfo=timezone.utc)
+                return moment.timestamp()
+
+            active = int(candidate.state in {"forming", "armed", "triggered"})
+            return (
+                timestamp(candidate.updated_at),
+                timestamp(candidate.first_seen_at),
+                active,
+                candidate.discovery_id,
+            )
+
         for candidate in candidates:
             key = (candidate.sector, candidate.code, candidate.track)
             current = result.get(key)
-            if current is None or candidate.updated_at > current.updated_at:
+            if current is None or generation_key(candidate) > generation_key(current):
                 result[key] = candidate
         return result
 
-    def should_notify(self, candidate: DiscoveryCandidate, *, no_notify: bool = False) -> bool:
+    def should_notify(
+        self,
+        candidate: DiscoveryCandidate,
+        *,
+        no_notify: bool = False,
+        notification_state: str | None = None,
+    ) -> bool:
         """Deduplicate unchanged states while permitting later re-established states."""
 
         if no_notify:
             return False
+        state = notification_state or candidate.state
         row = self._conn.execute(
             "SELECT state FROM discovery_notifications WHERE discovery_id = ? ORDER BY id DESC LIMIT 1",
             (candidate.discovery_id,),
         ).fetchone()
-        if row is not None and row["state"] == candidate.state:
+        if row is not None and row["state"] == state:
             return False
         self._conn.execute(
             "INSERT INTO discovery_notifications (discovery_id, state, notified_at) VALUES (?, ?, ?)",
-            (candidate.discovery_id, candidate.state, _now_iso()),
+            (candidate.discovery_id, state, _now_iso()),
         )
         self._conn.commit()
         return True

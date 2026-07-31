@@ -3,7 +3,7 @@ import json
 import tempfile
 import unittest
 from contextlib import redirect_stdout
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -16,8 +16,12 @@ from tools.stock_skills.discovery_engine import (
 )
 from tools.stock_skills.discovery_features import completed_daily_bars
 from tools.stock_skills.discovery_store import DiscoveryStore
-from tools.stock_skills.discovery_runtime import sector_confirmation_from_snapshots
+from tools.stock_skills.discovery_runtime import (
+    run_live_discovery,
+    sector_confirmation_from_snapshots,
+)
 from tools.stock_skills.models import KLineBar, MarketSnapshot
+from tools.stock_skills.store import MarketStore
 from tools.stock_skills.universe import (
     MarketUniverse,
     SectorUniverse,
@@ -233,6 +237,11 @@ class OpportunityDiscoveryTests(unittest.TestCase):
         self.assertLessEqual(len(base["forming"]), 5)
         self.assertIn("representative", base["sector_opportunities"][0])
         self.assertIn("leaders", base["sector_opportunities"][0])
+        leader_codes = [row["code"] for row in base["sector_opportunities"][0]["leaders"]]
+        self.assertEqual(len(leader_codes), len(set(leader_codes)))
+        for key in ("armed", "forming"):
+            codes = [row["code"] for row in base[key]]
+            self.assertEqual(len(codes), len(set(codes)))
         self.assertIsNone(base["entry_recommendation"])
         self.assertNotIn("enter", {row["state"] for row in base["candidates"]})
 
@@ -331,6 +340,16 @@ class OpportunityDiscoveryTests(unittest.TestCase):
         self.assertEqual(still_forming["candidates"][0]["state"], "armed")
         self.assertFalse(still_forming["deep_analysis_handoffs"])
 
+        exchange_closed = confirm_discoveries(
+            [candidate],
+            intraday,
+            {"star50": {"breadth": 0.75, "leader_breadth": 1.0, "coverage": 1.0}},
+            evaluated_at="2026-07-21T09:56:00+08:00",
+            market_states={candidate.code: "CLOSED"},
+            analyzer=lambda row: {"entry_decision": "probe", "code": row.code},
+        )
+        self.assertEqual(exchange_closed["candidates"][0]["state"], "armed")
+
         confirmed = confirm_discoveries(
             [candidate],
             intraday,
@@ -342,6 +361,90 @@ class OpportunityDiscoveryTests(unittest.TestCase):
         self.assertEqual(updated.state, "triggered")
         self.assertEqual(updated.deep_analysis["entry_decision"], "probe")
         self.assertTrue(confirmed["deep_analysis_handoffs"][0]["deep_analysis_invoked"])
+
+    def test_stale_five_minute_bar_cannot_trigger_later_in_session(self):
+        report = discover_universe(
+            _star_universe(),
+            _golden_bars(),
+            evaluated_at="2026-07-20T15:15:00+08:00",
+            capital_improvement={code: 80.0 for code in _golden_bars() if code != "SH.000300"},
+        )
+        candidate = candidate_from_record(
+            next(
+                row
+                for row in report["armed"]
+                if row["code"] == "SH.000688" and row["track"] == "oversold-reversal"
+            )
+        )
+        bar = KLineBar(
+            time="2026-07-21T09:50:00+08:00",
+            open=candidate.trigger_level - 1,
+            high=candidate.trigger_level + 2,
+            low=candidate.structural_invalidation + 1,
+            close=candidate.trigger_level + 1,
+            volume=100_000,
+            turnover=(candidate.trigger_level + 1) * 100_000,
+        )
+        result = confirm_discoveries(
+            [candidate],
+            {candidate.code: [bar]},
+            {candidate.sector: {"breadth": 0.75, "leader_breadth": 1.0, "coverage": 1.0}},
+            evaluated_at="2026-07-21T14:30:00+08:00",
+        )
+        self.assertEqual(result["candidates"][0]["state"], "armed")
+        self.assertFalse(result["transitions"])
+
+    def test_failed_deep_analysis_is_retried_while_triggered(self):
+        report = discover_universe(
+            _star_universe(),
+            _golden_bars(),
+            evaluated_at="2026-07-20T15:15:00+08:00",
+            capital_improvement={code: 80.0 for code in _golden_bars() if code != "SH.000300"},
+        )
+        candidate = candidate_from_record(
+            next(
+                row
+                for row in report["armed"]
+                if row["code"] == "SH.000688" and row["track"] == "oversold-reversal"
+            )
+        )
+        bar = KLineBar(
+            time="2026-07-21T09:50:00+08:00",
+            open=candidate.trigger_level - 1,
+            high=candidate.trigger_level + 2,
+            low=candidate.structural_invalidation + 1,
+            close=candidate.trigger_level + 1,
+            volume=100_000,
+            turnover=(candidate.trigger_level + 1) * 100_000,
+        )
+        evidence = {
+            candidate.sector: {"breadth": 0.75, "leader_breadth": 1.0, "coverage": 1.0}
+        }
+        first = confirm_discoveries(
+            [candidate],
+            {candidate.code: [bar]},
+            evidence,
+            evaluated_at="2026-07-21T09:56:00+08:00",
+            analyzer=lambda _: {
+                "entry_decision": "defer",
+                "error": "OpenD unavailable",
+                "retryable": True,
+            },
+        )
+        triggered = candidate_from_record(first["candidates"][0])
+        calls = []
+        second = confirm_discoveries(
+            [triggered],
+            {triggered.code: [bar]},
+            evidence,
+            evaluated_at="2026-07-21T10:01:00+08:00",
+            analyzer=lambda row: calls.append(row.discovery_id)
+            or {"entry_decision": "probe"},
+        )
+        updated = candidate_from_record(second["candidates"][0])
+        self.assertEqual(calls, [triggered.discovery_id])
+        self.assertEqual(updated.deep_analysis["entry_decision"], "probe")
+        self.assertTrue(second["deep_analysis_handoffs"][0]["retry"])
 
     def test_material_capital_divergence_invalidates_armed_candidate(self):
         report = discover_universe(
@@ -471,12 +574,96 @@ class OpportunityDiscoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             with DiscoveryStore(Path(tmpdir) / "discoveries.db") as store:
                 store.upsert(candidate)
+                store.upsert(candidate)
                 self.assertEqual(store.get(candidate.discovery_id), candidate)
+                self.assertEqual(
+                    len(store.transition_history(candidate.discovery_id)),
+                    len(candidate.transition_history),
+                )
                 self.assertTrue(store.should_notify(candidate))
                 self.assertFalse(store.should_notify(candidate))
                 review = review_discovery(candidate, _series(recovery=True)[:10])
                 store.save_review(review)
                 self.assertEqual(len(store.reviews("CN")), 1)
+
+    def test_latest_generation_wins_when_terminal_and_active_updates_tie(self):
+        report = discover_universe(
+            _star_universe(),
+            _golden_bars(),
+            evaluated_at="2026-07-20T15:15:00+08:00",
+            capital_improvement={code: 80.0 for code in _golden_bars() if code != "SH.000300"},
+        )
+        candidate = candidate_from_record(report["armed"][0])
+        old = replace(
+            candidate,
+            discovery_id="old-generation",
+            state="expired",
+            score=90.0,
+            updated_at="2026-07-24T15:15:00+08:00",
+        )
+        new = replace(
+            candidate,
+            discovery_id="new-generation",
+            state="armed",
+            score=70.0,
+            first_seen_at="2026-07-24T15:15:00+08:00",
+            updated_at="2026-07-24T15:15:00+08:00",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with DiscoveryStore(Path(tmpdir) / "discoveries.db") as store:
+                store.upsert(old)
+                store.upsert(new)
+                latest = store.latest_by_key("CN")[(new.sector, new.code, new.track)]
+                self.assertEqual(latest.discovery_id, "new-generation")
+
+    def test_live_discovery_cannot_arm_from_stale_cache_when_opend_fails(self):
+        class FailingFetcher:
+            def get_snapshots(self, codes):
+                raise RuntimeError("OpenD unavailable")
+
+            def get_daily_bars(self, code, num=260):
+                raise RuntimeError("OpenD unavailable")
+
+            def get_capital(self, code):
+                return None
+
+            def get_trading_days(self, market, start, end):
+                return ["2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24"]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with (
+                MarketStore(Path(tmpdir) / "market.db") as market_store,
+                DiscoveryStore(Path(tmpdir) / "discovery.db") as discovery_store,
+            ):
+                for code, bars in _golden_bars().items():
+                    market_store.upsert_bars(code, "1d", bars)
+                report = run_live_discovery(
+                    _star_universe(),
+                    evaluated_at="2026-07-24T15:15:00+08:00",
+                    discovery_store=discovery_store,
+                    market_store=market_store,
+                    fetcher=FailingFetcher(),
+                )
+        self.assertFalse(report["armed"])
+        self.assertTrue(report["data_failures"]["daily_bars"])
+        self.assertTrue(report["stale_daily_codes"])
+
+    def test_expiry_uses_supplied_exchange_sessions_not_weekdays(self):
+        report = discover_universe(
+            _star_universe(),
+            _golden_bars(),
+            evaluated_at="2026-07-20T15:15:00+08:00",
+            capital_improvement={code: 80.0 for code in _golden_bars() if code != "SH.000300"},
+            trading_sessions=(
+                "2026-07-20",
+                "2026-07-21",
+                "2026-07-22",
+                # 2026-07-23 is an exchange holiday in this deterministic fixture.
+                "2026-07-24",
+                "2026-07-27",
+            ),
+        )
+        self.assertEqual(report["armed"][0]["expires_at"][:10], "2026-07-24")
 
     def test_cli_discovers_confirms_and_reviews_offline_fixture(self):
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -3232,6 +3232,58 @@
         "high-volatility",
         "oversold-watch"
       ]
+    },
+    {
+      "code": "SZ.000333",
+      "name": "美的集团",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "always",
+      "tags": [
+        "a-share",
+        "consumer",
+        "appliance",
+        "value",
+        "dividend",
+        "diversifier"
+      ]
+    },
+    {
+      "code": "SH.603993",
+      "name": "洛阳钼业",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "always",
+      "tags": [
+        "a-share",
+        "metals",
+        "copper",
+        "cyclical",
+        "value",
+        "diversifier"
+      ]
     }
   ]
 }

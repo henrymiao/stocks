@@ -137,6 +137,61 @@ class PointInTimeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "after package captured_at"):
             self._package(evidence=(late_capture,))
 
+    def test_bar_payload_rejects_any_bar_after_as_of(self):
+        with self.assertRaisesRegex(ValueError, "bar is after package as_of"):
+            PointInTimeInput.build_market_payload(
+                code="US.NVDA",
+                security_id="listing:US.NVDA",
+                company_id="security:US.NVDA",
+                market="US",
+                as_of="2026-08-03T16:00:00-04:00",
+                captured_at="2026-08-03T16:00:02-04:00",
+                session_phase="after-close",
+                universe_version="universe:test",
+                identity_version="identity:test",
+                snapshot={"timestamp": "2026-08-03T16:00:00-04:00", "last_price": 100.0},
+                daily_bars=[
+                    {"time": "2026-08-03T00:00:00-04:00", "close": 100.0},
+                    {"time": "2026-08-04T00:00:00-04:00", "close": 101.0},
+                ],
+                intraday_bars=[],
+                daily_adjustment_basis="forward-adjusted",
+                intraday_adjustment_basis="none",
+                evidence=(
+                    EvidenceStamp(
+                        component="snapshot",
+                        status="available",
+                        source="futu-opend",
+                        observed_at="2026-08-03T16:00:00-04:00",
+                        published_at=None,
+                        captured_at="2026-08-03T16:00:02-04:00",
+                        source_ref="futu:snapshot",
+                        adjustment_basis="none",
+                        conflict_refs=(),
+                    ),
+                ),
+            )
+
+    def test_market_payload_requires_explicit_bar_adjustment_basis(self):
+        with self.assertRaisesRegex(ValueError, "adjustment basis"):
+            PointInTimeInput.build_market_payload(
+                code="HK.00700",
+                security_id="listing:HK.00700",
+                company_id="security:HK.00700",
+                market="HK",
+                as_of="2026-08-03T10:00:00+08:00",
+                captured_at="2026-08-03T10:00:02+08:00",
+                session_phase="intraday",
+                universe_version="universe:test",
+                identity_version="identity:test",
+                snapshot=None,
+                daily_bars=[],
+                intraday_bars=[],
+                daily_adjustment_basis=None,
+                intraday_adjustment_basis="none",
+                evidence=(),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

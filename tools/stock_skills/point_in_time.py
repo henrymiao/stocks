@@ -176,6 +176,130 @@ class PointInTimeInput:
             evidence=ordered_evidence,
         )
 
+    @classmethod
+    def build_market_payload(
+        cls,
+        *,
+        code: str,
+        security_id: str,
+        company_id: str,
+        market: str,
+        as_of: str,
+        captured_at: str,
+        session_phase: str,
+        universe_version: str,
+        identity_version: str,
+        snapshot: Mapping[str, Any] | None,
+        daily_bars: list[Mapping[str, Any]],
+        intraday_bars: list[Mapping[str, Any]],
+        daily_adjustment_basis: str | None,
+        intraday_adjustment_basis: str | None,
+        evidence: tuple[EvidenceStamp, ...],
+        capital: Mapping[str, Any] | None = None,
+        financial: Mapping[str, Any] | None = None,
+        sector: Mapping[str, Any] | None = None,
+        macro: Mapping[str, Any] | None = None,
+        cross_market: Mapping[str, Any] | None = None,
+    ) -> "PointInTimeInput":
+        market = normalize_market(market)
+        cutoff = market_moment(as_of, market)
+        for label, basis in (
+            ("daily_bars", daily_adjustment_basis),
+            ("intraday_bars", intraday_adjustment_basis),
+        ):
+            if basis is None or not str(basis).strip():
+                raise ValueError(f"{label} requires an explicit adjustment basis")
+
+        snapshot_record = None if snapshot is None else dict(snapshot)
+        if snapshot_record is not None:
+            if "timestamp" not in snapshot_record:
+                raise ValueError("Snapshot requires a timestamp")
+            if market_moment(str(snapshot_record["timestamp"]), market) > cutoff:
+                raise ValueError("Snapshot is after package as_of")
+
+        def freeze_bars(
+            component: str, records: list[Mapping[str, Any]]
+        ) -> list[dict[str, Any]]:
+            frozen: list[dict[str, Any]] = []
+            for row in records:
+                record = dict(row)
+                if "time" not in record:
+                    raise ValueError(f"{component} bar requires time")
+                if market_moment(str(record["time"]), market) > cutoff:
+                    raise ValueError(f"{component} bar is after package as_of")
+                frozen.append(record)
+            return sorted(
+                frozen,
+                key=lambda item: market_moment(str(item["time"]), market),
+            )
+
+        daily_records = freeze_bars("daily", daily_bars)
+        intraday_records = freeze_bars("intraday", intraday_bars)
+        component_values: dict[str, object] = {
+            "snapshot": snapshot_record,
+            "daily_bars": daily_records,
+            "intraday_bars": intraday_records,
+            "capital": capital,
+            "financial": financial,
+            "sector": sector,
+            "macro": macro,
+            "cross_market": cross_market,
+        }
+        normalized_evidence = list(evidence)
+        evidence_by_component = {stamp.component: stamp for stamp in normalized_evidence}
+        if len(evidence_by_component) != len(normalized_evidence):
+            raise ValueError("Point-in-time input contains duplicate evidence component names")
+        for component, value in component_values.items():
+            empty = value is None or value == {} or value == [] or value == ()
+            stamp = evidence_by_component.get(component)
+            if empty and stamp is None:
+                normalized_evidence.append(
+                    EvidenceStamp(
+                        component=component,
+                        status="missing",
+                        source=None,
+                        observed_at=None,
+                        published_at=None,
+                        captured_at=captured_at,
+                        source_ref=None,
+                        adjustment_basis=None,
+                    )
+                )
+            elif empty and stamp is not None and stamp.status != "missing":
+                raise ValueError(f"Empty {component} payload must be marked missing")
+            elif not empty and stamp is not None and stamp.status == "missing":
+                raise ValueError(f"Non-empty {component} payload cannot be marked missing")
+
+        payload = {
+            "snapshot": snapshot_record,
+            "daily_bars": {
+                "adjustment_basis": str(daily_adjustment_basis),
+                "bars": daily_records,
+            },
+            "intraday_bars": {
+                "adjustment_basis": str(intraday_adjustment_basis),
+                "bars": intraday_records,
+            },
+            "capital": capital,
+            "financial": financial,
+            "sector": sector,
+            "macro": macro,
+            "cross_market": cross_market,
+        }
+        return cls.build(
+            code=code,
+            security_id=security_id,
+            company_id=company_id,
+            market=market,
+            as_of=as_of,
+            captured_at=captured_at,
+            session_phase=session_phase,
+            universe_version=universe_version,
+            identity_version=identity_version,
+            payload=payload,
+            evidence=tuple(normalized_evidence),
+        )
+
     def payload(self) -> dict[str, Any]:
         return json.loads(self.payload_json)
 

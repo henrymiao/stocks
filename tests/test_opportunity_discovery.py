@@ -6,6 +6,7 @@ from contextlib import redirect_stdout
 from dataclasses import asdict, replace
 from datetime import date, timedelta
 from pathlib import Path
+from unittest import mock
 
 from tools.stock_skills.cli import main as cli_main
 from tools.stock_skills.discovery_engine import (
@@ -17,10 +18,13 @@ from tools.stock_skills.discovery_engine import (
 from tools.stock_skills.discovery_features import completed_daily_bars
 from tools.stock_skills.discovery_store import DiscoveryStore
 from tools.stock_skills.discovery_runtime import (
+    freeze_discovery_inputs,
     run_live_discovery,
     sector_confirmation_from_snapshots,
 )
+from tools.stock_skills.identity import SecurityIdentity
 from tools.stock_skills.models import KLineBar, MarketSnapshot
+from tools.stock_skills.point_in_time import EvidenceStamp, ModelRelease, PointInTimeInput, bind_shadow_pair
 from tools.stock_skills.store import MarketStore
 from tools.stock_skills.universe import (
     MarketUniverse,
@@ -141,6 +145,77 @@ def _golden_bars(*, future=False, breadth=True):
 
 
 class OpportunityDiscoveryTests(unittest.TestCase):
+    def test_shadow_bindings_share_one_frozen_discovery_input(self):
+        universe = _star_universe()
+        identity = SecurityIdentity(
+            "listing:SH.000688",
+            "security:SH.000688",
+            "SH.000688",
+            "科创50",
+            "CN",
+            "ordinary-stock",
+            "CNY",
+            "2026-01-01T00:00:00+08:00",
+        )
+        snapshot = MarketSnapshot(
+            "SH.000688",
+            "科创50",
+            87.0,
+            82.0,
+            88.0,
+            77.5,
+            82.0,
+            3_400_000,
+            295_800_000.0,
+            "2026-07-20T15:15:00+08:00",
+            "2026-07-20T15:15:02+08:00",
+        )
+        evidence = (
+            EvidenceStamp(
+                "snapshot",
+                "available",
+                "offline-fixture",
+                snapshot.timestamp,
+                None,
+                snapshot.captured_at,
+                "fixture:snapshot",
+                "none",
+            ),
+        )
+
+        with mock.patch.object(
+            PointInTimeInput,
+            "build_market_payload",
+            wraps=PointInTimeInput.build_market_payload,
+        ) as builder:
+            package = freeze_discovery_inputs(
+                universe=universe,
+                identity=identity,
+                identity_version="identity:test",
+                as_of="2026-07-20T15:15:00+08:00",
+                captured_at="2026-07-20T15:15:02+08:00",
+                session_phase="after-close",
+                snapshot=snapshot,
+                daily_bars=_golden_bars()["SH.000688"],
+                intraday_bars=[],
+                daily_adjustment_basis="none",
+                intraday_adjustment_basis="none",
+                evidence=evidence,
+            )
+
+        champion, challenger = bind_shadow_pair(
+            package,
+            ModelRelease("stock-analysis-v6", "logic-first-method-evidence-v6", "recommendation-v6"),
+            ModelRelease(
+                "stock-analysis-v7-shadow",
+                "stock-analysis-v7-shadow-v1",
+                "recommendation-v7-shadow-v1",
+            ),
+        )
+        self.assertEqual(builder.call_count, 1)
+        self.assertEqual(champion.input_package_id, challenger.input_package_id)
+        self.assertEqual(champion.input_digest, challenger.input_digest)
+
     def test_configured_universes_are_valid_and_market_routed(self):
         expected_timezones = {
             "cn": "Asia/Shanghai",

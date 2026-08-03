@@ -14,9 +14,60 @@ from .discovery_engine import (
 )
 from .discovery_store import DiscoveryStore
 from .futu_fetcher import FutuFetcher
+from .identity import SecurityIdentity
 from .models import KLineBar, MarketSnapshot
+from .point_in_time import EvidenceStamp, PointInTimeInput
 from .store import MarketStore
 from .universe import MarketUniverse, market_timezone, universe_from_record
+
+
+def freeze_discovery_inputs(
+    *,
+    universe: MarketUniverse,
+    identity: SecurityIdentity,
+    identity_version: str,
+    as_of: str,
+    captured_at: str,
+    session_phase: str,
+    snapshot: MarketSnapshot | dict[str, Any] | None,
+    daily_bars: list[KLineBar] | list[dict[str, Any]],
+    intraday_bars: list[KLineBar] | list[dict[str, Any]],
+    daily_adjustment_basis: str,
+    intraday_adjustment_basis: str,
+    evidence: tuple[EvidenceStamp, ...],
+    capital: dict[str, Any] | None = None,
+    financial: dict[str, Any] | None = None,
+    sector: dict[str, Any] | None = None,
+    macro: dict[str, Any] | None = None,
+    cross_market: dict[str, Any] | None = None,
+) -> PointInTimeInput:
+    """Freeze already-fetched discovery records without fetching or scoring."""
+
+    def record(value: Any) -> dict[str, Any]:
+        return dict(value) if isinstance(value, dict) else asdict(value)
+
+    return PointInTimeInput.build_market_payload(
+        code=identity.code,
+        security_id=identity.security_id,
+        company_id=identity.company_id,
+        market=universe.market,
+        as_of=as_of,
+        captured_at=captured_at,
+        session_phase=session_phase,
+        universe_version=universe.version_id,
+        identity_version=identity_version,
+        snapshot=None if snapshot is None else record(snapshot),
+        daily_bars=[record(bar) for bar in daily_bars],
+        intraday_bars=[record(bar) for bar in intraday_bars],
+        daily_adjustment_basis=daily_adjustment_basis,
+        intraday_adjustment_basis=intraday_adjustment_basis,
+        evidence=evidence,
+        capital=capital,
+        financial=financial,
+        sector=sector,
+        macro=macro,
+        cross_market=cross_market,
+    )
 
 
 def bar_from_record(payload: dict[str, Any]) -> KLineBar:

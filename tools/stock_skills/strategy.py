@@ -15,10 +15,19 @@ WATCH_MIN_SETUP = 50.0            # below this with no missing evidence -> rejec
 SUPPORTING_CLUSTER_MIN_SCORE = 60.0  # inclusive: a cluster at 60 counts as support
 ENTER_MIN_SUPPORTING_CLUSTERS = 2  # full entry/add needs independent confirmation
 PROBE_MIN_SUPPORTING_CLUSTERS = 1  # one live cluster may justify a small early probe
-PROBE_MIN_CAPITAL_SCORE = 60.0    # probe needs real capital sponsorship...
-PROBE_MIN_PRICE_VOLUME_SCORE = 55.0  # ...and at least neutral price/volume behaviour
-RISK_OFF_PROBE_MIN_SETUP = 68.0   # risk-off tape: probe only for clear leadership...
-RISK_OFF_PROBE_MIN_CAPITAL = 70.0  # ...with strong capital confirmation
+PROBE_MIN_PRICE_VOLUME_SCORE = 55.0  # probe needs at least neutral price/volume behaviour
+RISK_OFF_PROBE_MIN_SETUP = 68.0   # risk-off tape: probe only for clear leadership
+# Retired 2026-08-03: capital_flow no longer gates the probe path.
+# The score classifies flow by ORDER SIZE and infers "main force vs retail" from it. That
+# inference does not survive algorithmic child-order splitting (and in US names, dark pools
+# and internalised retail flow are invisible to the feed entirely), so the identity read is
+# unverifiable. Measured on the journals it also shows no edge: component edge -0.1034, and a
+# four-quadrant replay found accumulation (price down, "main force" in) no better than its
+# opposite, with the distribution quadrant outperforming outright. An unvalidated factor must
+# not veto a candidate. capital_flow stays in scoring and in the market_behavior cluster as
+# explanatory evidence; what it may no longer do is decide.
+PROBE_MIN_CAPITAL_SCORE = 60.0    # retained for historical replay only — not a live gate
+RISK_OFF_PROBE_MIN_CAPITAL = 70.0  # retained for historical replay only — not a live gate
 POSITION_FULL_EXIT_MAX_SETUP = 45.0  # held position below this setup -> full exit
 POSITION_TRIM_MAX_SETUP = 55.0    # held position below this setup -> partial exit
 POSITION_TRIM_ON_STRENGTH_MIN_SETUP = 80.0  # strong setup pinned at resistance -> trim
@@ -388,11 +397,9 @@ def evaluate_strategy(
     if profile.leveraged_overlay and "underlying-confirmation" in set(failed + missing):
         hard_failed.add("underlying-confirmation")
 
-    capital_score = factor_scores.get("capital_flow", factor_scores.get("volume_accumulation", 0.0))
     price_volume_score = factor_scores.get("price_volume", factor_scores.get("trend_quality", 0.0))
     risk_off_probe_ok = (
-        evidence.market_regime != "risk-off"
-        or (setup_score >= RISK_OFF_PROBE_MIN_SETUP and capital_score >= RISK_OFF_PROBE_MIN_CAPITAL)
+        evidence.market_regime != "risk-off" or setup_score >= RISK_OFF_PROBE_MIN_SETUP
     )
     horizon_probe_ok = profile.horizon in {"short", "core"} or evidence.weekly_aligned is True
     # The core track drops the tactical timing gates, so its probe path must drop the
@@ -401,7 +408,6 @@ def evaluate_strategy(
     tactical_probe_ok = profile.horizon == "core" or (
         evidence.relative_strength_positive is True
         and evidence.trigger_confirmed is not False
-        and capital_score >= PROBE_MIN_CAPITAL_SCORE
         and price_volume_score >= PROBE_MIN_PRICE_VOLUME_SCORE
     )
     probe_qualifies = (

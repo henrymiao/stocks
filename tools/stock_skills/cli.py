@@ -120,13 +120,47 @@ def _completed_daily_bars(
     return bars[:-1] if session_phase == "intraday" and bars else list(bars)
 
 
+def _load_decline_assessment(payload: object, errors: dict[str, str]):
+    """Parse the optional decline classification; a malformed one is an error, not a default."""
+    if payload is None:
+        return None
+    from .method_models import DeclineAssessment
+
+    if not isinstance(payload, dict):
+        errors["decline"] = "decline section must be an object"
+        return None
+    try:
+        return DeclineAssessment(
+            cause=str(payload["cause"]),
+            bear_case_loss_pct=(
+                None
+                if payload.get("bear_case_loss_pct") is None
+                else float(payload["bear_case_loss_pct"])
+            ),
+            selling_exhaustion=(
+                None
+                if payload.get("selling_exhaustion") is None
+                else bool(payload["selling_exhaustion"])
+            ),
+            as_of=str(payload["as_of"]),
+            source_ref=str(payload["source_ref"]),
+            drawdown_pct=(
+                None if payload.get("drawdown_pct") is None else float(payload["drawdown_pct"])
+            ),
+            notes=tuple(str(note) for note in payload.get("notes", ())),
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        errors["decline"] = f"{type(exc).__name__}: {exc}"
+        return None
+
+
 def _load_method_inputs(raw: str | None) -> dict[str, object]:
     if raw is None:
         return {}
     payload = json.loads(raw)
     if not isinstance(payload, dict):
         raise ValueError("method inputs must be a JSON object")
-    allowed = {"thesis", "valuation", "evidence"}
+    allowed = {"thesis", "valuation", "evidence", "decline"}
     unknown = set(payload) - allowed
     if unknown:
         raise ValueError(f"unknown method input sections: {sorted(unknown)}")
@@ -749,6 +783,7 @@ def _recommend(
         thesis,
         technical_confirmation=_technical_confirmation(structure, linkage),
     )
+    decline = _load_decline_assessment(method_payload.get("decline"), method_errors)
     methods = build_method_assessment(
         market_profile.profile_id,
         structure,
@@ -758,6 +793,7 @@ def _recommend(
         valuation_critical=thesis_manual.get("valuation_critical") is True,
         source_conflicts=source_conflicts,
         errors=method_errors,
+        decline=decline,
     )
 
     refs = list(source_refs)
@@ -989,6 +1025,59 @@ def _cmd_dry_run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> i
     return 0
 
 
+def _resolve_portfolio_heat(
+    args: argparse.Namespace, fetcher: Any
+) -> tuple[float | None, float | None, list[str]]:
+    """Fill the two heat gates from the positions book.
+
+    Both gates were previously hand-passed parameters, so in practice nobody passed them and
+    `portfolio-heat` was missing on every recommendation ever journaled — which made `enter`
+    structurally unreachable, since it requires zero missing gates. Reading the book closes
+    that hole. An explicit flag still wins, and an incomplete book (any missing price or stop)
+    leaves the gates unset rather than reporting an understated risk number.
+    """
+
+    portfolio_path = getattr(args, "portfolio", None)
+    if not portfolio_path:
+        return args.portfolio_open_risk_pct, args.theme_open_risk_pct, []
+
+    from .positions import load_portfolio
+
+    book = load_portfolio(portfolio_path)
+    prices = {
+        snapshot.code: snapshot.last_price
+        for snapshot in fetcher.get_snapshots(list(book.codes()))
+    }
+    heat = book.heat(prices)
+    refs = [f"portfolio:{portfolio_path}:nav={heat.nav:.0f}:as_of={book.as_of}"]
+    if not heat.complete:
+        refs.append(
+            "portfolio-heat: book incomplete "
+            f"(missing prices {heat.missing_prices}, missing stops {heat.missing_stops}) "
+            "— heat gates left unset"
+        )
+        return args.portfolio_open_risk_pct, args.theme_open_risk_pct, refs
+
+    portfolio_pct = (
+        args.portfolio_open_risk_pct
+        if args.portfolio_open_risk_pct is not None
+        else heat.portfolio_open_risk_pct
+    )
+    theme_pct = args.theme_open_risk_pct
+    theme = getattr(args, "theme", None) or book.theme_of(args.code)
+    if theme_pct is None:
+        if theme is None:
+            refs.append(
+                f"theme-heat: {args.code} is not in the book and no --theme was given "
+                "— theme gate left unset"
+            )
+        else:
+            theme_pct = heat.theme_open_risk_pct.get(theme, 0.0)
+            refs.append(f"theme-heat:{theme}={theme_pct}%")
+    refs.append(f"portfolio-heat:total={portfolio_pct}%")
+    return portfolio_pct, theme_pct, refs
+
+
 def _cmd_analyze(args: argparse.Namespace) -> int:
     # Imported lazily so dry-run and unit tests never require the live adapter.
     from .futu_fetcher import FutuFetcher
@@ -1003,11 +1092,13 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         user_context=user_context,
     )
 
+    portfolio_pct, theme_pct, heat_refs = _resolve_portfolio_heat(args, fetcher)
+
     tags = _tags_for_code(args.code, args.watchlist)
     cross_codes = args.cross if args.cross is not None else _default_cross_codes_for(args.code, tags)
     cross_snapshots: dict[str, MarketSnapshot] = _snapshots_for_codes(fetcher, cross_codes, shared_snapshots) if cross_codes else {}
 
-    refs = [f"futu:snapshot:{args.code}"]
+    refs = [f"futu:snapshot:{args.code}", *heat_refs]
     if len(state.daily_bars) >= 2:
         refs.append(f"futu:kline:{args.code}")
     if state.capital is not None:
@@ -1128,8 +1219,8 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         horizon=args.horizon,
         event_days=args.event_days,
         underlying_confirmed=args.underlying_confirmed,
-        portfolio_open_risk_pct=args.portfolio_open_risk_pct,
-        theme_open_risk_pct=args.theme_open_risk_pct,
+        portfolio_open_risk_pct=portfolio_pct,
+        theme_open_risk_pct=theme_pct,
         trade_id=args.trade_id,
         position_stage=args.position_stage,
         reference_bars=reference_bars,
@@ -1877,8 +1968,10 @@ def main(argv: list[str] | None = None) -> int:
     analyze.add_argument("--horizon", choices=["short", "swing", "core"], default="short", help="Strategy horizon (default: short, 1-3 trading days; core = multi-quarter thesis holding)")
     analyze.add_argument("--event-days", type=int, default=None, help="Trading days until the next known major event; required to clear the swing event gate")
     analyze.add_argument("--underlying-confirmed", action=argparse.BooleanOptionalAction, default=None, help="Whether a leveraged ETF is confirmed by its underlying proxy")
-    analyze.add_argument("--portfolio-open-risk-pct", type=float, default=None, help="Current total open portfolio risk %% for the 6%% heat gate")
-    analyze.add_argument("--theme-open-risk-pct", type=float, default=None, help="Current correlated-theme open risk %% for the 3%% heat gate")
+    analyze.add_argument("--portfolio-open-risk-pct", type=float, default=None, help="Current total open portfolio risk %% for the 6%% heat gate (overrides --portfolio)")
+    analyze.add_argument("--theme-open-risk-pct", type=float, default=None, help="Current correlated-theme open risk %% for the 3%% heat gate (overrides --portfolio)")
+    analyze.add_argument("--portfolio", default=None, help="Positions book (portfolio-positions-v1) used to compute the heat gates automatically")
+    analyze.add_argument("--theme", default=None, help="Theme bucket for a candidate not yet in the book, so its theme heat can be read")
     analyze.add_argument("--cost-basis", type=float, default=None, help="Existing cost basis, to report open P&L in the plan")
     analyze.add_argument("--position-stage", choices=["probe", "core"], default=None, help="Existing position stage; a confirmed probe may become an add candidate")
     analyze.add_argument("--trade-id", default=None, help="Existing trade id for position-management records; new entries get a deterministic id")

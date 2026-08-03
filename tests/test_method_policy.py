@@ -1,6 +1,7 @@
 import unittest
 
 from tools.stock_skills.method_models import (
+    DeclineAssessment,
     LinkageAnalysis,
     SwingStructureAnalysis,
     ThesisAnalysis,
@@ -40,6 +41,7 @@ def _methods(
     conflicts=(),
     valuation_disagreement=None,
     valuation_critical=False,
+    decline=None,
 ):
     if gate is None:
         gate = "reject-new-risk" if stage in {"stage-3", "stage-4"} else "none"
@@ -89,6 +91,7 @@ def _methods(
         linkage,
         valuation_critical=valuation_critical,
         source_conflicts=conflicts,
+        decline=decline,
     )
 
 
@@ -206,3 +209,79 @@ class MethodPolicyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _decline(cause, bear=20.0, exhausted=True):
+    return DeclineAssessment(
+        cause=cause,
+        bear_case_loss_pct=bear,
+        selling_exhaustion=exhausted,
+        as_of="2026-08-03",
+        source_ref="manual:review-note",
+    )
+
+
+class DeclineClassificationTests(unittest.TestCase):
+    def test_structural_impairment_rejects_at_every_horizon_regardless_of_price(self):
+        for horizon in ("short", "swing", "core"):
+            with self.subTest(horizon=horizon):
+                final = apply_method_restrictions(
+                    _assessment(entry="enter", horizon=horizon),
+                    _methods(decline=_decline("structural-impairment")),
+                    get_strategy_profile(horizon),
+                    has_position=False,
+                )
+                self.assertEqual(final.entry_decision, "reject")
+                self.assertIsNone(final.suggested_allocation_pct)
+
+    def test_unconfirmed_cause_caps_a_full_build_down_to_a_probe(self):
+        final = apply_method_restrictions(
+            _assessment(entry="enter", allocation=20.0),
+            _methods(decline=_decline("unconfirmed")),
+            get_strategy_profile("swing"),
+            has_position=False,
+        )
+        self.assertEqual(final.entry_decision, "probe")
+        self.assertLessEqual(final.suggested_allocation_pct, 5.0)
+
+    def test_unbounded_bear_case_caps_a_full_build_even_for_a_benign_cause(self):
+        final = apply_method_restrictions(
+            _assessment(entry="enter"),
+            _methods(decline=_decline("liquidity", bear=None)),
+            get_strategy_profile("swing"),
+            has_position=False,
+        )
+        self.assertEqual(final.entry_decision, "probe")
+
+    def test_benign_and_bounded_decline_adds_no_restriction(self):
+        methods = _methods(decline=_decline("bounded-event"))
+        self.assertEqual(methods.restrictions, ())
+        final = apply_method_restrictions(
+            _assessment(entry="enter"),
+            methods,
+            get_strategy_profile("swing"),
+            has_position=False,
+        )
+        self.assertEqual(final.entry_decision, "enter")
+
+    def test_selling_not_exhausted_caps_to_probe(self):
+        final = apply_method_restrictions(
+            _assessment(entry="enter"),
+            _methods(decline=_decline("liquidity", exhausted=False)),
+            get_strategy_profile("swing"),
+            has_position=False,
+        )
+        self.assertEqual(final.entry_decision, "probe")
+
+    def test_absent_assessment_creates_no_restriction_and_no_fake_safety(self):
+        methods = _methods(decline=None)
+        self.assertIsNone(methods.decline)
+        self.assertEqual(methods.restrictions, ())
+
+    def test_contract_rejects_unknown_cause_and_anonymous_claims(self):
+        with self.assertRaisesRegex(ValueError, "Unsupported decline cause"):
+            DeclineAssessment("cheap", 10.0, True, "2026-08-03", "ref")
+        with self.assertRaisesRegex(ValueError, "requires as_of and source_ref"):
+            DeclineAssessment("liquidity", 10.0, True, "", "ref")
+        with self.assertRaisesRegex(ValueError, "positive loss magnitude"):
+            DeclineAssessment("liquidity", -10.0, True, "2026-08-03", "ref")

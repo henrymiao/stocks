@@ -2,13 +2,64 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from .method_models import MethodAssessment, MethodRestriction
+from .method_models import DeclineAssessment, MethodAssessment, MethodRestriction
 from .models import StrategyAssessment
 from .strategy import StrategyProfile
 
 
 METHOD_POLICY = "finance-method-evidence-v1"
 VALUATION_DISAGREEMENT_REJECT_PCT = 30.0
+
+
+ALL_HORIZONS = ("short", "swing", "core")
+
+
+def _decline_restrictions(decline: DeclineAssessment) -> list[MethodRestriction]:
+    """Turn the classified cause of a decline into entry restrictions.
+
+    Only downgrades are possible here — a favourable classification never authorises
+    anything on its own, exactly like the rest of the method sidecar.
+    """
+
+    restrictions: list[MethodRestriction] = []
+    if decline.cause == "structural-impairment":
+        restrictions.append(
+            MethodRestriction(
+                "decline-structural-impairment",
+                "reject-new-risk",
+                ALL_HORIZONS,
+                "durable earnings power is impaired — no price is a low",
+            )
+        )
+        return restrictions
+    if decline.cause == "unconfirmed":
+        restrictions.append(
+            MethodRestriction(
+                "decline-cause-unconfirmed",
+                "probe-only",
+                ALL_HORIZONS,
+                "cause of the decline is not established — capped probe at most",
+            )
+        )
+    if not decline.bear_case_estimable:
+        restrictions.append(
+            MethodRestriction(
+                "decline-bear-case-unbounded",
+                "probe-only",
+                ALL_HORIZONS,
+                "bear-case loss is not estimable — a full build cannot be sized",
+            )
+        )
+    if decline.selling_exhaustion is False:
+        restrictions.append(
+            MethodRestriction(
+                "decline-selling-not-exhausted",
+                "probe-only",
+                ALL_HORIZONS,
+                "marginal selling has not exhausted",
+            )
+        )
+    return restrictions
 
 
 def build_method_assessment(
@@ -21,8 +72,11 @@ def build_method_assessment(
     valuation_critical=False,
     source_conflicts=(),
     errors=None,
+    decline=None,
 ):
     restrictions: list[MethodRestriction] = []
+    if decline is not None:
+        restrictions.extend(_decline_restrictions(decline))
     if source_conflicts:
         restrictions.append(
             MethodRestriction(
@@ -97,6 +151,7 @@ def build_method_assessment(
         source_conflicts=tuple(source_conflicts),
         method_policy=METHOD_POLICY,
         errors={} if errors is None else dict(errors),
+        decline=decline,
     )
 
 

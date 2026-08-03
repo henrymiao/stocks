@@ -180,6 +180,46 @@ class StrategyGateTests(unittest.TestCase):
         self.assertIn("entry-trigger", missing_trigger.gates_missing)
         self.assertEqual(missing_trigger.suggested_allocation_pct, 5.0)
 
+    def test_capital_flow_explains_but_no_longer_gates_the_probe_path(self):
+        """Retired 2026-08-03: order-size flow cannot identify the participant, and the
+        journals show no edge, so a weak capital score must not veto a probe."""
+        profile = get_strategy_profile("short")
+        weak_capital = _good_evidence(
+            factor_scores={
+                "price_volume": 70.0,
+                "relative_strength": 70.0,
+                "market_regime": 70.0,
+                "capital_flow": 5.0,
+                "liquidity_event": 70.0,
+                "position_fit": 70.0,
+                "trend_quality": 80.0,
+                "fundamental": 70.0,
+                "backdrop": 70.0,
+                "volume_accumulation": 5.0,
+            },
+            trigger_confirmed=None,
+        )
+        result = evaluate_strategy(profile, weak_capital)
+        self.assertEqual(result.entry_decision, "probe")
+
+        # Price/volume behaviour is tape data, not an identity inference — it still gates.
+        weak_price_volume = _good_evidence(
+            factor_scores={
+                "price_volume": 20.0,
+                "relative_strength": 70.0,
+                "market_regime": 70.0,
+                "capital_flow": 95.0,
+                "liquidity_event": 70.0,
+                "position_fit": 70.0,
+                "trend_quality": 20.0,
+                "fundamental": 70.0,
+                "backdrop": 70.0,
+                "volume_accumulation": 95.0,
+            },
+            trigger_confirmed=None,
+        )
+        self.assertNotEqual(evaluate_strategy(profile, weak_price_volume).entry_decision, "probe")
+
     def test_swing_profile_requires_weekly_and_event_evidence(self):
         profile = get_strategy_profile("swing")
         missing_weekly = evaluate_strategy(profile, _good_evidence(weekly_aligned=None))

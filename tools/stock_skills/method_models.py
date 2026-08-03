@@ -96,6 +96,55 @@ class ThesisAnalysis:
     notes: tuple[str, ...] = ()
 
 
+DECLINE_CAUSES = frozenset(
+    {
+        "liquidity",              # market/sector-wide forced or passive selling
+        "bounded-event",          # a one-off with an estimable ceiling on the damage
+        "valuation-reset",        # excessive expectations repricing to a new equilibrium
+        "structural-impairment",  # durable earnings power is gone
+        "unconfirmed",            # the move is observed, the cause is not established
+    }
+)
+
+
+@dataclass(frozen=True)
+class DeclineAssessment:
+    """Why a security fell, recorded before its price is used as evidence of a bottom.
+
+    A drawdown is not a discount. The same -30% is a recoverable liquidity flush, a bounded
+    one-off, a permanent repricing, or a broken business, and those four have incompatible
+    implications for whether a "low" exists at all. Classifying the cause first is what stops
+    the framework from averaging into structural impairment, which is the single most
+    expensive mistake this input exists to prevent. It is manual, opt-in evidence: absence
+    means unassessed, never "safe".
+    """
+
+    cause: str
+    bear_case_loss_pct: float | None
+    selling_exhaustion: bool | None
+    as_of: str
+    source_ref: str
+    drawdown_pct: float | None = None
+    source: str = "official-manual"
+    notes: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.cause not in DECLINE_CAUSES:
+            raise ValueError(f"Unsupported decline cause: {self.cause!r}")
+        if self.source != "official-manual":
+            raise ValueError("Decline assessment is a manual judgement: source must be official-manual")
+        if not self.as_of or not self.source_ref:
+            raise ValueError("Decline assessment requires as_of and source_ref")
+        if self.bear_case_loss_pct is not None and self.bear_case_loss_pct <= 0:
+            raise ValueError("bear_case_loss_pct is a positive loss magnitude in percent")
+        if self.drawdown_pct is not None and self.drawdown_pct <= 0:
+            raise ValueError("drawdown_pct is a positive magnitude in percent")
+
+    @property
+    def bear_case_estimable(self) -> bool:
+        return self.bear_case_loss_pct is not None
+
+
 @dataclass(frozen=True)
 class MethodRestriction:
     code: str
@@ -117,3 +166,4 @@ class MethodAssessment:
     source_conflicts: tuple[str, ...] = ()
     method_policy: str = "finance-method-evidence-v1"
     errors: dict[str, str] = field(default_factory=dict)
+    decline: DeclineAssessment | None = None

@@ -1,0 +1,153 @@
+{
+  "schema_version": "portfolio-positions-v1",
+  "as_of": "2026-08-03T22:30:00+08:00",
+  "source": "user-confirmed-2026-08-03",
+  "base_currency": "CNY",
+  "fx_rates": {
+    "CNY": 1.0,
+    "USD": 7.13,
+    "HKD": 0.912
+  },
+  "cash": {
+    "CNY": 1500000.0
+  },
+  "notes": [
+    "股数与成本由用户 2026-08-03 逐个确认，取代此前所有快照。",
+    "current_stop 取自当日 analyze 的 exit_plan.initial_stop，随每次复盘更新。",
+    "工业富联成本 59.25 为前复权口径（实付 59.90，8/3 除息每股 0.65）。",
+    "宁德A 与长电的成本暂按 8/3 收盘价填，待用户提供真实成交价。",
+    "fx_rates 为近似值，需定期核对。"
+  ],
+  "positions": [
+    {
+      "code": "US.GOOGL",
+      "shares": 170,
+      "cost_basis": 290.0,
+      "currency": "USD",
+      "theme": "ai-compute",
+      "trade_id": "googl-core-290",
+      "current_stop": 326.1,
+      "leverage": 1.0
+    },
+    {
+      "code": "HK.00700",
+      "shares": 700,
+      "cost_basis": 402.0,
+      "currency": "HKD",
+      "theme": "china-internet",
+      "trade_id": "tencent-00700-core412",
+      "current_stop": 453.03,
+      "leverage": 1.0
+    },
+    {
+      "code": "HK.09868",
+      "shares": 7000,
+      "cost_basis": 50.38,
+      "currency": "HKD",
+      "theme": "ev-chain",
+      "trade_id": "xpeng-09868-5038",
+      "current_stop": 47.45,
+      "leverage": 1.0
+    },
+    {
+      "code": "HK.09988",
+      "shares": 1500,
+      "cost_basis": 106.0,
+      "currency": "HKD",
+      "theme": "china-internet",
+      "trade_id": "baba-09988-20260718",
+      "current_stop": 110.53,
+      "leverage": 1.0
+    },
+    {
+      "code": "SH.563380",
+      "shares": 109200,
+      "cost_basis": 0.998,
+      "currency": "CNY",
+      "theme": "aerospace-defense",
+      "trade_id": "hangtian-563380-20260718",
+      "current_stop": 0.8862,
+      "leverage": 1.0
+    },
+    {
+      "code": "HK.00522",
+      "shares": 600,
+      "cost_basis": 154.0,
+      "currency": "HKD",
+      "theme": "semiconductor",
+      "trade_id": "asmpt-00522-154",
+      "current_stop": 139.72,
+      "leverage": 1.0
+    },
+    {
+      "code": "US.SMH",
+      "shares": 20,
+      "cost_basis": 537.0,
+      "currency": "USD",
+      "theme": "semiconductor",
+      "trade_id": "smh-us-core539",
+      "current_stop": 511.79,
+      "leverage": 1.0
+    },
+    {
+      "code": "SH.601138",
+      "shares": 1300,
+      "cost_basis": 59.25,
+      "currency": "CNY",
+      "theme": "ai-compute",
+      "trade_id": "fii-601138-599",
+      "current_stop": 52.78,
+      "leverage": 1.0
+    },
+    {
+      "code": "US.SOXL",
+      "shares": 70,
+      "cost_basis": 130.0,
+      "currency": "USD",
+      "theme": "semiconductor",
+      "trade_id": "soxl-3x-130",
+      "current_stop": 90.55,
+      "leverage": 3.0
+    },
+    {
+      "code": "US.LNG",
+      "shares": 30,
+      "cost_basis": 259.0,
+      "currency": "USD",
+      "theme": "energy",
+      "trade_id": "lng-cheniere-259",
+      "current_stop": 250.33,
+      "leverage": 1.0
+    },
+    {
+      "code": "SZ.300750",
+      "shares": 100,
+      "cost_basis": 394.4,
+      "currency": "CNY",
+      "theme": "ev-chain",
+      "trade_id": "catl-a-probe-20260803",
+      "current_stop": 381.43,
+      "leverage": 1.0
+    },
+    {
+      "code": "US.CRCL",
+      "shares": 80,
+      "cost_basis": 72.0,
+      "currency": "USD",
+      "theme": "crypto",
+      "trade_id": "circle-crcl-20260718",
+      "current_stop": 55.47,
+      "leverage": 1.0
+    },
+    {
+      "code": "SH.600584",
+      "shares": 100,
+      "cost_basis": 61.0,
+      "currency": "CNY",
+      "theme": "semiconductor",
+      "trade_id": "cjkj-probe-20260803",
+      "current_stop": 56.54,
+      "leverage": 1.0
+    }
+  ]
+}

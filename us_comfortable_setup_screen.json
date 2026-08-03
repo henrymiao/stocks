@@ -1,0 +1,32 @@
+{
+  "filters": [
+    {"type": "simple_field", "field": "MARKET", "values": ["US"]},
+    {"type": "simple_property", "name": "PRICE", "lower": 10.0},
+    {"type": "simple_property", "name": "MARKET_CAP", "lower": 20000000000.0},
+    {"type": "simple_property", "name": "PRICE_TO_52W_HIGH", "lower": -0.18, "upper": -0.02},
+    {"type": "simple_property", "name": "VOLUME_RATIO", "lower": 0.4, "upper": 1.8},
+    {"type": "cumulative_property", "name": "AVG_TURNOVER", "days": 20, "lower": 20000000.0},
+    {"type": "cumulative_property", "name": "PRICE_CHANGE_PCT", "days": 20, "lower": 0.03, "upper": 0.18},
+    {"type": "cumulative_property", "name": "PRICE_CHANGE_PCT", "days": 5, "lower": -0.06, "upper": -0.005},
+    {"type": "indicator_positional", "first_indicator_name": "PRICE", "period_type": "DAY", "position": "OVER", "second_indicator": "MA20"}
+  ],
+  "retrieves": [
+    {"type": "basic", "name": "CODE"},
+    {"type": "basic", "name": "NAME"},
+    {"type": "basic", "name": "INDUSTRY"},
+    {"type": "simple", "name": "PRICE"},
+    {"type": "simple", "name": "MARKET_CAP"},
+    {"type": "simple", "name": "PE_TTM"},
+    {"type": "simple", "name": "PRICE_TO_52W_HIGH"},
+    {"type": "simple", "name": "VOLUME_RATIO"},
+    {"type": "cumulative", "name": "PRICE_CHANGE_PCT", "days": 1},
+    {"type": "cumulative", "name": "PRICE_CHANGE_PCT", "days": 5},
+    {"type": "cumulative", "name": "PRICE_CHANGE_PCT", "days": 20},
+    {"type": "cumulative", "name": "AVG_TURNOVER", "days": 20}
+  ],
+  "sort": {
+    "direction": "DESC",
+    "property_type": "cumulative",
+    "property_params": {"name": "PRICE_CHANGE_PCT", "days": 20}
+  }
+}

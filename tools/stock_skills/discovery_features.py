@@ -6,6 +6,7 @@ from datetime import datetime
 from statistics import fmean
 from typing import Any
 
+from .markets import market_close_time
 from .models import KLineBar
 from .universe import SectorUniverse, market_timezone, normalize_market
 
@@ -70,8 +71,7 @@ def completed_daily_bars(
     moment = datetime.fromisoformat(evaluated_at)
     tz = market_timezone(market)
     local = moment.replace(tzinfo=tz) if moment.tzinfo is None else moment.astimezone(tz)
-    close_hour = 15 if market == "CN" else 16
-    include_today = local.hour >= close_hour
+    include_today = local.time() >= market_close_time(market)
     result: list[KLineBar] = []
     for bar in bars:
         if not _valid_bar(bar):

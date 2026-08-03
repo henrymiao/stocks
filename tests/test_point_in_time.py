@@ -157,6 +157,7 @@ class PointInTimeTests(unittest.TestCase):
                 intraday_bars=[],
                 daily_adjustment_basis="forward-adjusted",
                 intraday_adjustment_basis="none",
+                intraday_bar_interval="5m",
                 evidence=(
                     EvidenceStamp(
                         component="snapshot",
@@ -189,8 +190,67 @@ class PointInTimeTests(unittest.TestCase):
                 intraday_bars=[],
                 daily_adjustment_basis=None,
                 intraday_adjustment_basis="none",
+                intraday_bar_interval="5m",
                 evidence=(),
             )
+
+    def _hk_payload(self, **overrides):
+        arguments = {
+            "code": "HK.00700",
+            "security_id": "listing:HK.00700",
+            "company_id": "security:HK.00700",
+            "market": "HK",
+            "as_of": "2026-08-03T10:00:00+08:00",
+            "captured_at": "2026-08-03T10:00:02+08:00",
+            "session_phase": "intraday",
+            "universe_version": "universe:test",
+            "identity_version": "identity:test",
+            "snapshot": None,
+            "daily_bars": [],
+            "intraday_bars": [],
+            "daily_adjustment_basis": "forward-adjusted",
+            "intraday_adjustment_basis": "none",
+            "intraday_bar_interval": "5m",
+            "evidence": (),
+        }
+        arguments.update(overrides)
+        return PointInTimeInput.build_market_payload(**arguments)
+
+    def test_still_forming_session_bar_is_rejected_until_its_interval_closes(self):
+        forming_day = [{"time": "2026-08-03T00:00:00+08:00", "close": 445.0}]
+        with self.assertRaisesRegex(ValueError, "daily bar is incomplete at package as_of"):
+            self._hk_payload(daily_bars=forming_day)
+
+        after_close = self._hk_payload(
+            as_of="2026-08-03T16:00:00+08:00",
+            captured_at="2026-08-03T16:00:02+08:00",
+            session_phase="after-close",
+            daily_bars=forming_day,
+        )
+        self.assertEqual(len(after_close.payload()["daily_bars"]["bars"]), 1)
+        self.assertEqual(after_close.payload()["daily_bars"]["interval"], "1d")
+
+    def test_five_minute_bar_is_usable_only_after_its_interval_elapses(self):
+        forming = [{"time": "2026-08-03T09:55:00+08:00", "close": 445.0}]
+        with self.assertRaisesRegex(ValueError, "intraday bar is incomplete at package as_of"):
+            self._hk_payload(
+                as_of="2026-08-03T09:57:00+08:00",
+                captured_at="2026-08-03T09:57:02+08:00",
+                intraday_bars=forming,
+            )
+
+        complete = self._hk_payload(intraday_bars=forming)
+        self.assertEqual(complete.payload()["intraday_bars"]["bars"], forming)
+        self.assertEqual(complete.payload()["intraday_bars"]["interval"], "5m")
+
+    def test_intraday_interval_must_be_explicit_and_supported(self):
+        with self.assertRaisesRegex(ValueError, "Unsupported bar interval"):
+            self._hk_payload(intraday_bar_interval="4h")
+
+    def test_bar_interval_is_part_of_the_input_digest(self):
+        five_minute = self._hk_payload(intraday_bar_interval="5m")
+        one_minute = self._hk_payload(intraday_bar_interval="1m")
+        self.assertNotEqual(five_minute.input_digest, one_minute.input_digest)
 
 
 if __name__ == "__main__":

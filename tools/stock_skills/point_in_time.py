@@ -5,7 +5,13 @@ import json
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping
 
-from .markets import market_moment, normalize_market
+from .markets import (
+    DAILY_BAR_INTERVAL,
+    INTRADAY_BAR_MINUTES,
+    bar_close_moment,
+    market_moment,
+    normalize_market,
+)
 
 
 INPUT_SCHEMA_VERSION = "analysis-input-v1"
@@ -194,6 +200,7 @@ class PointInTimeInput:
         intraday_bars: list[Mapping[str, Any]],
         daily_adjustment_basis: str | None,
         intraday_adjustment_basis: str | None,
+        intraday_bar_interval: str,
         evidence: tuple[EvidenceStamp, ...],
         capital: Mapping[str, Any] | None = None,
         financial: Mapping[str, Any] | None = None,
@@ -209,6 +216,8 @@ class PointInTimeInput:
         ):
             if basis is None or not str(basis).strip():
                 raise ValueError(f"{label} requires an explicit adjustment basis")
+        if intraday_bar_interval not in INTRADAY_BAR_MINUTES:
+            raise ValueError(f"Unsupported bar interval: {intraday_bar_interval!r}")
 
         snapshot_record = None if snapshot is None else dict(snapshot)
         if snapshot_record is not None:
@@ -218,23 +227,26 @@ class PointInTimeInput:
                 raise ValueError("Snapshot is after package as_of")
 
         def freeze_bars(
-            component: str, records: list[Mapping[str, Any]]
+            component: str, records: list[Mapping[str, Any]], interval: str
         ) -> list[dict[str, Any]]:
             frozen: list[dict[str, Any]] = []
             for row in records:
                 record = dict(row)
                 if "time" not in record:
                     raise ValueError(f"{component} bar requires time")
-                if market_moment(str(record["time"]), market) > cutoff:
+                bar_time = str(record["time"])
+                if market_moment(bar_time, market) > cutoff:
                     raise ValueError(f"{component} bar is after package as_of")
+                if bar_close_moment(bar_time, market, interval) > cutoff:
+                    raise ValueError(f"{component} bar is incomplete at package as_of")
                 frozen.append(record)
             return sorted(
                 frozen,
                 key=lambda item: market_moment(str(item["time"]), market),
             )
 
-        daily_records = freeze_bars("daily", daily_bars)
-        intraday_records = freeze_bars("intraday", intraday_bars)
+        daily_records = freeze_bars("daily", daily_bars, DAILY_BAR_INTERVAL)
+        intraday_records = freeze_bars("intraday", intraday_bars, intraday_bar_interval)
         component_values: dict[str, object] = {
             "snapshot": snapshot_record,
             "daily_bars": daily_records,
@@ -274,10 +286,12 @@ class PointInTimeInput:
             "snapshot": snapshot_record,
             "daily_bars": {
                 "adjustment_basis": str(daily_adjustment_basis),
+                "interval": DAILY_BAR_INTERVAL,
                 "bars": daily_records,
             },
             "intraday_bars": {
                 "adjustment_basis": str(intraday_adjustment_basis),
+                "interval": intraday_bar_interval,
                 "bars": intraday_records,
             },
             "capital": capital,

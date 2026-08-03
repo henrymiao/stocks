@@ -21,6 +21,8 @@ The legacy total score remains for historical comparison. The authoritative setu
 
 Recommendations also carry a shadow `method_assessment` under schema `recommendation-v6` and decision policy `logic-first-method-evidence-v6`. This market-specific sidecar records swing stage, a structured pre-technical thesis, explicit valuation scenarios, rolling linkage, provenance conflicts, coverage, and restrictions. In Phase 1, positive method evidence adds zero points to `setup_score`: it explains and calibrates only. Negative evidence may preserve or downgrade the existing decision, never upgrade it.
 
+A **v7 shadow foundation** exists alongside this, and it is foundation only: point-in-time security identity, versioned universe membership, and immutable input packages. It defines no v7 score, recommendation, or routing — `recommendation-v6` under `logic-first-method-evidence-v6` remains the only authoritative decision path. Its purpose is that a champion and a challenger consume one frozen input package (same `package_id`, same `input_digest`), so a comparison between them can never be contaminated by two different fetches. Run `foundation-check` after editing any universe or identity file.
+
 This skill supports analysis and decision support only. It must not place real trades.
 
 ## Repository Paths
@@ -95,6 +97,17 @@ python3 -m tools.stock_skills.cli review-discoveries --market CN --output /tmp/d
 `review-discoveries` measures **alert quality, deliberately separate from trade P&L**: for each triggered candidate it reports MFE/MAE/return over fixed 1/3/5/10-session windows measured from `trigger_level`, and returns `null` for any window that has not fully elapsed. These reviews live in the discovery store, not in `reviews.jsonl`, and are not inputs to legacy component or cluster weight optimisation.
 
 Shared flags: `--market CN|HK|US` (required), `--horizon short|swing` (discover; default short), `--backfill 60|260`, `--universe`, `--membership-cache`, `--db` (default `data/discovery.db`), `--market-db`, `--as-of`, `--output`. `--fixture` runs the whole pipeline deterministically offline with no OpenD, which is how the discovery tests exercise it.
+
+Validate the v7 point-in-time foundation (offline, read-only, no fetch/score/store write):
+
+```bash
+python3 -m tools.stock_skills.cli foundation-check \
+  --identity-registry data/identities/securities-v1.json \
+  --universe data/universes/cn.json --universe data/universes/hk.json --universe data/universes/us.json \
+  --as-of 2026-08-03T18:00:00+08:00
+```
+
+It checks active membership, investability, reference-only benchmarks, publication cutoffs, cross-file version agreement, and identity links, and exits non-zero when any market is not `ready`. Every universe/identity edit changes a content-addressed digest, so the three universe files and the registry must be re-migrated together via `foundation_migrate.py` — never hand-edit one side.
 
 Turn a rejection into a waiting price with `entry_zone.py`:
 
@@ -185,7 +198,11 @@ python3 -c "import json; p=json.load(open('/tmp/hudian-recommendation.json')); p
    - `path_backtest.py`: chronological OHLC execution simulator, costs, R metrics, aggregation, and portfolio/theme heat checks. It is offline-only and never calls trade APIs.
    - `evidence_optimization.py`: versioned evidence joins, synthetic/incomplete exclusion, trade-id deduplication, ordinary/leveraged buckets, and advisory chronological walk-forward evaluation.
    - `watchlist_scan.py`: tier-aware snapshot filters, separate short/swing promotion rankings, and bounded always/Top-N/Bottom-N deep-analysis selection. The command wrapper is `scan_watchlist.py`.
-   - `universe.py`: market universes and sector membership (manually versioned), market timezones, and code normalization — the input to discovery.
+   - `universe.py`: market universes and sector membership (manually versioned), market timezones, and code normalization — the input to discovery. Schema v2 adds `security_id`, membership windows, publication cutoffs, and a content-addressed `version_id`.
+   - `markets.py`: the single CN/HK/US prefix, timezone, currency, and session-close contract. `bar_close_moment` encodes that an OpenD bar is stamped with its interval **start**, so a bar counts as observed only once its interval has elapsed.
+   - `identity.py`: point-in-time `SecurityIdentity` (listing) versus `company_id` (economic issuer, so A/H listings never read as independent diversification), activity windows, and the content-addressed registry. A reissued listing code is legal only as non-overlapping closed windows.
+   - `point_in_time.py`: `EvidenceStamp` four-state evidence (available/missing/stale/conflicting), the immutable `PointInTimeInput` package with explicit adjustment basis and no-lookahead cutoffs, and `bind_shadow_pair` champion/challenger bindings.
+   - `foundation_validation.py` / `foundation_migrate.py`: read-only cross-file validation behind `foundation-check`, and the deterministic v1→v2 + registry migration.
    - `discovery_features.py`: completed-bar feature tracks and sector context used to score a candidate; it never reads a partial session.
    - `discovery_engine.py`: candidate construction, the `forming`/`armed`/`triggered`/`invalidated`/`expired` state machine with session-based expiry, intraday confirmation against completed five-minute bars, and `review_discovery` fixed-window alert scoring. Discovery output is an alert queue, not a recommendation.
    - `discovery_runtime.py`: live wiring (universe → OpenD bars → engine) plus deterministic offline fixture loading.

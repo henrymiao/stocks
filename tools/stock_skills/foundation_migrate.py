@@ -204,13 +204,22 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--identity-output", required=True, type=Path)
     parser.add_argument("--write-universes", action="store_true")
     parser.add_argument("--verify-only", action="store_true")
+    parser.add_argument(
+        "--allow-v2-rewrite",
+        action="store_true",
+        help=(
+            "Regenerate already-v2 universes and the registry together. Required for "
+            "maintenance edits (renames, membership changes): the registry version is "
+            "embedded in every universe, so both sides must be rewritten in one pass."
+        ),
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     universes, market_paths = _universe_map(args.universe)
-    if args.write_universes and not args.verify_only:
+    if args.write_universes and not args.verify_only and not args.allow_v2_rewrite:
         already_v2 = [
             market
             for market, payload in universes.items()
@@ -218,8 +227,8 @@ def main(argv: list[str] | None = None) -> int:
         ]
         if already_v2:
             raise RuntimeError(
-                "Refusing to rewrite already-v2 universes without --verify-only: "
-                + ", ".join(sorted(already_v2))
+                "Refusing to rewrite already-v2 universes without --verify-only "
+                "or --allow-v2-rewrite: " + ", ".join(sorted(already_v2))
             )
 
     migrated, registry = migrate_universes(

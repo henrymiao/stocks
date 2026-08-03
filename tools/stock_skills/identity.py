@@ -66,12 +66,28 @@ class IdentityRegistry:
     def __post_init__(self) -> None:
         if self.schema_version != IDENTITY_SCHEMA_VERSION:
             raise ValueError(f"Unsupported identity schema: {self.schema_version!r}")
-        codes = [identity.code for identity in self.identities]
         security_ids = [identity.security_id for identity in self.identities]
-        if len(codes) != len(set(codes)):
-            raise ValueError("Identity registry contains duplicate codes")
         if len(security_ids) != len(set(security_ids)):
             raise ValueError("Identity registry contains duplicate security IDs")
+        # A listing code is unique only within one activity window.  Exchanges reissue
+        # codes after a delisting, so the registry keys on security_id and requires the
+        # windows sharing a code to be closed and non-overlapping.
+        by_code: dict[str, list[SecurityIdentity]] = {}
+        for identity in self.identities:
+            by_code.setdefault(identity.code, []).append(identity)
+        for code, group in by_code.items():
+            if len(group) == 1:
+                continue
+            ordered = sorted(
+                group, key=lambda item: market_moment(item.active_from, item.market)
+            )
+            for previous, current in zip(ordered, ordered[1:]):
+                if previous.active_to is None or market_moment(
+                    previous.active_to, previous.market
+                ) > market_moment(current.active_from, current.market):
+                    raise ValueError(
+                        f"Identity registry contains overlapping windows for code {code}"
+                    )
 
     def _material_record(self) -> dict[str, Any]:
         return {
@@ -91,12 +107,13 @@ class IdentityRegistry:
         return f"identity:{digest}"
 
     def resolve(self, code: str, at: str) -> SecurityIdentity:
-        match = next((identity for identity in self.identities if identity.code == code), None)
-        if match is None:
+        matches = [identity for identity in self.identities if identity.code == code]
+        if not matches:
             raise KeyError(f"Unknown identity code: {code}")
-        if not match.active_at(at):
+        active = [identity for identity in matches if identity.active_at(at)]
+        if not active:
             raise KeyError(f"Identity {code} is not active at {at}")
-        return match
+        return active[0]
 
     def company_codes(self, company_id: str) -> tuple[str, ...]:
         return tuple(

@@ -26,7 +26,7 @@ class WatchlistDataTests(unittest.TestCase):
         self.assertEqual(len(by_code), len(entries))
         self.assertEqual(by_code["HK.00700"]["position_status"], "reduced-holding")
         self.assertEqual(by_code["HK.09988"]["position_status"], "reduced-holding")
-        self.assertEqual(by_code["SZ.000021"]["position_status"], "holding")
+        self.assertEqual(by_code["SZ.000021"]["position_status"], "exited-watch")
         self.assertEqual(by_code["HK.09868"]["position_status"], "holding")
         self.assertEqual(by_code["HK.09868"]["scan_policy"], "always")
         self.assertEqual(by_code["SZ.002463"]["position_status"], "exited-watch")

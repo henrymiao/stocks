@@ -1,6 +1,8 @@
 import unittest
 
 from tools.stock_skills.markets import (
+    bar_close_moment,
+    market_close_time,
     market_currency,
     market_from_code,
     market_timezone,
@@ -26,6 +28,23 @@ class MarketContractTests(unittest.TestCase):
             normalize_market("CC")
         with self.assertRaisesRegex(ValueError, "Malformed market code"):
             market_from_code("NVDA")
+
+    def test_bar_close_uses_the_interval_end_not_its_start(self):
+        self.assertEqual(str(market_close_time("CN")), "15:00:00")
+        self.assertEqual(str(market_close_time("HK")), "16:00:00")
+
+        daily = bar_close_moment("2026-08-03T00:00:00+08:00", "CN", "1d")
+        self.assertEqual(daily.isoformat(), "2026-08-03T15:00:00+08:00")
+        self.assertEqual(
+            bar_close_moment("2026-08-03", "HK", "1d").isoformat(),
+            "2026-08-03T16:00:00+08:00",
+        )
+
+        five_minute = bar_close_moment("2026-08-03T09:50:00-04:00", "US", "5m")
+        self.assertEqual(five_minute.isoformat(), "2026-08-03T09:55:00-04:00")
+
+        with self.assertRaisesRegex(ValueError, "Unsupported bar interval"):
+            bar_close_moment("2026-08-03T09:50:00-04:00", "US", "4h")
 
 
 if __name__ == "__main__":

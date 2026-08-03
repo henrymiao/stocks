@@ -89,6 +89,72 @@ class IdentityTests(unittest.TestCase):
             with self.subTest(code=code), self.assertRaisesRegex(KeyError, "not active"):
                 registry.resolve(code, "2026-08-03T10:00:00+08:00")
 
+    def test_reissued_listing_code_resolves_by_activity_window(self):
+        delisted = SecurityIdentity(
+            "listing:US.XYZ@2015", "security:old-xyz", "US.XYZ", "Old XYZ",
+            "US", "ordinary-stock", "USD",
+            "2015-03-02T09:30:00-05:00", "2021-06-30T16:00:00-04:00",
+        )
+        reissued = SecurityIdentity(
+            "listing:US.XYZ@2023", "security:new-xyz", "US.XYZ", "New XYZ",
+            "US", "ordinary-stock", "USD",
+            "2023-09-11T09:30:00-04:00", None,
+        )
+        registry = IdentityRegistry(
+            published_at="2026-08-01T18:00:00-04:00",
+            identities=(reissued, delisted),
+        )
+
+        self.assertEqual(
+            registry.resolve("US.XYZ", "2018-05-04T10:00:00-04:00").company_id,
+            "security:old-xyz",
+        )
+        self.assertEqual(
+            registry.resolve("US.XYZ", "2026-08-03T10:00:00-04:00").company_id,
+            "security:new-xyz",
+        )
+        with self.assertRaisesRegex(KeyError, "not active"):
+            registry.resolve("US.XYZ", "2022-01-04T10:00:00-05:00")
+
+    def test_overlapping_windows_for_one_code_are_rejected(self):
+        first = SecurityIdentity(
+            "listing:US.XYZ@2015", "security:old-xyz", "US.XYZ", "Old XYZ",
+            "US", "ordinary-stock", "USD",
+            "2015-03-02T09:30:00-05:00", "2023-12-31T16:00:00-05:00",
+        )
+        second = SecurityIdentity(
+            "listing:US.XYZ@2023", "security:new-xyz", "US.XYZ", "New XYZ",
+            "US", "ordinary-stock", "USD",
+            "2023-09-11T09:30:00-04:00", None,
+        )
+        with self.assertRaisesRegex(ValueError, "overlapping windows for code US.XYZ"):
+            IdentityRegistry(
+                published_at="2026-08-01T18:00:00-04:00",
+                identities=(first, second),
+            )
+
+        never_closed = SecurityIdentity(
+            "listing:US.XYZ@open", "security:open-xyz", "US.XYZ", "Open XYZ",
+            "US", "ordinary-stock", "USD",
+            "2015-03-02T09:30:00-05:00", None,
+        )
+        with self.assertRaisesRegex(ValueError, "overlapping windows for code US.XYZ"):
+            IdentityRegistry(
+                published_at="2026-08-01T18:00:00-04:00",
+                identities=(never_closed, second),
+            )
+
+    def test_duplicate_security_ids_are_still_rejected(self):
+        duplicate = SecurityIdentity(
+            "listing:US.SPY", "fund:spy", "US.SPY", "SPY", "US",
+            "unleveraged-etf", "USD", "1993-01-29T09:30:00-05:00",
+        )
+        with self.assertRaisesRegex(ValueError, "duplicate security IDs"):
+            IdentityRegistry(
+                published_at="2026-08-01T18:00:00-04:00",
+                identities=(duplicate, duplicate),
+            )
+
     def test_registry_version_is_content_addressed_and_order_stable(self):
         base = {
             "schema_version": "security-identity-registry-v1",

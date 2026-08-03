@@ -1,6 +1,6 @@
 {
   "schema_version": "security-identity-registry-v1",
-  "published_at": "2026-08-03T18:00:00+08:00",
+  "published_at": "2026-08-03T21:30:00+08:00",
   "identities": [
     {
       "security_id": "benchmark:HK.800000",
@@ -314,7 +314,7 @@
       "security_id": "listing:HK.09868",
       "company_id": "security:HK.09868",
       "code": "HK.09868",
-      "name": "小鹏汽车-W",
+      "name": "小鹏集团-W",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1026,5 +1026,5 @@
       "active_to": null
     }
   ],
-  "version_id": "identity:9a23ac98b48cb2ae52d508dba6337fed6840db0fb4c182bdc6c0ce5cdfb2d3b2"
+  "version_id": "identity:f174983dee1106f22e5341503a1c2bb2d002973984bafe9c2396a47aaf8f80a2"
 }

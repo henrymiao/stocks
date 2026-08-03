@@ -200,6 +200,7 @@ class OpportunityDiscoveryTests(unittest.TestCase):
                 intraday_bars=[],
                 daily_adjustment_basis="none",
                 intraday_adjustment_basis="none",
+                intraday_bar_interval="5m",
                 evidence=evidence,
             )
 

@@ -69,7 +69,7 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
+      "position_status": "holding",
       "scan_policy": "always",
       "tags": [
         "a-share",
@@ -78,7 +78,9 @@
         "cyclical",
         "valuation-reference-only",
         "national-tech",
-        "advanced-packaging"
+        "advanced-packaging",
+        "holding",
+        "probe"
       ]
     },
     {
@@ -108,8 +110,8 @@
       "code": "US.GOOGL",
       "name": "Alphabet",
       "enabled": true,
-      "tier": "thematic",
-      "priority": 50,
+      "tier": "core",
+      "priority": 100,
       "strategy_profiles": [
         "short",
         "swing"
@@ -119,12 +121,14 @@
       "benchmark": "US.SPY",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
-      "scan_policy": "ranked",
+      "position_status": "holding",
+      "scan_policy": "always",
       "tags": [
         "us",
         "mega-cap",
-        "ai"
+        "ai",
+        "holding",
+        "core-thesis"
       ]
     },
     {
@@ -215,14 +219,15 @@
       "benchmark": "US.SPY",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
+      "position_status": "holding",
       "scan_policy": "always",
       "tags": [
         "us",
         "etf",
         "semiconductor",
         "ai-hardware",
-        "growth"
+        "growth",
+        "holding"
       ]
     },
     {
@@ -240,12 +245,13 @@
       "benchmark": "US.SPY",
       "underlying_proxy": "US.SMH",
       "event_policy": "standard",
-      "position_status": "watch",
-      "scan_policy": "ranked",
+      "position_status": "holding",
+      "scan_policy": "always",
       "tags": [
         "us",
         "semiconductor",
-        "leveraged"
+        "leveraged",
+        "holding"
       ]
     },
     {
@@ -320,7 +326,7 @@
     },
     {
       "code": "HK.09868",
-      "name": "小鹏汽车-W",
+      "name": "小鹏集团-W",
       "enabled": true,
       "tier": "core",
       "priority": 100,
@@ -983,15 +989,17 @@
       "benchmark": "SZ.399006",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
-      "scan_policy": "ranked",
+      "position_status": "holding",
+      "scan_policy": "always",
       "tags": [
         "a-share",
         "battery",
         "new-energy",
         "national-tech",
         "new-energy-vehicle",
-        "growth"
+        "growth",
+        "holding",
+        "probe"
       ]
     },
     {
@@ -1785,8 +1793,8 @@
       "code": "SZ.000021",
       "name": "深科技",
       "enabled": true,
-      "tier": "core",
-      "priority": 100,
+      "tier": "thematic",
+      "priority": 90,
       "strategy_profiles": [
         "short",
         "swing"
@@ -1796,8 +1804,8 @@
       "benchmark": "SZ.399006",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "holding",
-      "scan_policy": "always",
+      "position_status": "exited-watch",
+      "scan_policy": "ranked",
       "tags": [
         "a-share",
         "semiconductor",
@@ -1805,7 +1813,7 @@
         "advanced-manufacturing",
         "high-volatility",
         "momentum",
-        "holding"
+        "exited-watch"
       ]
     },
     {
@@ -3283,6 +3291,32 @@
         "cyclical",
         "value",
         "diversifier"
+      ]
+    },
+    {
+      "code": "HK.00522",
+      "name": "ASMPT",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 90,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "holding",
+      "scan_policy": "always",
+      "tags": [
+        "hk",
+        "semiconductor",
+        "equipment",
+        "advanced-packaging",
+        "cyclical",
+        "holding"
       ]
     }
   ]

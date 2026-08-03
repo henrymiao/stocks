@@ -16,6 +16,8 @@ class MarketProfileTests(unittest.TestCase):
         self.assertNotEqual(us.buy_zone_extension_pct, a_share.buy_zone_extension_pct)
         self.assertEqual(a_share.price_limit_policy, "board-aware")
         self.assertEqual(hk.lot_policy, "board-lot")
+        self.assertEqual(hk.session_timezone, "Asia/Hong_Kong")
+        self.assertEqual(hk.liquidity_currency, "HKD")
 
     def test_unknown_prefix_is_non_actionable_instead_of_us_default(self):
         profile = resolve_market_profile("CC.BTCUSD", asset_type="crypto")

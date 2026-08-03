@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .markets import market_currency, market_timezone
+
 
 @dataclass(frozen=True)
 class MarketProfile:
@@ -22,10 +24,10 @@ _US = MarketProfile(
     0.05,
     220,
     ("earnings-multiple", "sotp", "dcf"),
-    "America/New_York",
+    str(market_timezone("US")),
     "none",
     "single-share",
-    "USD",
+    market_currency("US"),
 )
 _A = MarketProfile(
     "a-share-equity-v1",
@@ -33,10 +35,10 @@ _A = MarketProfile(
     0.03,
     220,
     ("earnings-multiple", "sotp", "dcf"),
-    "Asia/Shanghai",
+    str(market_timezone("CN")),
     "board-aware",
     "board-lot",
-    "CNY",
+    market_currency("CN"),
 )
 _HK = MarketProfile(
     "hk-equity-v1",
@@ -44,10 +46,10 @@ _HK = MarketProfile(
     0.03,
     220,
     ("earnings-multiple", "sotp", "dcf"),
-    "Asia/Shanghai",
+    str(market_timezone("HK")),
     "none",
     "board-lot",
-    "HKD",
+    market_currency("HK"),
 )
 _UNKNOWN = MarketProfile(
     "unknown-market-v1",

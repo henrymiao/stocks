@@ -3,21 +3,19 @@ from __future__ import annotations
 from datetime import datetime, time
 from zoneinfo import ZoneInfo
 
+from .markets import market_from_code, market_timezone
+
 
 def _local_time(prefix: str, timestamp: str) -> datetime:
     value = datetime.fromisoformat(timestamp)
-    market_timezone = ZoneInfo(
-        {
-            "US": "America/New_York",
-            "HK": "Asia/Hong_Kong",
-            "SH": "Asia/Shanghai",
-            "SZ": "Asia/Shanghai",
-            "CC": "Asia/Shanghai",
-        }[prefix]
+    timezone = (
+        ZoneInfo("Asia/Shanghai")
+        if prefix == "CC"
+        else market_timezone(market_from_code(f"{prefix}.REFERENCE"))
     )
     if value.tzinfo is None:
-        return value.replace(tzinfo=market_timezone)
-    return value.astimezone(market_timezone)
+        return value.replace(tzinfo=timezone)
+    return value.astimezone(timezone)
 
 
 def _inside(value: time, start: time, end: time) -> bool:
@@ -30,8 +28,8 @@ def classify_session_phase(code: str, timestamp: str) -> str:
     if len(code_parts) != 2 or not code_parts[1]:
         raise ValueError(f"Malformed market code: {code!r}")
     prefix = code_parts[0].upper()
-    if prefix not in {"US", "HK", "SH", "SZ", "CC"}:
-        raise ValueError(f"Unsupported market prefix: {code_parts[0]!r}")
+    if prefix != "CC":
+        market_from_code(code)
 
     local = _local_time(prefix, timestamp)
     if prefix == "CC":

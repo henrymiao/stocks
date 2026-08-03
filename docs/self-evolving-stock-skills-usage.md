@@ -1,5 +1,43 @@
 # Self-Evolving Stock Skills Usage
 
+## v7 shadow foundation
+
+The production champion remains `recommendation-v6` with decision policy
+`logic-first-method-evidence-v6`. Phase 1 of v7 adds only a shadow foundation: it
+does not define a v7 score, recommendation, entry decision, or production routing.
+
+The foundation separates a listed security from its economic issuer. Every A/H
+listing keeps a distinct `security_id`, while explicitly verified cross-listings
+share a `company_id`; this prevents two listings of the same company from being
+misreported as independent diversification. The CN/HK/US universe v2 files and the
+security registry are point-in-time, publication-gated, and content-addressed.
+Historical runs therefore bind to the membership and identity versions that were
+actually available at their `as_of`, rather than silently using today's constituents.
+
+Run the offline, read-only foundation validator before any later v7 phase consumes
+these inputs:
+
+```bash
+python3 -m tools.stock_skills.cli foundation-check \
+  --identity-registry data/identities/securities-v1.json \
+  --universe data/universes/cn.json \
+  --universe data/universes/hk.json \
+  --universe data/universes/us.json \
+  --as-of 2026-08-03T18:00:00+08:00 \
+  --output /tmp/stock-analysis-v7-foundation.json
+```
+
+`foundation-check` performs no fetch, scoring, store write, or trade action. It
+validates active membership, reference-only benchmarks, investability, publication
+cutoffs, cross-file versions, and identity links. A `PointInTimeInput` then freezes
+the already-fetched payload, explicit missing/stale/conflicting evidence states,
+source timestamps, adjustment bases, and an audit digest. Champion and shadow
+challenger bindings share that exact package ID and digest.
+
+Later phases must pass this validator and reuse `SecurityIdentity`, `MarketUniverse`,
+and `PointInTimeInput`; bypassing or reimplementing their version, identity, or time
+cutoff logic is outside the supported architecture.
+
 ## Analyze a real instrument (live)
 
 Fetch snapshot, daily K-line, capital flow, sector strength, market regime, macro proxies, and valuation through Futu OpenD and score the instrument by its own data:

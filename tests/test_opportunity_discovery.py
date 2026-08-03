@@ -28,6 +28,7 @@ from tools.stock_skills.universe import (
     UniverseMember,
     load_universe,
     resolve_universe,
+    universe_from_record,
 )
 
 
@@ -141,11 +142,144 @@ def _golden_bars(*, future=False, breadth=True):
 
 class OpportunityDiscoveryTests(unittest.TestCase):
     def test_configured_universes_are_valid_and_market_routed(self):
+        expected_timezones = {
+            "cn": "Asia/Shanghai",
+            "hk": "Asia/Hong_Kong",
+            "us": "America/New_York",
+        }
         for market in ("cn", "hk", "us"):
             universe = load_universe(Path("data/universes") / f"{market}.json")
             self.assertEqual(universe.market, market.upper())
             self.assertTrue(universe.unique_codes())
-            self.assertIn("Shanghai" if market != "us" else "New_York", universe.timezone)
+            self.assertEqual(universe.timezone, expected_timezones[market])
+
+    def test_v1_universe_remains_loadable_during_migration(self):
+        payload = _star_universe().to_record()
+        payload["schema_version"] = "opportunity-universe-v1"
+        payload.pop("published_at", None)
+        payload.pop("identity_registry_version", None)
+        payload.pop("version_id", None)
+        for sector in payload["sectors"]:
+            for member in sector["members"]:
+                member.pop("security_id", None)
+                member.pop("member_from", None)
+                member.pop("member_to", None)
+
+        loaded = universe_from_record(payload, source="legacy-fixture")
+
+        self.assertEqual(loaded.schema_version, "opportunity-universe-v1")
+        self.assertEqual(loaded.effective_published_at, loaded.as_of)
+        self.assertEqual(loaded.unique_codes(), _star_universe().unique_codes())
+
+    def test_v2_membership_filters_future_and_ended_members(self):
+        payload = _star_universe().to_record()
+        payload.update(
+            {
+                "schema_version": "opportunity-universe-v2",
+                "published_at": "2026-07-20T08:00:00+08:00",
+                "identity_registry_version": "identity:test",
+            }
+        )
+        payload.pop("version_id", None)
+        members = payload["sectors"][0]["members"]
+        for member in members:
+            member["security_id"] = f"listing:{member['code']}"
+            member["member_from"] = "2026-01-01T00:00:00+08:00"
+        members[1]["member_to"] = "2026-07-19T23:59:59+08:00"
+        members[2]["member_from"] = "2026-07-21T00:00:00+08:00"
+
+        loaded = universe_from_record(payload)
+        active = loaded.active_member_codes("2026-07-20T15:15:00+08:00")
+
+        self.assertNotIn(members[1]["code"], active)
+        self.assertNotIn(members[2]["code"], active)
+        self.assertIn(members[3]["code"], active)
+
+    def test_future_published_membership_is_rejected(self):
+        payload = _star_universe().to_record()
+        payload.update(
+            {
+                "schema_version": "opportunity-universe-v2",
+                "published_at": "2026-07-21T08:00:00+08:00",
+                "identity_registry_version": "identity:test",
+            }
+        )
+        payload.pop("version_id", None)
+        for member in payload["sectors"][0]["members"]:
+            member["security_id"] = f"listing:{member['code']}"
+            member["member_from"] = "2026-01-01T00:00:00+08:00"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "cn.json"
+            path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "published after"):
+                resolve_universe(
+                    "CN",
+                    configured_path=path,
+                    at="2026-07-20T15:15:00+08:00",
+                )
+
+    def test_universe_version_ignores_runtime_source_but_not_membership(self):
+        payload = _star_universe().to_record()
+        payload.pop("version_id", None)
+        configured = universe_from_record(payload, source="configured")
+        cached = universe_from_record(payload, source="cache")
+        changed = json.loads(json.dumps(payload))
+        changed["sectors"][0]["members"][0]["weight"] = 2.0
+
+        self.assertEqual(configured.version_id, cached.version_id)
+        self.assertNotEqual(
+            configured.version_id,
+            universe_from_record(changed).version_id,
+        )
+
+    def test_v2_persisted_version_mismatch_is_rejected(self):
+        payload = _star_universe().to_record()
+        payload.update(
+            {
+                "schema_version": "opportunity-universe-v2",
+                "published_at": "2026-07-20T08:00:00+08:00",
+                "identity_registry_version": "identity:test",
+                "version_id": "universe:tampered",
+            }
+        )
+        for member in payload["sectors"][0]["members"]:
+            member["security_id"] = f"listing:{member['code']}"
+            member["member_from"] = "2026-01-01T00:00:00+08:00"
+
+        with self.assertRaisesRegex(ValueError, "version_id mismatch"):
+            universe_from_record(payload)
+
+    def test_future_cache_is_ignored_when_configured_membership_is_valid(self):
+        configured = _star_universe().to_record()
+        configured.pop("version_id", None)
+        cached = json.loads(json.dumps(configured))
+        cached.update(
+            {
+                "schema_version": "opportunity-universe-v2",
+                "published_at": "2026-07-21T08:00:00+08:00",
+                "identity_registry_version": "identity:test",
+            }
+        )
+        for member in cached["sectors"][0]["members"]:
+            member["security_id"] = f"listing:{member['code']}"
+            member["member_from"] = "2026-01-01T00:00:00+08:00"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            configured_path = root / "configured.json"
+            cache_path = root / "cache.json"
+            configured_path.write_text(json.dumps(configured), encoding="utf-8")
+            cache_path.write_text(json.dumps(cached), encoding="utf-8")
+
+            resolved = resolve_universe(
+                "CN",
+                configured_path=configured_path,
+                cache_path=cache_path,
+                at="2026-07-20T15:15:00+08:00",
+            )
+
+        self.assertEqual(resolved.source, f"file:{configured_path}")
 
     def test_us_completed_bar_cutoff_observes_daylight_saving_time(self):
         summer_bar = _bar(date(2026, 7, 20), 100.0, previous=99.0)

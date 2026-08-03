@@ -1,0 +1,9 @@
+{
+  "schema_version": "company-identity-overrides-v1",
+  "source": "manual-explicit-cross-listing-map",
+  "company_codes": {
+    "company:byd": ["HK.01211", "SZ.002594"],
+    "company:smic": ["HK.00981", "SH.688981"],
+    "company:zijin": ["HK.02899", "SH.601899"]
+  }
+}

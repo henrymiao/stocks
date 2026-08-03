@@ -1,9 +1,10 @@
 {
-  "schema_version": "opportunity-universe-v1",
+  "schema_version": "opportunity-universe-v2",
   "market": "HK",
   "as_of": "2026-07-21T16:00:00+08:00",
-  "source": "manual-versioned-universe-v1",
   "expires_at": "2026-10-31T23:59:59+08:00",
+  "published_at": "2026-08-03T18:00:00+08:00",
+  "identity_registry_version": "identity:9a23ac98b48cb2ae52d508dba6337fed6840db0fb4c182bdc6c0ce5cdfb2d3b2",
   "sectors": [
     {
       "key": "internet-platforms",
@@ -11,12 +12,66 @@
       "representative": "HK.03033",
       "benchmark": "HK.800700",
       "members": [
-        {"code": "HK.03033", "name": "南方恒生科技", "role": "etf"},
-        {"code": "HK.00700", "name": "腾讯控股", "role": "leader"},
-        {"code": "HK.09988", "name": "阿里巴巴-W", "role": "leader", "shared_identity": "Alibaba"},
-        {"code": "HK.03690", "name": "美团-W", "role": "constituent"},
-        {"code": "HK.09618", "name": "京东集团-SW", "role": "constituent"},
-        {"code": "HK.09888", "name": "百度集团-SW", "role": "constituent"}
+        {
+          "code": "HK.03033",
+          "name": "南方恒生科技",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03033",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00700",
+          "name": "腾讯控股",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00700",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09988",
+          "name": "阿里巴巴-W",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": "Alibaba",
+          "security_id": "listing:HK.09988",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03690",
+          "name": "美团-W",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03690",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09618",
+          "name": "京东集团-SW",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09618",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09888",
+          "name": "百度集团-SW",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09888",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -25,9 +80,36 @@
       "representative": "HK.00981",
       "benchmark": "HK.800700",
       "members": [
-        {"code": "HK.00981", "name": "中芯国际", "role": "leader", "shared_identity": "SMIC"},
-        {"code": "HK.01347", "name": "华虹半导体", "role": "leader"},
-        {"code": "HK.00020", "name": "商汤-W", "role": "constituent"}
+        {
+          "code": "HK.00981",
+          "name": "中芯国际",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": "SMIC",
+          "security_id": "listing:HK.00981",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01347",
+          "name": "华虹半导体",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01347",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00020",
+          "name": "商汤-W",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00020",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -36,10 +118,46 @@
       "representative": "HK.01211",
       "benchmark": "HK.800700",
       "members": [
-        {"code": "HK.01211", "name": "比亚迪股份", "role": "leader", "shared_identity": "BYD"},
-        {"code": "HK.09868", "name": "小鹏汽车-W", "role": "leader", "shared_identity": "XPeng"},
-        {"code": "HK.02015", "name": "理想汽车-W", "role": "constituent"},
-        {"code": "HK.09866", "name": "蔚来-SW", "role": "constituent"}
+        {
+          "code": "HK.01211",
+          "name": "比亚迪股份",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": "BYD",
+          "security_id": "listing:HK.01211",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09868",
+          "name": "小鹏汽车-W",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": "XPeng",
+          "security_id": "listing:HK.09868",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02015",
+          "name": "理想汽车-W",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02015",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09866",
+          "name": "蔚来-SW",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09866",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -48,9 +166,36 @@
       "representative": "HK.01177",
       "benchmark": "HK.800000",
       "members": [
-        {"code": "HK.01177", "name": "中国生物制药", "role": "leader"},
-        {"code": "HK.02269", "name": "药明生物", "role": "leader"},
-        {"code": "HK.06160", "name": "百济神州", "role": "constituent"}
+        {
+          "code": "HK.01177",
+          "name": "中国生物制药",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01177",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02269",
+          "name": "药明生物",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02269",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06160",
+          "name": "百济神州",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06160",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -59,9 +204,36 @@
       "representative": "HK.00005",
       "benchmark": "HK.800000",
       "members": [
-        {"code": "HK.00005", "name": "汇丰控股", "role": "leader"},
-        {"code": "HK.00939", "name": "建设银行", "role": "leader"},
-        {"code": "HK.01299", "name": "友邦保险", "role": "constituent"}
+        {
+          "code": "HK.00005",
+          "name": "汇丰控股",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00005",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00939",
+          "name": "建设银行",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00939",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01299",
+          "name": "友邦保险",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01299",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -70,11 +242,49 @@
       "representative": "HK.02899",
       "benchmark": "HK.800000",
       "members": [
-        {"code": "HK.02899", "name": "紫金矿业", "role": "leader", "shared_identity": "Zijin"},
-        {"code": "HK.00883", "name": "中国海洋石油", "role": "leader"},
-        {"code": "HK.00941", "name": "中国移动", "role": "constituent"},
-        {"code": "HK.01088", "name": "中国神华", "role": "constituent"}
+        {
+          "code": "HK.02899",
+          "name": "紫金矿业",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": "Zijin",
+          "security_id": "listing:HK.02899",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00883",
+          "name": "中国海洋石油",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00883",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00941",
+          "name": "中国移动",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00941",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01088",
+          "name": "中国神华",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01088",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     }
-  ]
+  ],
+  "source": "manual-versioned-universe-v1-migrated-v2",
+  "version_id": "universe:845dfa8ff4805ff28bfade0497bb798916358f8a3278505d7e01b43ce7625688"
 }

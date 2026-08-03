@@ -136,7 +136,16 @@ class MarketUniverse:
             "expires_at": self.expires_at,
             "published_at": self.effective_published_at,
             "identity_registry_version": self.identity_registry_version,
-            "sectors": [asdict(sector) for sector in self.sectors],
+            "sectors": [
+                {
+                    "key": sector.key,
+                    "name": sector.name,
+                    "representative": sector.representative,
+                    "benchmark": sector.benchmark,
+                    "members": [asdict(member) for member in sector.members],
+                }
+                for sector in self.sectors
+            ],
         }
 
     @property

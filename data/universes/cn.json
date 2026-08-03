@@ -1,9 +1,10 @@
 {
-  "schema_version": "opportunity-universe-v1",
+  "schema_version": "opportunity-universe-v2",
   "market": "CN",
   "as_of": "2026-07-21T16:00:00+08:00",
-  "source": "manual-versioned-universe-v1",
   "expires_at": "2026-10-31T23:59:59+08:00",
+  "published_at": "2026-08-03T18:00:00+08:00",
+  "identity_registry_version": "identity:9a23ac98b48cb2ae52d508dba6337fed6840db0fb4c182bdc6c0ce5cdfb2d3b2",
   "sectors": [
     {
       "key": "semiconductor-ai-hardware",
@@ -11,12 +12,66 @@
       "representative": "SH.512480",
       "benchmark": "SH.000688",
       "members": [
-        {"code": "SH.512480", "name": "半导体ETF", "role": "etf"},
-        {"code": "SH.688981", "name": "中芯国际", "role": "leader"},
-        {"code": "SH.688256", "name": "寒武纪", "role": "leader"},
-        {"code": "SH.600584", "name": "长电科技", "role": "constituent"},
-        {"code": "SZ.002463", "name": "沪电股份", "role": "constituent"},
-        {"code": "SZ.002938", "name": "鹏鼎控股", "role": "constituent"}
+        {
+          "code": "SH.512480",
+          "name": "半导体ETF",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.512480",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688981",
+          "name": "中芯国际",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688981",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688256",
+          "name": "寒武纪",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688256",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600584",
+          "name": "长电科技",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600584",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002463",
+          "name": "沪电股份",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002463",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002938",
+          "name": "鹏鼎控股",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002938",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -25,10 +80,46 @@
       "representative": "SH.515030",
       "benchmark": "SZ.399006",
       "members": [
-        {"code": "SH.515030", "name": "新能源车ETF", "role": "etf"},
-        {"code": "SZ.300750", "name": "宁德时代", "role": "leader"},
-        {"code": "SZ.002594", "name": "比亚迪", "role": "leader"},
-        {"code": "SH.601633", "name": "长城汽车", "role": "constituent"}
+        {
+          "code": "SH.515030",
+          "name": "新能源车ETF",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.515030",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300750",
+          "name": "宁德时代",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300750",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002594",
+          "name": "比亚迪",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002594",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601633",
+          "name": "长城汽车",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601633",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -37,10 +128,46 @@
       "representative": "SH.512290",
       "benchmark": "SH.000300",
       "members": [
-        {"code": "SH.512290", "name": "生物医药ETF", "role": "etf"},
-        {"code": "SH.600276", "name": "恒瑞医药", "role": "leader"},
-        {"code": "SH.688180", "name": "君实生物", "role": "constituent"},
-        {"code": "SZ.300760", "name": "迈瑞医疗", "role": "leader"}
+        {
+          "code": "SH.512290",
+          "name": "生物医药ETF",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.512290",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600276",
+          "name": "恒瑞医药",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600276",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688180",
+          "name": "君实生物",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688180",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300760",
+          "name": "迈瑞医疗",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300760",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -49,10 +176,46 @@
       "representative": "SH.512000",
       "benchmark": "SH.000300",
       "members": [
-        {"code": "SH.512000", "name": "券商ETF", "role": "etf"},
-        {"code": "SH.600036", "name": "招商银行", "role": "leader"},
-        {"code": "SH.601318", "name": "中国平安", "role": "leader"},
-        {"code": "SH.601398", "name": "工商银行", "role": "constituent"}
+        {
+          "code": "SH.512000",
+          "name": "券商ETF",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.512000",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600036",
+          "name": "招商银行",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600036",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601318",
+          "name": "中国平安",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601318",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601398",
+          "name": "工商银行",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601398",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -61,11 +224,56 @@
       "representative": "SH.512400",
       "benchmark": "SH.000905",
       "members": [
-        {"code": "SH.512400", "name": "有色金属ETF", "role": "etf"},
-        {"code": "SH.601899", "name": "紫金矿业", "role": "leader"},
-        {"code": "SH.603993", "name": "洛阳钼业", "role": "leader"},
-        {"code": "SH.600547", "name": "山东黄金", "role": "constituent"},
-        {"code": "SH.600760", "name": "中航沈飞", "role": "constituent"}
+        {
+          "code": "SH.512400",
+          "name": "有色金属ETF",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.512400",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601899",
+          "name": "紫金矿业",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601899",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603993",
+          "name": "洛阳钼业",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603993",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600547",
+          "name": "山东黄金",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600547",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600760",
+          "name": "中航沈飞",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600760",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -74,11 +282,49 @@
       "representative": "SH.600406",
       "benchmark": "SH.000905",
       "members": [
-        {"code": "SH.600406", "name": "国电南瑞", "role": "leader"},
-        {"code": "SH.601012", "name": "隆基绿能", "role": "constituent"},
-        {"code": "SZ.300124", "name": "汇川技术", "role": "leader"},
-        {"code": "SH.601100", "name": "恒立液压", "role": "constituent"}
+        {
+          "code": "SH.600406",
+          "name": "国电南瑞",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600406",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601012",
+          "name": "隆基绿能",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601012",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300124",
+          "name": "汇川技术",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300124",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601100",
+          "name": "恒立液压",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601100",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        }
       ]
     }
-  ]
+  ],
+  "source": "manual-versioned-universe-v1-migrated-v2",
+  "version_id": "universe:84267a6a89392e8d711b78094cd42d0fff12a4289e299ea1073fe361b9c9879f"
 }

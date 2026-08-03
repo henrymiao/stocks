@@ -1,9 +1,10 @@
 {
-  "schema_version": "opportunity-universe-v1",
+  "schema_version": "opportunity-universe-v2",
   "market": "US",
   "as_of": "2026-07-21T16:00:00-04:00",
-  "source": "manual-versioned-universe-v1",
   "expires_at": "2026-10-31T23:59:59-04:00",
+  "published_at": "2026-08-03T18:00:00+08:00",
+  "identity_registry_version": "identity:9a23ac98b48cb2ae52d508dba6337fed6840db0fb4c182bdc6c0ce5cdfb2d3b2",
   "sectors": [
     {
       "key": "semiconductors",
@@ -11,12 +12,66 @@
       "representative": "US.SMH",
       "benchmark": "US.QQQ",
       "members": [
-        {"code": "US.SMH", "name": "VanEck Semiconductor ETF", "role": "etf"},
-        {"code": "US.NVDA", "name": "NVIDIA", "role": "leader"},
-        {"code": "US.AVGO", "name": "Broadcom", "role": "leader"},
-        {"code": "US.MU", "name": "Micron", "role": "constituent"},
-        {"code": "US.AMD", "name": "AMD", "role": "constituent"},
-        {"code": "US.MRVL", "name": "Marvell", "role": "constituent"}
+        {
+          "code": "US.SMH",
+          "name": "VanEck Semiconductor ETF",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SMH",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NVDA",
+          "name": "NVIDIA",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NVDA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AVGO",
+          "name": "Broadcom",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AVGO",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MU",
+          "name": "Micron",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MU",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AMD",
+          "name": "AMD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AMD",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MRVL",
+          "name": "Marvell",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MRVL",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -25,11 +80,56 @@
       "representative": "US.IGV",
       "benchmark": "US.QQQ",
       "members": [
-        {"code": "US.IGV", "name": "iShares Expanded Tech-Software ETF", "role": "etf"},
-        {"code": "US.MSFT", "name": "Microsoft", "role": "leader"},
-        {"code": "US.GOOGL", "name": "Alphabet", "role": "leader"},
-        {"code": "US.AMZN", "name": "Amazon", "role": "constituent"},
-        {"code": "US.ORCL", "name": "Oracle", "role": "constituent"}
+        {
+          "code": "US.IGV",
+          "name": "iShares Expanded Tech-Software ETF",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.IGV",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MSFT",
+          "name": "Microsoft",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MSFT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.GOOGL",
+          "name": "Alphabet",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GOOGL",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AMZN",
+          "name": "Amazon",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AMZN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ORCL",
+          "name": "Oracle",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ORCL",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -38,11 +138,56 @@
       "representative": "US.XLF",
       "benchmark": "US.SPY",
       "members": [
-        {"code": "US.XLF", "name": "Financial Select Sector SPDR", "role": "etf"},
-        {"code": "US.JPM", "name": "JPMorgan", "role": "leader"},
-        {"code": "US.BAC", "name": "Bank of America", "role": "constituent"},
-        {"code": "US.GS", "name": "Goldman Sachs", "role": "leader"},
-        {"code": "US.MS", "name": "Morgan Stanley", "role": "constituent"}
+        {
+          "code": "US.XLF",
+          "name": "Financial Select Sector SPDR",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.XLF",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.JPM",
+          "name": "JPMorgan",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.JPM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BAC",
+          "name": "Bank of America",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BAC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.GS",
+          "name": "Goldman Sachs",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MS",
+          "name": "Morgan Stanley",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -51,11 +196,56 @@
       "representative": "US.XLE",
       "benchmark": "US.SPY",
       "members": [
-        {"code": "US.XLE", "name": "Energy Select Sector SPDR", "role": "etf"},
-        {"code": "US.XOM", "name": "Exxon Mobil", "role": "leader"},
-        {"code": "US.CVX", "name": "Chevron", "role": "leader"},
-        {"code": "US.COP", "name": "ConocoPhillips", "role": "constituent"},
-        {"code": "US.SLB", "name": "SLB", "role": "constituent"}
+        {
+          "code": "US.XLE",
+          "name": "Energy Select Sector SPDR",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.XLE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.XOM",
+          "name": "Exxon Mobil",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.XOM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CVX",
+          "name": "Chevron",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CVX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.COP",
+          "name": "ConocoPhillips",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.COP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SLB",
+          "name": "SLB",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SLB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -64,11 +254,56 @@
       "representative": "US.XLI",
       "benchmark": "US.SPY",
       "members": [
-        {"code": "US.XLI", "name": "Industrial Select Sector SPDR", "role": "etf"},
-        {"code": "US.CAT", "name": "Caterpillar", "role": "leader"},
-        {"code": "US.GE", "name": "GE Aerospace", "role": "leader"},
-        {"code": "US.HON", "name": "Honeywell", "role": "constituent"},
-        {"code": "US.ETN", "name": "Eaton", "role": "constituent"}
+        {
+          "code": "US.XLI",
+          "name": "Industrial Select Sector SPDR",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.XLI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CAT",
+          "name": "Caterpillar",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CAT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.GE",
+          "name": "GE Aerospace",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HON",
+          "name": "Honeywell",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HON",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ETN",
+          "name": "Eaton",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ETN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -77,11 +312,56 @@
       "representative": "US.XLV",
       "benchmark": "US.SPY",
       "members": [
-        {"code": "US.XLV", "name": "Health Care Select Sector SPDR", "role": "etf"},
-        {"code": "US.LLY", "name": "Eli Lilly", "role": "leader"},
-        {"code": "US.UNH", "name": "UnitedHealth", "role": "leader"},
-        {"code": "US.JNJ", "name": "Johnson & Johnson", "role": "constituent"},
-        {"code": "US.ABBV", "name": "AbbVie", "role": "constituent"}
+        {
+          "code": "US.XLV",
+          "name": "Health Care Select Sector SPDR",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.XLV",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LLY",
+          "name": "Eli Lilly",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LLY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.UNH",
+          "name": "UnitedHealth",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.UNH",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.JNJ",
+          "name": "Johnson & Johnson",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.JNJ",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ABBV",
+          "name": "AbbVie",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ABBV",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        }
       ]
     },
     {
@@ -90,12 +370,59 @@
       "representative": "US.XLY",
       "benchmark": "US.SPY",
       "members": [
-        {"code": "US.XLY", "name": "Consumer Discretionary Select Sector SPDR", "role": "etf"},
-        {"code": "US.AMZN", "name": "Amazon", "role": "leader"},
-        {"code": "US.TSLA", "name": "Tesla", "role": "leader"},
-        {"code": "US.HD", "name": "Home Depot", "role": "constituent"},
-        {"code": "US.MCD", "name": "McDonald's", "role": "constituent"}
+        {
+          "code": "US.XLY",
+          "name": "Consumer Discretionary Select Sector SPDR",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.XLY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AMZN",
+          "name": "Amazon",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AMZN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TSLA",
+          "name": "Tesla",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TSLA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HD",
+          "name": "Home Depot",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HD",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MCD",
+          "name": "McDonald's",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MCD",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        }
       ]
     }
-  ]
+  ],
+  "source": "manual-versioned-universe-v1-migrated-v2",
+  "version_id": "universe:337a01bfc56ef1b20a41e5c7595124f52698550549d38e90b510ddb9cc5ba561"
 }

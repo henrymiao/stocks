@@ -1,6 +1,9 @@
+import copy
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -16,6 +19,8 @@ from tools.stock_skills.cli import (
     main,
 )
 from tools.stock_skills.journal import append_record, read_records
+from tools.stock_skills.foundation_migrate import migrate_universes
+from tools.stock_skills.universe import universe_from_record
 from tools.stock_skills.models import (
     CapitalSnapshot,
     FinancialsSnapshot,
@@ -202,6 +207,76 @@ class PartialHistoryFetcher(FakeFetcher):
 
 
 class CliTests(unittest.TestCase):
+    def test_foundation_check_is_offline_and_returns_readiness_exit_code(self):
+        source = {
+            "HK": {
+                "schema_version": "opportunity-universe-v1",
+                "market": "HK",
+                "as_of": "2026-08-03T08:00:00+08:00",
+                "source": "fixture",
+                "sectors": [
+                    {
+                        "key": "internet",
+                        "name": "互联网",
+                        "representative": "HK.00700",
+                        "benchmark": "HK.800000",
+                        "members": [
+                            {"code": "HK.00700", "name": "腾讯控股", "role": "leader"}
+                        ],
+                    }
+                ],
+            }
+        }
+        universes, registry = migrate_universes(
+            source, {}, published_at="2026-08-03T08:00:00+08:00"
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            identity_path = Path(tmpdir) / "identities.json"
+            universe_path = Path(tmpdir) / "hk.json"
+            output_path = Path(tmpdir) / "report.json"
+            identity_path.write_text(
+                json.dumps(registry.to_record(), ensure_ascii=False), encoding="utf-8"
+            )
+            universe_path.write_text(
+                json.dumps(universes["HK"], ensure_ascii=False), encoding="utf-8"
+            )
+            argv = [
+                "foundation-check",
+                "--identity-registry",
+                str(identity_path),
+                "--universe",
+                str(universe_path),
+                "--as-of",
+                "2026-08-03T10:00:00+08:00",
+                "--output",
+                str(output_path),
+            ]
+            stdout = io.StringIO()
+            with mock.patch(
+                "tools.stock_skills.futu_fetcher.FutuFetcher",
+                side_effect=AssertionError("foundation-check must not construct FutuFetcher"),
+            ), redirect_stdout(stdout):
+                valid_exit = main(argv)
+            valid_stdout = json.loads(stdout.getvalue())
+            valid_output = json.loads(output_path.read_text(encoding="utf-8"))
+
+            wrong = copy.deepcopy(universes["HK"])
+            wrong["identity_registry_version"] = "identity:wrong"
+            wrong.pop("version_id", None)
+            wrong = universe_from_record(wrong).to_record()
+            universe_path.write_text(json.dumps(wrong), encoding="utf-8")
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                invalid_exit = main(argv)
+            invalid_report = json.loads(stdout.getvalue())
+
+        self.assertEqual(valid_exit, 0)
+        self.assertTrue(valid_stdout["ready"])
+        self.assertEqual(valid_stdout, valid_output)
+        self.assertEqual(invalid_exit, 1)
+        self.assertFalse(invalid_report["ready"])
+
     def test_review_accepts_twenty_day_shadow_window(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             recommendations = Path(tmpdir) / "recommendations.jsonl"

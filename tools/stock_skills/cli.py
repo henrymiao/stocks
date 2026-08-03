@@ -1804,6 +1804,25 @@ def _add_discovery_arguments(parser: argparse.ArgumentParser, *, confirmation: b
         parser.add_argument("--backfill", type=int, choices=[60, 260], default=260)
 
 
+def _cmd_foundation_check(args: argparse.Namespace) -> int:
+    from .foundation_validation import validate_foundation
+    from .identity import load_identity_registry
+    from .universe import load_universe
+
+    report = validate_foundation(
+        load_identity_registry(args.identity_registry),
+        tuple(load_universe(path) for path in args.universe),
+        as_of=args.as_of,
+    )
+    text = json.dumps(report, ensure_ascii=False, indent=2)
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text + "\n", encoding="utf-8")
+    print(text)
+    return 0 if report["ready"] else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Self-evolving stock skill tools")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -1968,6 +1987,15 @@ def main(argv: list[str] | None = None) -> int:
     discovery_review.add_argument("--output", default=None)
     discovery_review.add_argument("--json", action="store_true", help="Compatibility flag; output is always JSON")
 
+    foundation = subparsers.add_parser(
+        "foundation-check",
+        help="Validate point-in-time identity and universe contracts without fetching or scoring",
+    )
+    foundation.add_argument("--identity-registry", required=True)
+    foundation.add_argument("--universe", action="append", required=True)
+    foundation.add_argument("--as-of", required=True)
+    foundation.add_argument("--output", default=None)
+
     args = parser.parse_args(argv)
 
     if args.command in {"analyze", "analyze-offline"} and args.cost_basis is not None and not args.trade_id:
@@ -1999,6 +2027,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_confirm_discoveries(args)
     if args.command == "review-discoveries":
         return _cmd_review_discoveries(args)
+    if args.command == "foundation-check":
+        return _cmd_foundation_check(args)
     return 2
 
 

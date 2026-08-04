@@ -68,12 +68,37 @@ class PortfolioHeatTests(unittest.TestCase):
         self.assertEqual(no_stop.portfolio_open_risk_pct, 0.0)
         self.assertFalse(no_stop.complete)
 
-    def test_stop_above_price_contributes_no_open_risk(self):
+    def test_a_breached_stop_is_listed_not_scored_as_zero_risk(self):
         book = _book(
             positions=(Position("US.GOOGL", 100, 290.0, "USD", "ai-compute", current_stop=400.0),),
             cash={},
         )
-        self.assertEqual(book.heat({"US.GOOGL": 350.0}).portfolio_open_risk_pct, 0.0)
+        heat = book.heat({"US.GOOGL": 350.0})
+
+        # The exit should already have happened, so there is no loss-to-stop left to
+        # measure. Reporting 0 would show the riskiest state in the book as the safest.
+        self.assertEqual(heat.breached_stops, ("US.GOOGL",))
+        self.assertFalse(heat.complete)
+        self.assertEqual(heat.portfolio_open_risk_pct, 0.0)
+        self.assertEqual(heat.theme_open_risk_pct, {})
+
+    def test_price_exactly_at_the_stop_counts_as_breached(self):
+        book = _book(
+            positions=(Position("US.GOOGL", 100, 290.0, "USD", "ai-compute", current_stop=350.0),),
+            cash={},
+        )
+        self.assertEqual(book.heat({"US.GOOGL": 350.0}).breached_stops, ("US.GOOGL",))
+
+    def test_stop_above_cost_but_below_price_is_normal_open_risk(self):
+        book = _book(
+            positions=(Position("US.GOOGL", 100, 290.0, "USD", "ai-compute", current_stop=320.0),),
+            cash={},
+        )
+        heat = book.heat({"US.GOOGL": 350.0})
+        self.assertEqual(heat.breached_stops, ())
+        self.assertTrue(heat.complete)
+        # NAV 100*350*7 = 245,000 | risk 100*(350-320)*7 = 21,000
+        self.assertEqual(heat.portfolio_open_risk_pct, round(21_000 / 245_000 * 100, 4))
 
     def test_contract_rejects_duplicates_unknown_fx_and_bad_rows(self):
         with self.assertRaisesRegex(ValueError, "duplicate position codes"):

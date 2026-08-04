@@ -49,10 +49,11 @@ class HeatReport:
     position_weight_pct: dict[str, float]
     missing_prices: tuple[str, ...]
     missing_stops: tuple[str, ...]
+    breached_stops: tuple[str, ...] = ()
 
     @property
     def complete(self) -> bool:
-        return not self.missing_prices and not self.missing_stops
+        return not self.missing_prices and not self.missing_stops and not self.breached_stops
 
 
 @dataclass(frozen=True)
@@ -92,10 +93,16 @@ class Portfolio:
         comparable with the portfolio and theme limits.  A position whose price or stop is
         unavailable contributes nothing and is listed instead: an incomplete book must read
         as incomplete, never as a lower risk number.
+
+        A price at or below the stop is a *breach*, not a zero-risk position: the exit should
+        already have happened, and there is no defined loss-to-stop left to measure. Scoring it
+        as 0 would quietly report the riskiest state in the book as the safest, so it is listed
+        and makes the whole report incomplete until the position is exited or re-stopped.
         """
 
         missing_prices: list[str] = []
         missing_stops: list[str] = []
+        breached_stops: list[str] = []
         equity = 0.0
         risk_by_theme: dict[str, float] = {}
         value_by_theme: dict[str, float] = {}
@@ -114,9 +121,11 @@ class Portfolio:
             if position.current_stop is None:
                 missing_stops.append(position.code)
                 continue
-            # A stop above the current price (a locked-in profit) contributes no open risk.
+            if price <= position.current_stop:
+                breached_stops.append(position.code)
+                continue
             risk = self._base(
-                max(0.0, price - position.current_stop) * position.shares, position.currency
+                (price - position.current_stop) * position.shares, position.currency
             )
             total_risk += risk
             risk_by_theme[position.theme] = risk_by_theme.get(position.theme, 0.0) + risk
@@ -137,6 +146,7 @@ class Portfolio:
             position_weight_pct={k: pct(v) for k, v in sorted(value_by_code.items())},
             missing_prices=tuple(sorted(missing_prices)),
             missing_stops=tuple(sorted(missing_stops)),
+            breached_stops=tuple(sorted(breached_stops)),
         )
 
     def theme_of(self, code: str) -> str | None:

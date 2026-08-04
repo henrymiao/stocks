@@ -1053,8 +1053,8 @@ def _resolve_portfolio_heat(
     if not heat.complete:
         refs.append(
             "portfolio-heat: book incomplete "
-            f"(missing prices {heat.missing_prices}, missing stops {heat.missing_stops}) "
-            "— heat gates left unset"
+            f"(missing prices {heat.missing_prices}, missing stops {heat.missing_stops}, "
+            f"breached stops {heat.breached_stops}) — heat gates left unset"
         )
         return args.portfolio_open_risk_pct, args.theme_open_risk_pct, refs
 

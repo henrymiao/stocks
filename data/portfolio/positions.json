@@ -1,6 +1,6 @@
 {
   "schema_version": "portfolio-positions-v1",
-  "as_of": "2026-08-03T22:30:00+08:00",
+  "as_of": "2026-08-04T20:10:00+08:00",
   "source": "user-confirmed-2026-08-03",
   "base_currency": "CNY",
   "fx_rates": {
@@ -9,14 +9,16 @@
     "HKD": 0.912
   },
   "cash": {
-    "CNY": 1500000.0
+    "CNY": 1527970.0,
+    "HKD": 62700.0
   },
   "notes": [
     "股数与成本由用户 2026-08-03 逐个确认，取代此前所有快照。",
     "current_stop 取自当日 analyze 的 exit_plan.initial_stop，随每次复盘更新。",
     "工业富联成本 59.25 为前复权口径（实付 59.90，8/3 除息每股 0.65）。",
     "宁德A 与长电的成本暂按 8/3 收盘价填，待用户提供真实成交价。",
-    "fx_rates 为近似值，需定期核对。"
+    "fx_rates 为近似值，需定期核对。",
+    "2026-08-04: 宁德A 396.3 清仓100股；阿里 125.4 减500股余1000；工业富联 58.3 加200股至1500，成本摊薄。"
   ],
   "positions": [
     {
@@ -51,7 +53,7 @@
     },
     {
       "code": "HK.09988",
-      "shares": 1500,
+      "shares": 1000,
       "cost_basis": 106.0,
       "currency": "HKD",
       "theme": "china-internet",
@@ -91,8 +93,8 @@
     },
     {
       "code": "SH.601138",
-      "shares": 1300,
-      "cost_basis": 59.25,
+      "shares": 1500,
+      "cost_basis": 59.1233,
       "currency": "CNY",
       "theme": "ai-compute",
       "trade_id": "fii-601138-599",
@@ -117,16 +119,6 @@
       "theme": "energy",
       "trade_id": "lng-cheniere-259",
       "current_stop": 250.33,
-      "leverage": 1.0
-    },
-    {
-      "code": "SZ.300750",
-      "shares": 100,
-      "cost_basis": 394.4,
-      "currency": "CNY",
-      "theme": "ev-chain",
-      "trade_id": "catl-a-probe-20260803",
-      "current_stop": 381.43,
       "leverage": 1.0
     },
     {

@@ -67,9 +67,14 @@ class WatchlistDataTests(unittest.TestCase):
             "scan_policy",
             "tags",
         }
+        # `theme` is optional: the scanner's per-theme quota falls back to deriving one
+        # from tags, so an entry may either state its theme or leave it inferred.
+        optional = {"theme"}
         payload = load_json(CORE)
         for entry in payload["watchlist"]:
-            self.assertEqual(set(entry), required, entry["code"])
+            fields = set(entry)
+            self.assertTrue(required <= fields, entry["code"])
+            self.assertEqual(fields - required - optional, set(), entry["code"])
 
 
 if __name__ == "__main__":

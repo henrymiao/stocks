@@ -3318,6 +3318,133 @@
         "cyclical",
         "holding"
       ]
+    },
+    {
+      "code": "US.COHR",
+      "name": "Coherent",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.QQQ",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "theme": "optical-module",
+      "tags": [
+        "us",
+        "optical-module",
+        "ai-infrastructure",
+        "semiconductor",
+        "growth"
+      ]
+    },
+    {
+      "code": "US.LITE",
+      "name": "Lumentum",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.QQQ",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "theme": "optical-module",
+      "tags": [
+        "us",
+        "optical-module",
+        "ai-infrastructure",
+        "laser",
+        "growth"
+      ]
+    },
+    {
+      "code": "US.FN",
+      "name": "Fabrinet",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.QQQ",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "theme": "optical-module",
+      "tags": [
+        "us",
+        "optical-module",
+        "ai-infrastructure",
+        "contract-manufacturing"
+      ]
+    },
+    {
+      "code": "US.CIEN",
+      "name": "Ciena",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.QQQ",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "theme": "optical-module",
+      "tags": [
+        "us",
+        "optical-networking",
+        "ai-infrastructure",
+        "telecom-equipment"
+      ]
+    },
+    {
+      "code": "US.AAOI",
+      "name": "Applied Optoelectronics",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 85,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "US.QQQ",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "theme": "optical-module",
+      "tags": [
+        "us",
+        "optical-module",
+        "ai-infrastructure",
+        "high-volatility"
+      ]
     }
   ]
 }

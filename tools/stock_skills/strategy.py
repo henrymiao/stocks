@@ -54,6 +54,7 @@ class StrategyProfile:
     probe_allocation_fraction: float
     probe_allocation_cap_pct: float
     leveraged_overlay: bool = False
+    defensive_overlay: bool = False
 
 
 @dataclass(frozen=True)
@@ -205,7 +206,44 @@ CORE_PROFILE = StrategyProfile(
 )
 
 
-def get_strategy_profile(horizon: str, leveraged: bool = False) -> StrategyProfile:
+DEFENSIVE_CLUSTER_SHIFT = 0.15      # moved from market_behavior to thesis
+DEFENSIVE_MIN_MARKET_BEHAVIOR = 0.15  # price action still counts, it just stops deciding
+
+
+def _apply_defensive_overlay(profile: StrategyProfile) -> StrategyProfile:
+    """Score a low-volatility name on what it is, not on how fast it moves.
+
+    The momentum gates are not neutral. `relative-strength` asks a staple to outrun a
+    benchmark that a semiconductor sets, and `volume-confirmation` asks for a volume
+    spike from a name that trades an even book every day. Both are failures by
+    construction, not evidence: measured on the US watchlist, banks, staples and energy
+    never once reached the gates, and the resulting silence read as "nothing there
+    qualifies" when nothing there had been tested.
+
+    So the overlay drops those two gates and moves weight from market_behavior to thesis.
+    What it keeps is everything about whether the trade works: trend regime, entry
+    trigger, resistance room, liquidity, portfolio heat, exit plan. A cheap stock in a
+    confirmed downtrend is still refused.
+    """
+
+    weights = dict(profile.cluster_weights)
+    shift = min(
+        DEFENSIVE_CLUSTER_SHIFT,
+        max(0.0, weights.get("market_behavior", 0.0) - DEFENSIVE_MIN_MARKET_BEHAVIOR),
+    )
+    weights["market_behavior"] = round(weights["market_behavior"] - shift, 10)
+    weights["thesis"] = round(weights["thesis"] + shift, 10)
+    return replace(
+        profile,
+        strategy_id=f"{profile.strategy_id}+defensive-overlay-v1",
+        cluster_weights=weights,
+        defensive_overlay=True,
+    )
+
+
+def get_strategy_profile(
+    horizon: str, leveraged: bool = False, defensive: bool = False
+) -> StrategyProfile:
     if horizon == "short":
         profile = SHORT_PROFILE
     elif horizon == "swing":
@@ -214,6 +252,8 @@ def get_strategy_profile(horizon: str, leveraged: bool = False) -> StrategyProfi
         profile = CORE_PROFILE
     else:
         raise ValueError(f"Unknown strategy horizon: {horizon}")
+    if defensive:
+        profile = _apply_defensive_overlay(profile)
     if not leveraged:
         return profile
     return replace(
@@ -347,11 +387,14 @@ def evaluate_strategy(
     # while the thesis and the valuation are still intact.
     if profile.horizon != "core":
         gate("trend-regime", evidence.trend_regime == "uptrend")
-        gate("relative-strength", evidence.relative_strength_positive)
-        gate(
-            "volume-confirmation",
-            None if evidence.volume_ratio is None else evidence.volume_ratio >= profile.minimum_volume_ratio,
-        )
+        # The defensive overlay drops the two gates that a low-volatility name fails by
+        # construction rather than on the evidence. See _apply_defensive_overlay.
+        if not profile.defensive_overlay:
+            gate("relative-strength", evidence.relative_strength_positive)
+            gate(
+                "volume-confirmation",
+                None if evidence.volume_ratio is None else evidence.volume_ratio >= profile.minimum_volume_ratio,
+            )
         gate("entry-trigger", evidence.trigger_confirmed)
         gate(
             "resistance-room",
@@ -404,12 +447,18 @@ def evaluate_strategy(
     horizon_probe_ok = profile.horizon in {"short", "core"} or evidence.weekly_aligned is True
     # The core track drops the tactical timing gates, so its probe path must drop the
     # same conditions — otherwise relative strength and price/volume would veto through
-    # the back door what the gate list deliberately stopped asking about.
-    tactical_probe_ok = profile.horizon == "core" or (
-        evidence.relative_strength_positive is True
-        and evidence.trigger_confirmed is not False
-        and price_volume_score >= PROBE_MIN_PRICE_VOLUME_SCORE
-    )
+    # the back door what the gate list deliberately stopped asking about. The defensive
+    # overlay needs the same treatment for the two momentum conditions it dropped.
+    if profile.horizon == "core":
+        tactical_probe_ok = True
+    elif profile.defensive_overlay:
+        tactical_probe_ok = evidence.trigger_confirmed is not False
+    else:
+        tactical_probe_ok = (
+            evidence.relative_strength_positive is True
+            and evidence.trigger_confirmed is not False
+            and price_volume_score >= PROBE_MIN_PRICE_VOLUME_SCORE
+        )
     probe_qualifies = (
         not hard_failed
         and evidence.data_probe_eligible

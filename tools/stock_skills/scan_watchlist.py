@@ -153,6 +153,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--codes", help="Comma-separated codes overriding the watchlist")
     parser.add_argument("--bars", type=int, default=None)
     parser.add_argument("--deep-top", type=int, default=10, help="Top thematic names per requested horizon")
+    parser.add_argument("--deep-per-theme", type=int, default=0, help="Minimum deep analyses per theme, so momentum ranking cannot starve a whole sector")
     parser.add_argument(
         "--deep-bottom",
         type=int,
@@ -243,6 +244,7 @@ def main(argv: list[str] | None = None) -> int:
             analyzer=None if args.snapshot_only else analyze,
             deep_top=args.deep_top,
             deep_bottom=args.deep_bottom,
+            deep_per_theme=args.deep_per_theme,
             deep_horizons=horizons,
             context_codes=tuple(DEFAULT_MACRO_CODES),
         )

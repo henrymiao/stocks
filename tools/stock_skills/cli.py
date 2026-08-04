@@ -310,6 +310,27 @@ def _tags_for_code(code: str, watchlist_path: str) -> list[str]:
     return []
 
 
+def _watchlist_entry(code: str, watchlist_path: str) -> dict | None:
+    try:
+        entries = load_watchlist(watchlist_path)
+    except (OSError, ValueError):
+        return None
+    return next((entry for entry in entries if entry.get("code") == code), None)
+
+
+def _is_defensive(tags: list[str], valuation_profile: str | None) -> bool:
+    """Route low-volatility value/defensive names onto the defensive overlay.
+
+    Driven by the watchlist's own classification, so the routing is auditable data rather
+    than a判断 buried in code: an explicit `value` valuation profile, or a `defensive`,
+    `staple` or `dividend` tag.
+    """
+    lowered = {str(tag).lower() for tag in tags}
+    return str(valuation_profile or "").lower() == "value" or bool(
+        lowered & {"defensive", "staple", "dividend"}
+    )
+
+
 def _is_leveraged(name: str, tags: list[str]) -> bool:
     lowered = name.lower()
     return "leveraged" in {str(tag).lower() for tag in tags} or any(
@@ -603,6 +624,7 @@ def _recommend(
     reference_bars: dict[str, list[KLineBar]] | None = None,
     asset_type: str = "equity",
     method_inputs: dict[str, object] | None = None,
+    defensive: bool = False,
 ) -> Recommendation:
     """Run every analyzer over `state`. Missing components score a neutral 50 and are flagged in source_refs."""
     trend = analyze_trend(state.snapshot, state.daily_bars)
@@ -640,7 +662,7 @@ def _recommend(
         atr = max(opening_range, gap_range * 0.35, state.snapshot.last_price * 0.01)
         structural_invalidation = state.snapshot.low
         opening_range_fallback = True
-    strategy_profile = get_strategy_profile(horizon, leveraged=leveraged)
+    strategy_profile = get_strategy_profile(horizon, leveraged=leveraged, defensive=defensive)
     effective_trade_id = trade_id or f"{strategy_profile.strategy_id}:{state.snapshot.code}:{state.snapshot.timestamp}"
     exit_plan = None
     exit_plan_error = None
@@ -1187,6 +1209,12 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
 
     inverse = args.inverse if args.inverse is not None else is_inverse_instrument(state.snapshot.name, tags)
     leveraged = _is_leveraged(state.snapshot.name, tags)
+    entry_for_code = _watchlist_entry(args.code, args.watchlist)
+    defensive = (
+        args.defensive
+        if getattr(args, "defensive", None) is not None
+        else _is_defensive(tags, (entry_for_code or {}).get("valuation_profile"))
+    )
     lowered_tags = {str(tag).lower() for tag in tags}
     asset_type = (
         "etf"
@@ -1226,6 +1254,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         reference_bars=reference_bars,
         asset_type=asset_type,
         method_inputs=method_inputs,
+        defensive=defensive,
     )
     _write(args.output, recommendation)
     if not args.no_journal:
@@ -1972,6 +2001,9 @@ def main(argv: list[str] | None = None) -> int:
     analyze.add_argument("--theme-open-risk-pct", type=float, default=None, help="Current correlated-theme open risk %% for the 3%% heat gate (overrides --portfolio)")
     analyze.add_argument("--portfolio", default=None, help="Positions book (portfolio-positions-v1) used to compute the heat gates automatically")
     analyze.add_argument("--theme", default=None, help="Theme bucket for a candidate not yet in the book, so its theme heat can be read")
+    defensive_group = analyze.add_mutually_exclusive_group()
+    defensive_group.add_argument("--defensive", dest="defensive", action="store_true", default=None, help="Force the defensive overlay: drop the two momentum gates a low-volatility name fails by construction")
+    defensive_group.add_argument("--no-defensive", dest="defensive", action="store_false", help="Force the standard momentum gates even for a value/defensive name")
     analyze.add_argument("--cost-basis", type=float, default=None, help="Existing cost basis, to report open P&L in the plan")
     analyze.add_argument("--position-stage", choices=["probe", "core"], default=None, help="Existing position stage; a confirmed probe may become an add candidate")
     analyze.add_argument("--trade-id", default=None, help="Existing trade id for position-management records; new entries get a deterministic id")

@@ -322,3 +322,81 @@ class StrategyGateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DefensiveOverlayTests(unittest.TestCase):
+    """A staple that never outruns a semiconductor is behaving, not failing."""
+
+    def _slow_name(self, **overrides):
+        # Strong business, no momentum: it lags the benchmark and trades an even book.
+        values = dict(
+            relative_strength_positive=False,
+            volume_ratio=0.6,
+            factor_scores={
+                "price_volume": 45.0,
+                "relative_strength": 30.0,
+                "market_regime": 70.0,
+                "capital_flow": 50.0,
+                "liquidity_event": 70.0,
+                "position_fit": 70.0,
+                "trend_quality": 55.0,
+                "fundamental": 85.0,
+                "backdrop": 70.0,
+                "volume_accumulation": 45.0,
+            },
+        )
+        values.update(overrides)
+        return _good_evidence(**values)
+
+    def test_momentum_gates_are_dropped_but_the_trade_gates_are_not(self):
+        standard = evaluate_strategy(get_strategy_profile("swing"), self._slow_name())
+        defensive = evaluate_strategy(
+            get_strategy_profile("swing", defensive=True), self._slow_name()
+        )
+
+        self.assertIn("relative-strength", standard.gates_failed)
+        self.assertIn("volume-confirmation", standard.gates_failed)
+        self.assertNotIn("relative-strength", defensive.gates_failed + defensive.gates_missing)
+        self.assertNotIn("volume-confirmation", defensive.gates_failed + defensive.gates_missing)
+        for kept in ("trend-regime", "entry-trigger", "resistance-room", "liquidity", "portfolio-heat"):
+            self.assertIn(kept, defensive.gates_passed, kept)
+
+    def test_a_cheap_stock_in_a_downtrend_is_still_refused(self):
+        defensive = evaluate_strategy(
+            get_strategy_profile("swing", defensive=True),
+            self._slow_name(trend_regime="downtrend"),
+        )
+        self.assertIn("trend-regime", defensive.gates_failed)
+        self.assertNotEqual(defensive.entry_decision, "enter")
+
+    def test_weight_moves_from_price_action_to_thesis_and_still_sums_to_one(self):
+        base = get_strategy_profile("swing")
+        overlaid = get_strategy_profile("swing", defensive=True)
+
+        self.assertGreater(overlaid.cluster_weights["thesis"], base.cluster_weights["thesis"])
+        self.assertLess(
+            overlaid.cluster_weights["market_behavior"], base.cluster_weights["market_behavior"]
+        )
+        self.assertGreaterEqual(overlaid.cluster_weights["market_behavior"], 0.15)
+        for horizon in ("short", "swing", "core"):
+            with self.subTest(horizon=horizon):
+                weights = get_strategy_profile(horizon, defensive=True).cluster_weights
+                self.assertAlmostEqual(sum(weights.values()), 1.0, places=9)
+
+    def test_probe_path_drops_the_same_momentum_conditions_it_stopped_gating_on(self):
+        # Without the overlay the probe path vetoes on relative strength directly, so
+        # dropping the gate alone would have changed nothing.
+        defensive = evaluate_strategy(
+            get_strategy_profile("swing", defensive=True), self._slow_name()
+        )
+        self.assertIn(defensive.entry_decision, {"enter", "probe"})
+
+    def test_overlay_is_recorded_in_the_strategy_id_and_composes_with_leverage(self):
+        self.assertEqual(
+            get_strategy_profile("swing", defensive=True).strategy_id,
+            "swing-balanced-v1+defensive-overlay-v1",
+        )
+        both = get_strategy_profile("swing", leveraged=True, defensive=True)
+        self.assertTrue(both.defensive_overlay)
+        self.assertTrue(both.leveraged_overlay)
+        self.assertEqual(both.allocation_cap_pct, 15.0)

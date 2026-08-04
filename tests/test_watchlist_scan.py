@@ -1,7 +1,7 @@
 import unittest
 
 from tools.stock_skills.models import MarketSnapshot
-from tools.stock_skills.watchlist_scan import run_watchlist_scan
+from tools.stock_skills.watchlist_scan import _entry_theme, run_watchlist_scan
 
 
 def _snapshot(code, change_pct=1.0, turnover=10_000_000.0):
@@ -219,3 +219,71 @@ class WatchlistScanTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ThemeQuotaTests(unittest.TestCase):
+    """Momentum ranking starves low-volatility themes; the quota is the counterweight."""
+
+    def setUp(self):
+        def entry(code, tags, priority=50):
+            return {
+                "code": code, "name": code, "tier": "thematic", "priority": priority,
+                "strategy_profiles": ["short", "swing"], "benchmark": "US.SPY",
+                "underlying_proxy": None, "tags": tags,
+            }
+        # Three semiconductors that move several percent a day, one bank and one staple
+        # that barely move. A Top-2/Bottom-0 selection can only ever see the semis.
+        self.entries = [
+            entry("US.SEMI1", ["us", "semiconductor"], 90),
+            entry("US.SEMI2", ["us", "semiconductor"], 80),
+            entry("US.SEMI3", ["us", "semiconductor"], 70),
+            entry("US.BANK", ["us", "bank", "value"], 60),
+            entry("US.STAPLE", ["us", "consumer", "defensive"], 60),
+        ]
+        self.snapshots = {
+            "US.SEMI1": _snapshot("US.SEMI1", change_pct=6.0),
+            "US.SEMI2": _snapshot("US.SEMI2", change_pct=5.0),
+            "US.SEMI3": _snapshot("US.SEMI3", change_pct=4.0),
+            "US.BANK": _snapshot("US.BANK", change_pct=0.2),
+            "US.STAPLE": _snapshot("US.STAPLE", change_pct=-0.1),
+        }
+
+    def _selected(self, **kwargs):
+        result = run_watchlist_scan(
+            self.entries, FakeFetcher(self.snapshots), deep_horizons=("swing",), **kwargs
+        )
+        return {row["code"]: row["selection_reasons"] for row in result["selections"]["swing"]}
+
+    def test_momentum_ranking_alone_never_reaches_the_slow_themes(self):
+        selected = self._selected(deep_top=2, deep_bottom=0)
+        self.assertEqual(set(selected), {"US.SEMI1", "US.SEMI2"})
+        self.assertNotIn("US.BANK", selected)
+        self.assertNotIn("US.STAPLE", selected)
+
+    def test_quota_pulls_one_name_from_every_starved_theme(self):
+        selected = self._selected(deep_top=2, deep_bottom=0, deep_per_theme=1)
+        self.assertIn("US.BANK", selected)
+        self.assertIn("US.STAPLE", selected)
+        self.assertEqual(selected["US.BANK"], ["theme-quota"])
+        self.assertEqual(selected["US.STAPLE"], ["theme-quota"])
+        # A theme already represented by the momentum ranking is not topped up further.
+        self.assertNotIn("US.SEMI3", selected)
+
+    def test_quota_takes_each_theme_best_ranked_name_first(self):
+        selected = self._selected(deep_top=0, deep_bottom=0, deep_per_theme=1)
+        self.assertIn("US.SEMI1", selected)
+        self.assertNotIn("US.SEMI2", selected)
+
+    def test_negative_quota_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "deep_per_theme must be non-negative"):
+            run_watchlist_scan(self.entries, FakeFetcher(self.snapshots), deep_per_theme=-1)
+
+
+class EntryThemeTests(unittest.TestCase):
+    def test_explicit_theme_wins_and_market_or_position_tags_are_skipped(self):
+        self.assertEqual(_entry_theme({"theme": "ai-compute", "tags": ["us", "bank"]}), "ai-compute")
+        self.assertEqual(_entry_theme({"tags": ["us", "holding", "bank", "value"]}), "bank")
+        self.assertEqual(_entry_theme({"tags": ["a-share", "semiconductor"]}), "semiconductor")
+        # A name described only by where it trades and what we hold has no theme to group on.
+        self.assertEqual(_entry_theme({"tags": ["us", "holding", "growth"]}), "unclassified")
+        self.assertEqual(_entry_theme({}), "unclassified")

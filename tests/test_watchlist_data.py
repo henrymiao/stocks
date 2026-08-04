@@ -79,3 +79,31 @@ class WatchlistDataTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BookAndWatchlistAgreeTests(unittest.TestCase):
+    """The two files drifted apart four times in one session; make it impossible.
+
+    On 2026-08-03 the watchlist called 深科技 a holding that had been sold long before,
+    called GOOGL and SMH watch-only while both were held, and on 08-04 still called CATL
+    a holding after it was closed. Every one of those silently changed what the scanner
+    analysed and what the heat gates measured.
+    """
+
+    def test_every_watchlist_holding_is_in_the_positions_book_and_the_reverse(self):
+        from tools.stock_skills.positions import load_portfolio
+
+        book = load_portfolio(Path("data/portfolio/positions.json"))
+        booked = set(book.codes())
+        flagged = {
+            entry["code"]
+            for entry in load_json(CORE)["watchlist"]
+            if entry.get("position_status") in {"holding", "reduced-holding"}
+        }
+
+        self.assertEqual(
+            flagged - booked, set(), "watchlist says held but the book has no position"
+        )
+        self.assertEqual(
+            booked - flagged, set(), "book holds a position the watchlist does not flag"
+        )

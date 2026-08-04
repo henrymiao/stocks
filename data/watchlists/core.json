@@ -989,8 +989,8 @@
       "benchmark": "SZ.399006",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "holding",
-      "scan_policy": "always",
+      "position_status": "exited-watch",
+      "scan_policy": "ranked",
       "tags": [
         "a-share",
         "battery",
@@ -998,8 +998,7 @@
         "national-tech",
         "new-energy-vehicle",
         "growth",
-        "holding",
-        "probe"
+        "exited-watch"
       ]
     },
     {

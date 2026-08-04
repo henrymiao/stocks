@@ -322,7 +322,7 @@ def _is_defensive(tags: list[str], valuation_profile: str | None) -> bool:
     """Route low-volatility value/defensive names onto the defensive overlay.
 
     Driven by the watchlist's own classification, so the routing is auditable data rather
-    than a判断 buried in code: an explicit `value` valuation profile, or a `defensive`,
+    than a judgement buried in code: an explicit `value` valuation profile, or a `defensive`,
     `staple` or `dividend` tag.
     """
     lowered = {str(tag).lower() for tag in tags}

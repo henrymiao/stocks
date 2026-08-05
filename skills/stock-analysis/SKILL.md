@@ -172,6 +172,15 @@ python3 -m tools.stock_skills.cli evidence-optimize --output /tmp/evidence-optim
 
 The report excludes synthetic/incomplete outcomes, deduplicates by `trade_id`, separates strategy versions and ordinary/leveraged instruments, and requires 60 unique realised closed trades per exact bucket. Candidate weights are selected only on chronological training windows and compared with the frozen baseline only on later test windows using expectancy and drawdown. The command has no apply mode and never changes weights.
 
+Read any analysis in plain Chinese instead of raw JSON:
+
+```bash
+python3 -m tools.stock_skills.cli analyze --code US.GOOGL --horizon core --portfolio data/portfolio/positions.json --explain --output /tmp/googl.json
+python3 -m tools.stock_skills.cli explain --input /tmp/googl.json --portfolio data/portfolio/positions.json
+```
+
+`explain` re-presents a record, it never re-analyses one, so it cannot disagree with the JSON it renders. It separates the three fields that are easiest to confuse — `label` and `position_decision` answer what to do with a position already held, `entry_decision` answers only whether new risk may be opened — splits failed gates into the one a lower price can fix (`resistance-room`) and the ones it cannot, and closes with the three-to-five levels actually worth watching. `docs/术语.md` defines every term once.
+
 Inspect a label:
 
 ```bash

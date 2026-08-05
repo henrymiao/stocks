@@ -1257,6 +1257,24 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         defensive=defensive,
     )
     _write(args.output, recommendation)
+    if getattr(args, "explain", False):
+        from .explain import explain_recommendation
+        from .positions import load_portfolio
+
+        held = None
+        if getattr(args, "portfolio", None):
+            try:
+                book = load_portfolio(args.portfolio)
+                held = next((p for p in book.positions if p.code == args.code), None)
+            except (OSError, ValueError):
+                held = None
+        print(
+            explain_recommendation(
+                recommendation.to_record(),
+                cost_basis=held.cost_basis if held else args.cost_basis,
+                shares=held.shares if held else None,
+            )
+        )
     if not args.no_journal:
         append_record(args.journal, recommendation.to_record())
     return 0
@@ -1420,6 +1438,24 @@ def _cmd_analyze_offline(args: argparse.Namespace) -> int:
         method_inputs={},
     )
     _write(args.output, recommendation)
+    if getattr(args, "explain", False):
+        from .explain import explain_recommendation
+        from .positions import load_portfolio
+
+        held = None
+        if getattr(args, "portfolio", None):
+            try:
+                book = load_portfolio(args.portfolio)
+                held = next((p for p in book.positions if p.code == args.code), None)
+            except (OSError, ValueError):
+                held = None
+        print(
+            explain_recommendation(
+                recommendation.to_record(),
+                cost_basis=held.cost_basis if held else args.cost_basis,
+                shares=held.shares if held else None,
+            )
+        )
     if not args.no_journal:
         append_record(args.journal, recommendation.to_record())
     print(f"{recommendation.label}  total_score={recommendation.total_score}  → {args.output}")
@@ -1924,6 +1960,29 @@ def _add_discovery_arguments(parser: argparse.ArgumentParser, *, confirmation: b
         parser.add_argument("--backfill", type=int, choices=[60, 260], default=260)
 
 
+def _cmd_explain(args: argparse.Namespace) -> int:
+    from .explain import explain_recommendation
+
+    record = json.loads(Path(args.input).read_text(encoding="utf-8"))
+    held = None
+    if args.portfolio:
+        from .positions import load_portfolio
+
+        try:
+            book = load_portfolio(args.portfolio)
+            held = next((p for p in book.positions if p.code == record.get("code")), None)
+        except (OSError, ValueError):
+            held = None
+    print(
+        explain_recommendation(
+            record,
+            cost_basis=held.cost_basis if held else None,
+            shares=held.shares if held else None,
+        )
+    )
+    return 0
+
+
 def _cmd_foundation_check(args: argparse.Namespace) -> int:
     from .foundation_validation import validate_foundation
     from .identity import load_identity_registry
@@ -2001,6 +2060,7 @@ def main(argv: list[str] | None = None) -> int:
     analyze.add_argument("--theme-open-risk-pct", type=float, default=None, help="Current correlated-theme open risk %% for the 3%% heat gate (overrides --portfolio)")
     analyze.add_argument("--portfolio", default=None, help="Positions book (portfolio-positions-v1) used to compute the heat gates automatically")
     analyze.add_argument("--theme", default=None, help="Theme bucket for a candidate not yet in the book, so its theme heat can be read")
+    analyze.add_argument("--explain", action="store_true", help="Also print a plain-Chinese read of the result")
     defensive_group = analyze.add_mutually_exclusive_group()
     defensive_group.add_argument("--defensive", dest="defensive", action="store_true", default=None, help="Force the defensive overlay: drop the two momentum gates a low-volatility name fails by construction")
     defensive_group.add_argument("--no-defensive", dest="defensive", action="store_false", help="Force the standard momentum gates even for a value/defensive name")
@@ -2112,6 +2172,12 @@ def main(argv: list[str] | None = None) -> int:
     discovery_review.add_argument("--output", default=None)
     discovery_review.add_argument("--json", action="store_true", help="Compatibility flag; output is always JSON")
 
+    explain_cmd = subparsers.add_parser(
+        "explain", help="Re-read a saved recommendation JSON in plain Chinese"
+    )
+    explain_cmd.add_argument("--input", required=True, help="A recommendation JSON written by analyze")
+    explain_cmd.add_argument("--portfolio", default=None, help="Positions book, to add cost/size context")
+
     foundation = subparsers.add_parser(
         "foundation-check",
         help="Validate point-in-time identity and universe contracts without fetching or scoring",
@@ -2152,6 +2218,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_confirm_discoveries(args)
     if args.command == "review-discoveries":
         return _cmd_review_discoveries(args)
+    if args.command == "explain":
+        return _cmd_explain(args)
     if args.command == "foundation-check":
         return _cmd_foundation_check(args)
     return 2

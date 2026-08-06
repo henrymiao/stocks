@@ -146,8 +146,8 @@
       "benchmark": "US.SPY",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "holding",
-      "scan_policy": "always",
+      "position_status": "exited-watch",
+      "scan_policy": "ranked",
       "tags": [
         "us",
         "energy",
@@ -155,7 +155,7 @@
         "natural-gas",
         "energy-infrastructure",
         "cyclical",
-        "holding"
+        "exited-watch"
       ]
     },
     {

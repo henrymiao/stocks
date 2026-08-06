@@ -3,8 +3,8 @@
   "market": "CN",
   "as_of": "2026-07-21T16:00:00+08:00",
   "expires_at": "2026-10-31T23:59:59+08:00",
-  "published_at": "2026-08-03T21:30:00+08:00",
-  "identity_registry_version": "identity:f174983dee1106f22e5341503a1c2bb2d002973984bafe9c2396a47aaf8f80a2",
+  "published_at": "2026-08-06T21:00:00+08:00",
+  "identity_registry_version": "identity:9178363fd7aa9ee3fbb23a80640675b2c9322417533f4f50241394853114785c",
   "sectors": [
     {
       "key": "semiconductor-ai-hardware",
@@ -71,6 +71,296 @@
           "security_id": "listing:SZ.002938",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
+        },
+        {
+          "code": "SZ.000725",
+          "name": "Boe Technology Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000725",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002475",
+          "name": "Luxshare Precision Industry",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002475",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603629",
+          "name": "Jiangsu Lettall Electronic",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603629",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300857",
+          "name": "Sharetronic Data Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300857",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000021",
+          "name": "Shenzhen Kaifa Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000021",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300136",
+          "name": "Shenzhen Sunway Communication",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300136",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300433",
+          "name": "Lens Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300433",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600703",
+          "name": "Sanan Optoelectronics",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600703",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000100",
+          "name": "Tcl Corporation",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000100",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002222",
+          "name": "Castech Inc.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002222",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002241",
+          "name": "Goertek Inc.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002241",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002273",
+          "name": "Zhejiang Crystal-optech",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002273",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002600",
+          "name": "Lingyi Itech",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002600",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600552",
+          "name": "Triumph Science & Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600552",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688322",
+          "name": "Orbbec Inc.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688322",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688195",
+          "name": "Optowide Technologies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688195",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688036",
+          "name": "Shenzhen Transsion Holdings Co., Ltd.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688036",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603773",
+          "name": "WG Tech(JiangXi)Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603773",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002655",
+          "name": "Gettop Acoustic",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002655",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002456",
+          "name": "OFILM Group Co., Ltd",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002456",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300115",
+          "name": "Shenzhen Everwin Precision Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300115",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688260",
+          "name": "Suzhou Gyz Electronic Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688260",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.001399",
+          "name": "Hkc Corporation",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.001399",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300322",
+          "name": "Huizhou Speed Wireless Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300322",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300843",
+          "name": "Shenglan Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300843",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.301183",
+          "name": "Hubei DOTI Micro Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.301183",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688502",
+          "name": "Mloptic Corp.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688502",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002036",
+          "name": "LianChuang Electronic Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002036",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603626",
+          "name": "Kunshan Kersen Science & Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603626",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
         }
       ]
     },
@@ -117,6 +407,316 @@
           "weight": 1.0,
           "shared_identity": null,
           "security_id": "listing:SH.601633",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603799",
+          "name": "Zhejiang Huayou Cobalt",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603799",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.605376",
+          "name": "Jiangsu Boqian New Materials Stock",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.605376",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000981",
+          "name": "Sensteed Hi-tech Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000981",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002466",
+          "name": "Tianqi Lithium Corporation",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002466",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000338",
+          "name": "Weichai Power",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000338",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002460",
+          "name": "Ganfeng Lithium Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002460",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002703",
+          "name": "Zhejiang Shibao",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002703",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002536",
+          "name": "Feilong Auto Components",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002536",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002240",
+          "name": "Chengxin Lithium Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002240",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603306",
+          "name": "HMT (Xiamen)New Technical Materiasls Co.,Ltd",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603306",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601689",
+          "name": "Ningbo Tuopu Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601689",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002472",
+          "name": "Zhejiang Shuanghuan Driveline",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002472",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603399",
+          "name": "Jinzhou Yongshan Lithium",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603399",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.301005",
+          "name": "Essence Fastening Systems",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.301005",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002126",
+          "name": "Zhejiang Yinlun Machinery",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002126",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600699",
+          "name": "Ningbo Joyson Electronic Corp.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600699",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603179",
+          "name": "Jiangsu Xinquan Automotive Trim",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603179",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000700",
+          "name": "Jiangnan Mould & Plastic Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000700",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600151",
+          "name": "Shanghai Aerospace Automobile Electromechanical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600151",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002756",
+          "name": "Yongxing Special Materials Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002756",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603596",
+          "name": "Bethel Automotive Safety Systems",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603596",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000887",
+          "name": "Anhui Zhongding Sealing Parts",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000887",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603119",
+          "name": "Zhejiang Rongtai Electric Material",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603119",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000559",
+          "name": "Wanxiang Qianchao",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000559",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002355",
+          "name": "Xingmin Intelligent Transportation Systems",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002355",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002766",
+          "name": "Shenzhen Soling Industrial",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002766",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.301310",
+          "name": "Wuxi Xinhongye Wire & Cable",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.301310",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600660",
+          "name": "Fuyao Glass Industry Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600660",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603319",
+          "name": "Hunan Meihu Intelligent Manufacturing",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603319",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002965",
+          "name": "Lucky Harvest",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002965",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603358",
+          "name": "Huada Automotive Technology Corp.,Ltd",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603358",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
         }
@@ -167,6 +767,316 @@
           "security_id": "listing:SZ.300760",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
+        },
+        {
+          "code": "SH.600664",
+          "name": "Harbin Pharmaceutical Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600664",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002432",
+          "name": "Andon Health",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002432",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688235",
+          "name": "BeOne Medicines Ltd.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688235",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688331",
+          "name": "RemeGen Co., Ltd.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688331",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300255",
+          "name": "Hebei Changshan Biochemical Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300255",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603538",
+          "name": "Ningbo Menovo Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603538",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000566",
+          "name": "Hainan Haiyao",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000566",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300204",
+          "name": "Staidson",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300204",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002422",
+          "name": "Sichuan Kelun Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002422",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300199",
+          "name": "Hybio Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300199",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300765",
+          "name": "CSPC Innovation Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300765",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300558",
+          "name": "Betta Pharmaceuticals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300558",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688266",
+          "name": "Suzhou Zelgen Biopharmaceuticals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688266",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688578",
+          "name": "Shanghai Allist Pharmaceuticals Co., Ltd.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688578",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600488",
+          "name": "Tianjin Tianyao Pharmaceuticals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600488",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002294",
+          "name": "Shenzhen Salubris Pharmaceuticals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002294",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.301047",
+          "name": "Sino Biological Inc.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.301047",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002653",
+          "name": "Haisco Pharmaceutical Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002653",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300497",
+          "name": "Jiangxi Fushine Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300497",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688166",
+          "name": "Brightgene Bio-Medical Technology Co.,Ltd.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688166",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.301188",
+          "name": "Shandong Linuo Pharmaceutical Packaging",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.301188",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000661",
+          "name": "Changchun High-Tech Industry",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000661",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600513",
+          "name": "Jiangsu Lianhuan Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600513",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300049",
+          "name": "Inner Mongolia Furui Medical Science",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300049",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688506",
+          "name": "Sichuan Biokin Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688506",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688301",
+          "name": "iRay Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688301",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.301093",
+          "name": "Jiangsu Hualan New Pharmaceutical Material",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.301093",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603087",
+          "name": "Gan & Lee Pharmaceuticals.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603087",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600267",
+          "name": "Zhejiang Hisun Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600267",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000739",
+          "name": "Apeloa Pharmaceutical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000739",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688271",
+          "name": "Shanghai United Imaging Healthcare",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688271",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
         }
       ]
     },
@@ -213,6 +1123,316 @@
           "weight": 1.0,
           "shared_identity": null,
           "security_id": "listing:SH.601398",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300059",
+          "name": "East Money Information",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300059",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600030",
+          "name": "CITIC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600030",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601336",
+          "name": "New China Life Insurance",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601336",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600999",
+          "name": "China Merchants",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600999",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601688",
+          "name": "Huatai",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601688",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601211",
+          "name": "Guotai Haitong",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601211",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601628",
+          "name": "China Life Insurance",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601628",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601601",
+          "name": "China Pacific Insurance",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601601",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600909",
+          "name": "Huaan",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600909",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000776",
+          "name": "GF securities",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000776",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601995",
+          "name": "China International Capital Corporation",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601995",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000783",
+          "name": "Changjiang",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000783",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601066",
+          "name": "China Securities Co.,Ltd.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601066",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601162",
+          "name": "Tianfeng",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601162",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601377",
+          "name": "Industrial",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601377",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000712",
+          "name": "Guangdong Golden Dragon Development Inc.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000712",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601319",
+          "name": "The People's Insurance",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601319",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000166",
+          "name": "Shenwan Hongyuan Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000166",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002797",
+          "name": "First Capital",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002797",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600958",
+          "name": "Orient",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600958",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601696",
+          "name": "BOC International",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601696",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601881",
+          "name": "China Galaxy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601881",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601901",
+          "name": "Founder",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601901",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601099",
+          "name": "The Pacific",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601099",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601108",
+          "name": "Caitong",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601108",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601788",
+          "name": "Everbright",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601788",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002670",
+          "name": "Guosheng",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002670",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002736",
+          "name": "Guosen",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002736",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601198",
+          "name": "Dongxing",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601198",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601555",
+          "name": "Soochow",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601555",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002945",
+          "name": "ChinaLin",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002945",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
         }
@@ -273,6 +1493,306 @@
           "security_id": "listing:SH.600760",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
+        },
+        {
+          "code": "SH.600549",
+          "name": "Xiamen Tungsten",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600549",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002428",
+          "name": "Yunnan Lincang Xinyuan Germanium Industry",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002428",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000426",
+          "name": "Inner Mongolia Xingye Silver&Tin Mining",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000426",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600111",
+          "name": "China Northern Rare Earth",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600111",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601168",
+          "name": "Western Mining",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601168",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000603",
+          "name": "Shengda Resources",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000603",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600988",
+          "name": "Chifeng Jilong Gold Mining",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600988",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600362",
+          "name": "Jiangxi Copper",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600362",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000630",
+          "name": "Tongling Nonferrous Metals Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000630",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600392",
+          "name": "Shenghe Resources Holding",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600392",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002842",
+          "name": "Guangdong Xianglu Tungsten",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002842",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601600",
+          "name": "Aluminum Corporation Of China",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601600",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600961",
+          "name": "Zhuzhou Smelter Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600961",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002167",
+          "name": "Guangdong Orient Zirconic Ind Sci & Tech",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002167",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600497",
+          "name": "Yunnan Chihong Zinc&Germanium",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600497",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002378",
+          "name": "Chongyi Zhangyuan Tungsten",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002378",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000807",
+          "name": "Yunnan Aluminium",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000807",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000506",
+          "name": "Zhaojin International Gold",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000506",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002738",
+          "name": "Sinomine Resource Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002738",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300395",
+          "name": "Hubei Feilihua Quartz Glass",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300395",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000933",
+          "name": "Henan Shenhuo Coal & Power",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000933",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002149",
+          "name": "Western Metal Materials",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002149",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600711",
+          "name": "Chengtun Mining Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600711",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002297",
+          "name": "HuNan Boyun New Materials",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002297",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002532",
+          "name": "Tianshan Aluminum Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002532",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601212",
+          "name": "Baiyin Nonferrous Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601212",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601958",
+          "name": "Jinduicheng Molybdenum",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601958",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000060",
+          "name": "Shenzhen Zhongjin Lingnan Nonfemet",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000060",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600259",
+          "name": "China Rare Earth Nonferrous Metals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600259",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600893",
+          "name": "AECC Aviation Power",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600893",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
         }
       ]
     },
@@ -321,10 +1841,320 @@
           "security_id": "listing:SH.601100",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
+        },
+        {
+          "code": "SZ.300308",
+          "name": "Zhongji Innolight",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300308",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300502",
+          "name": "Eoptolink Technology Inc.,",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300502",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600487",
+          "name": "Hengtong Optic-Electric",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600487",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002281",
+          "name": "Accelink Technologies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002281",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600105",
+          "name": "Jiangsu Etern",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600105",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.300620",
+          "name": "Advanced Fiber Resources",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.300620",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000063",
+          "name": "ZTE Corporation",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000063",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.301165",
+          "name": "Ruijie Networks",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.301165",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688313",
+          "name": "Henan Shijia Photons Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688313",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603083",
+          "name": "Cig Shanghai",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603083",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002491",
+          "name": "Tongding Interconnection Information",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002491",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600498",
+          "name": "Fiberhome Telecommunication Technologies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600498",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.301205",
+          "name": "Linktel Technologies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.301205",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002396",
+          "name": "Fujian Star-net Communication",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002396",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600900",
+          "name": "China Yangtze Power",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600900",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.001267",
+          "name": "Hui Lyu Ecological Technology Groups",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.001267",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601991",
+          "name": "Datang International Power Generation",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601991",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.603118",
+          "name": "Shenzhen Gongjin Electronics",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.603118",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688205",
+          "name": "Wuxi Taclink Optoelectronics Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688205",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688668",
+          "name": "Dongguan Dingtong Precision Metal Co.,Ltd.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688668",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.003031",
+          "name": "Hebei Sinopack Electronic Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.003031",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.601985",
+          "name": "China National Nuclear Power",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.601985",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.002015",
+          "name": "GCL Energy Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.002015",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600157",
+          "name": "Wintime Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600157",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600726",
+          "name": "Huadian Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600726",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.001896",
+          "name": "Henan Yuneng Holdings",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.001896",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600011",
+          "name": "Huaneng Power International,Inc.",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600011",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.688387",
+          "name": "CICT Mobile Communication Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.688387",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000595",
+          "name": "Ningxia Guoyun New Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000595",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SH.600930",
+          "name": "Huadian New Energy Group Corporation",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SH.600930",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "SZ.000070",
+          "name": "Shenzhen SDG Information",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:SZ.000070",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
         }
       ]
     }
   ],
   "source": "manual-versioned-universe-v1-migrated-v2",
-  "version_id": "universe:fa591eb5698fc2a6ffc36d68db75192638bfb94eb4498a13b5a0a634917e5821"
+  "version_id": "universe:adc8b59bdceda0d58c31f28e6cc428e5fdca97b1f6e415b7768435f166c06760"
 }

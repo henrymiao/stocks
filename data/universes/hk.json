@@ -3,8 +3,8 @@
   "market": "HK",
   "as_of": "2026-07-21T16:00:00+08:00",
   "expires_at": "2026-10-31T23:59:59+08:00",
-  "published_at": "2026-08-03T21:30:00+08:00",
-  "identity_registry_version": "identity:f174983dee1106f22e5341503a1c2bb2d002973984bafe9c2396a47aaf8f80a2",
+  "published_at": "2026-08-06T21:00:00+08:00",
+  "identity_registry_version": "identity:9178363fd7aa9ee3fbb23a80640675b2c9322417533f4f50241394853114785c",
   "sectors": [
     {
       "key": "internet-platforms",
@@ -71,6 +71,296 @@
           "security_id": "listing:HK.09888",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
+        },
+        {
+          "code": "HK.02556",
+          "name": "MARKETINGFORCE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02556",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03888",
+          "name": "KINGSOFT",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03888",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00268",
+          "name": "KINGDEE INT'L",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00268",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00068",
+          "name": "MANYCORE TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00068",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03738",
+          "name": "VOBILE GROUP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03738",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02013",
+          "name": "WEIMOB INC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02013",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09636",
+          "name": "JF SMARTINVEST",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09636",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01675",
+          "name": "ASIAINFO TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01675",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09959",
+          "name": "LINKLOGIS-W",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09959",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00909",
+          "name": "MING YUAN CLOUD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00909",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06687",
+          "name": "JST GROUP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06687",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00596",
+          "name": "INSPUR DIGI ENT",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00596",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.08611",
+          "name": "JUFEEL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.08611",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06051",
+          "name": "YOUZAN-NEW",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06051",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.08017",
+          "name": "TRADEGO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.08017",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06608",
+          "name": "BAIRONG-W",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06608",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01782",
+          "name": "IB DIGITAL TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01782",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09669",
+          "name": "BEISEN HOLDING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09669",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02167",
+          "name": "TI CLOUD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02167",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00465",
+          "name": "FUTONG TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00465",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06657",
+          "name": "BAIWANG CO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06657",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01808",
+          "name": "ENTERPRISE DEV",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01808",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00418",
+          "name": "FOUNDER HOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00418",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02571",
+          "name": "SAIMO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02571",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02392",
+          "name": "XUANWU CLOUD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02392",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03315",
+          "name": "GOLDPAC GROUP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03315",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01679",
+          "name": "RISECOMM GP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01679",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.08148",
+          "name": "WUXI LIFE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.08148",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.08635",
+          "name": "ELEPHANT HLDGS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.08635",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
         }
       ]
     },
@@ -107,6 +397,326 @@
           "weight": 1.0,
           "shared_identity": null,
           "security_id": "listing:HK.00020",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03986",
+          "name": "GIGADEVICE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03986",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06809",
+          "name": "MONTAGE TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06809",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09903",
+          "name": "ILUVATAR COREX",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09903",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02577",
+          "name": "INNOSCIENCE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02577",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01070",
+          "name": "TCL ELECTRONICS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01070",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01385",
+          "name": "SHANGHAI FUDAN",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01385",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06969",
+          "name": "SMOORE INTL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06969",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03661",
+          "name": "SG MICRO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03661",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00668",
+          "name": "ANKER",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00668",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02701",
+          "name": "NSING TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02701",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02249",
+          "name": "NEXCHIP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02249",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09971",
+          "name": "BASICSEMI",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09971",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00501",
+          "name": "OMNIVISION",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00501",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03277",
+          "name": "GPIXEL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03277",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00600",
+          "name": "AXERA",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00600",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01304",
+          "name": "FORTIOR",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01304",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00400",
+          "name": "INGDAN",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00400",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02676",
+          "name": "NOVOSENSE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02676",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06675",
+          "name": "SENASIC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06675",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03310",
+          "name": "VIEWTRIX TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03310",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03625",
+          "name": "FOURSEMI",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03625",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00751",
+          "name": "SKYWORTH GROUP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00751",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00167",
+          "name": "IDT INT'L",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00167",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06939",
+          "name": "MEGAIN",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06939",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06908",
+          "name": "HG SEMI",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06908",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02166",
+          "name": "SMART-CORE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02166",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02149",
+          "name": "BATELAB",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02149",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00595",
+          "name": "AV CONCEPT HOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00595",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00085",
+          "name": "CE HUADA TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00085",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01912",
+          "name": "CONTEL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01912",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01123",
+          "name": "CHINA-HK PHOTO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01123",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02358",
+          "name": "JIU RONG HOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02358",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
         }
@@ -157,6 +767,316 @@
           "security_id": "listing:HK.09866",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
+        },
+        {
+          "code": "HK.00175",
+          "name": "GEELY AUTO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00175",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09863",
+          "name": "LEAPMOTOR",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09863",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01057",
+          "name": "ZHEJIANG SHIBAO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01057",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03606",
+          "name": "FUYAO GLASS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03606",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09973",
+          "name": "CHERY AUTO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09973",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00425",
+          "name": "MINTH GROUP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00425",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02333",
+          "name": "GWMOTOR",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02333",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00179",
+          "name": "JOHNSON ELEC H",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00179",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02889",
+          "name": "PATEO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02889",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09927",
+          "name": "SERES",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09927",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01114",
+          "name": "BRILLIANCE CHI",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01114",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01316",
+          "name": "NEXTEER",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01316",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06162",
+          "name": "TR INTERIORS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06162",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02473",
+          "name": "XXF",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02473",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00699",
+          "name": "JOYSON ELEC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00699",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00805",
+          "name": "NEW GONOW RV",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00805",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02238",
+          "name": "GAC GROUP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02238",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02632",
+          "name": "NEW VISION CO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02632",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.07489",
+          "name": "VOYAH AUTO",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.07489",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00564",
+          "name": "ZCZL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00564",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02339",
+          "name": "BWI INT'L",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02339",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02025",
+          "name": "RUIFENG POWER",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02025",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01958",
+          "name": "BAIC MOTOR",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01958",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02488",
+          "name": "LAUNCH TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02488",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00710",
+          "name": "BOE VARITRONIX",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00710",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01571",
+          "name": "XIN POINT HOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01571",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01760",
+          "name": "INTRON TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01760",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01809",
+          "name": "PRINX CHENGSHAN",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01809",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00305",
+          "name": "WULING MOTORS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00305",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00929",
+          "name": "IPE GROUP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00929",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01269",
+          "name": "FIRST CAP GP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01269",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
         }
       ]
     },
@@ -195,6 +1115,326 @@
           "security_id": "listing:HK.06160",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
+        },
+        {
+          "code": "HK.01833",
+          "name": "PA GOODDOCTOR",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01833",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06699",
+          "name": "ANGELALIGN",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06699",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02666",
+          "name": "UNI MEDICAL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02666",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06681",
+          "name": "BRAINAURORA-B",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06681",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02158",
+          "name": "YIDU TECH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02158",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02273",
+          "name": "GUSHENGTANG",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02273",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02587",
+          "name": "HEALTHYWAY INC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02587",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02651",
+          "name": "DAZHONG DENTAL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02651",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03774",
+          "name": "FAMEGLOW",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03774",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02609",
+          "name": "BAYZED HEALTH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02609",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02373",
+          "name": "BEAUTYFARM MED",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02373",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06078",
+          "name": "HYGEIA HEALTH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06078",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02522",
+          "name": "RIMAG GROUP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02522",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02192",
+          "name": "MEDLIVE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02192",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01515",
+          "name": "CR MEDICAL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01515",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02506",
+          "name": "XUNFEIHEALTH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02506",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01830",
+          "name": "PERFECT MEDICAL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01830",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09860",
+          "name": "ADICON HOLDINGS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09860",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02667",
+          "name": "TONGRENTANGCARE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02667",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02453",
+          "name": "CONCORD HC GP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02453",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03309",
+          "name": "C-MER MEDICAL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03309",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02138",
+          "name": "EC HEALTHCARE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02138",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02279",
+          "name": "YONGHE MEDICAL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02279",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02677",
+          "name": "DISTINCT HEALTH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02677",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01526",
+          "name": "RICI HEALTH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01526",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00722",
+          "name": "UMP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00722",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03886",
+          "name": "TOWN HEALTH",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03886",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09960",
+          "name": "KINDSTAR GLOBAL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09960",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.08037",
+          "name": "CH BIOTECH SER",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.08037",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02159",
+          "name": "MEDIWELCOME",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02159",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01518",
+          "name": "NC HEALTHCARE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01518",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02581",
+          "name": "BENQ HOLDING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02581",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
         }
       ]
     },
@@ -231,6 +1471,326 @@
           "weight": 1.0,
           "shared_identity": null,
           "security_id": "listing:HK.01299",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02318",
+          "name": "PING AN",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02318",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02628",
+          "name": "CHINA LIFE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02628",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02328",
+          "name": "PICC P&C",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02328",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03908",
+          "name": "CICC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03908",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01336",
+          "name": "NCI",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01336",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02611",
+          "name": "GTHT",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02611",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02601",
+          "name": "CPIC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02601",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06881",
+          "name": "CGS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06881",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01339",
+          "name": "PICC GROUP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01339",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06886",
+          "name": "HTSC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06886",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00966",
+          "name": "CHINA TAIPING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00966",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01776",
+          "name": "GF SEC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01776",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01428",
+          "name": "BRIGHT SMART",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01428",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06099",
+          "name": "CMSC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06099",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00290",
+          "name": "GOFINTECH QUANT",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00290",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06060",
+          "name": "ZA ONLINE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06060",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06066",
+          "name": "CSC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06066",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03958",
+          "name": "DFZQ",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03958",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02378",
+          "name": "PRU",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02378",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00622",
+          "name": "OSHIDORI",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00622",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06806",
+          "name": "SWHY",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06806",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02672",
+          "name": "BAIGE DIGITAL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02672",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02691",
+          "name": "NANHUA FUTURES",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02691",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06963",
+          "name": "SUNSHINE INS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06963",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01828",
+          "name": "FWD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01828",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06178",
+          "name": "EB SECURITIES",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06178",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01508",
+          "name": "CHINA RE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01508",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00945",
+          "name": "MANULIFE-S",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00945",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01375",
+          "name": "CC SECURITIES",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01375",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01456",
+          "name": "GLMS SEC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01456",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00376",
+          "name": "YUNFENG FIN",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00376",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01141",
+          "name": "CMBC CAPITAL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01141",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
         }
@@ -281,10 +1841,320 @@
           "security_id": "listing:HK.01088",
           "member_from": "2026-07-21T16:00:00+08:00",
           "member_to": null
+        },
+        {
+          "code": "HK.02259",
+          "name": "ZIJIN GOLD INTL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02259",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03993",
+          "name": "CMOC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03993",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02099",
+          "name": "CHINAGOLDINTL",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02099",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03330",
+          "name": "LINGBAO GOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03330",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01818",
+          "name": "ZHAOJIN MINING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01818",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03939",
+          "name": "WANGUO GOLD GP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03939",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01787",
+          "name": "SD GOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01787",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01772",
+          "name": "GANFENGLITHIUM",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01772",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00358",
+          "name": "JIANGXI COPPER",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00358",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01208",
+          "name": "MMG",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01208",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06693",
+          "name": "CHIFENG GOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06693",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03858",
+          "name": "JIAXIN INTL RES",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03858",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01258",
+          "name": "CHINFMINING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01258",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01164",
+          "name": "CGN MINING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01164",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.09696",
+          "name": "TIANQI LITHIUM",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.09696",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06680",
+          "name": "JLMAG",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06680",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00340",
+          "name": "TONGGUAN GOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00340",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01815",
+          "name": "EVEREST GOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01815",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.06228",
+          "name": "MERDEKAGOLD-DRS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.06228",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00815",
+          "name": "CHI SILVER GP",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00815",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02245",
+          "name": "LYGEND RESOURCE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02245",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.08299",
+          "name": "GT GOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.08299",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.01712",
+          "name": "DRAGON MINING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.01712",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02546",
+          "name": "ZHIHUI MINING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02546",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03636",
+          "name": "JINXUN RESOURCE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03636",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00433",
+          "name": "NORTH MINING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00433",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.08162",
+          "name": "LOCO HK",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.08162",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.02302",
+          "name": "CNNC INT'L",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.02302",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.03833",
+          "name": "XINXIN MINING",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.03833",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00621",
+          "name": "TAUNG GOLD",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00621",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
+        },
+        {
+          "code": "HK.00521",
+          "name": "CWT INT'L",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:HK.00521",
+          "member_from": "2026-07-21T16:00:00+08:00",
+          "member_to": null
         }
       ]
     }
   ],
   "source": "manual-versioned-universe-v1-migrated-v2",
-  "version_id": "universe:8e90e022885d6b29a78d4f27664379d1b07d8f6d935d621367f700f32498692b"
+  "version_id": "universe:f155b3048b15222fdbbcbb4e8a7347f9ec38f41be427914e12e75daf6861eab1"
 }

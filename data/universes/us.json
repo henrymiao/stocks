@@ -3,8 +3,8 @@
   "market": "US",
   "as_of": "2026-07-21T16:00:00-04:00",
   "expires_at": "2026-10-31T23:59:59-04:00",
-  "published_at": "2026-08-03T21:30:00+08:00",
-  "identity_registry_version": "identity:f174983dee1106f22e5341503a1c2bb2d002973984bafe9c2396a47aaf8f80a2",
+  "published_at": "2026-08-06T21:00:00+08:00",
+  "identity_registry_version": "identity:9178363fd7aa9ee3fbb23a80640675b2c9322417533f4f50241394853114785c",
   "sectors": [
     {
       "key": "semiconductors",
@@ -71,6 +71,296 @@
           "security_id": "listing:US.MRVL",
           "member_from": "2026-07-21T16:00:00-04:00",
           "member_to": null
+        },
+        {
+          "code": "US.INTC",
+          "name": "Intel",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.INTC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TSM",
+          "name": "Taiwan Semiconductor",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TSM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ALAB",
+          "name": "Astera Labs",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ALAB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SKHY",
+          "name": "SK hynix",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SKHY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LRCX",
+          "name": "Lam Research",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LRCX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AMAT",
+          "name": "Applied Materials",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AMAT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ASML",
+          "name": "ASML Holding",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ASML",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.KLAC",
+          "name": "KLA Corp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.KLAC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.QCOM",
+          "name": "Qualcomm",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.QCOM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TXN",
+          "name": "Texas Instruments",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TXN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ON",
+          "name": "ON Semiconductor",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ON",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NXPI",
+          "name": "NXP Semiconductors",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NXPI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TER",
+          "name": "Teradyne",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TER",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ARM",
+          "name": "Arm Holdings",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ARM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ADI",
+          "name": "Analog Devices",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ADI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CRDO",
+          "name": "Credo Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CRDO",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AXTI",
+          "name": "AXT Inc",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AXTI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MPWR",
+          "name": "Monolithic Power Systems",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MPWR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CBRS",
+          "name": "Cerebras Systems",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CBRS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MCHP",
+          "name": "Microchip Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MCHP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TSEM",
+          "name": "Tower Semiconductor",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TSEM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LSCC",
+          "name": "Lattice Semiconductor",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LSCC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.STM",
+          "name": "STMicroelectronics",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.STM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MTSI",
+          "name": "MACOM Technology Solutions",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MTSI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ENTG",
+          "name": "Entegris",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ENTG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.VSH",
+          "name": "Vishay Intertechnology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.VSH",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.GFS",
+          "name": "GlobalFoundries",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GFS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SITM",
+          "name": "SiTime",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SITM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SWKS",
+          "name": "Skyworks Solutions",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SWKS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
         }
       ]
     },
@@ -127,6 +417,306 @@
           "weight": 1.0,
           "shared_identity": null,
           "security_id": "listing:US.ORCL",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.GOOG",
+          "name": "Alphabet-C",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GOOG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PLTR",
+          "name": "Palantir",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PLTR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.META",
+          "name": "Meta Platforms",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.META",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SHOP",
+          "name": "Shopify",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SHOP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NBIS",
+          "name": "NEBIUS",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NBIS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.UBER",
+          "name": "Uber Technologies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.UBER",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PANW",
+          "name": "Palo Alto Networks",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PANW",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CRWV",
+          "name": "CoreWeave",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CRWV",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CRM",
+          "name": "Salesforce",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CRM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NOW",
+          "name": "ServiceNow",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NOW",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.DDOG",
+          "name": "Datadog",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.DDOG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CRWD",
+          "name": "CrowdStrike",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CRWD",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SNOW",
+          "name": "Snowflake",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SNOW",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MSTR",
+          "name": "Strategy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MSTR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SPOT",
+          "name": "Spotify Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SPOT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PATH",
+          "name": "UiPath",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PATH",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FIG",
+          "name": "Figma Inc",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FIG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.INTU",
+          "name": "Intuit",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.INTU",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NET",
+          "name": "Cloudflare",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NET",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ADBE",
+          "name": "Adobe",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ADBE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ZETA",
+          "name": "Zeta Global",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ZETA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HUBS",
+          "name": "HubSpot",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HUBS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.DT",
+          "name": "Dynatrace",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.DT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FTNT",
+          "name": "Fortinet",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FTNT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TOST",
+          "name": "Toast",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TOST",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.XYZ",
+          "name": "Block",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.XYZ",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.YXT",
+          "name": "YXT.COM GROUP HOLDING LIMITED SPON ADS EA REP 30 CL A SHS (R/S)",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.YXT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.RDDT",
+          "name": "Reddit",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.RDDT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NTAP",
+          "name": "NetApp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NTAP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.U",
+          "name": "Unity Software",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.U",
           "member_from": "2026-07-21T16:00:00-04:00",
           "member_to": null
         }
@@ -187,6 +777,306 @@
           "security_id": "listing:US.MS",
           "member_from": "2026-07-21T16:00:00-04:00",
           "member_to": null
+        },
+        {
+          "code": "US.C",
+          "name": "Citigroup",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.C",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NU",
+          "name": "Nu Holdings",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NU",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.WFC",
+          "name": "Wells Fargo & Co",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.WFC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PRU",
+          "name": "Prudential Financial",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PRU",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HBAN",
+          "name": "Huntington Bancshares",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HBAN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TRV",
+          "name": "The Travelers Companies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TRV",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BNY",
+          "name": "Bank of New York Mellon",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BNY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CB",
+          "name": "Chubb Ltd",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MET",
+          "name": "MetLife",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MET",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SAN",
+          "name": "Banco Santander",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SAN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TD",
+          "name": "The Toronto-Dominion Bank",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TD",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PGR",
+          "name": "Progressive",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PGR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.RF",
+          "name": "Regions Financial",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.RF",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ALL",
+          "name": "Allstate",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ALL",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PNC",
+          "name": "PNC Financial Services",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PNC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HSBC",
+          "name": "HSBC Holdings",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HSBC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FITB",
+          "name": "Fifth Third Bancorp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FITB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MTB",
+          "name": "M&T Bank",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MTB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BNS",
+          "name": "Bank of Nova Scotia",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BNS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AFL",
+          "name": "Aflac Inc",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AFL",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MFC",
+          "name": "Manulife Financial",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MFC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ITUB",
+          "name": "Itau Unibanco",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ITUB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.KEY",
+          "name": "KeyCorp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.KEY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AIZ",
+          "name": "Assurant",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AIZ",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HDB",
+          "name": "HDFC Bank",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HDB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.IBN",
+          "name": "ICICI Bank",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.IBN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.RY",
+          "name": "Royal Bank of Canada",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.RY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CFG",
+          "name": "Citizens Financial",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CFG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ING",
+          "name": "ING Groep",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ING",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.UNM",
+          "name": "Unum Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.UNM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
         }
       ]
     },
@@ -243,6 +1133,306 @@
           "weight": 1.0,
           "shared_identity": null,
           "security_id": "listing:US.SLB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SHEL",
+          "name": "Shell",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SHEL",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SU",
+          "name": "Suncor Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SU",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BP",
+          "name": "BP PLC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CVE",
+          "name": "Cenovus Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CVE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PBR",
+          "name": "Petroleo Brasileiro SA Petrobras",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PBR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.EQNR",
+          "name": "Equinor",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.EQNR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TTE",
+          "name": "TotalEnergies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TTE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PBR.A",
+          "name": "Petroleo Brasileiro SA Petrobras",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PBR.A",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.YPF",
+          "name": "YPF SA",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.YPF",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NFG",
+          "name": "National Fuel Gas",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NFG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.IMO",
+          "name": "Imperial Oil",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.IMO",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.EC",
+          "name": "Ecopetrol",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.EC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.E",
+          "name": "Eni SpA",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.E",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.DEC",
+          "name": "Diversified Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.DEC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TGS",
+          "name": "Transportadora de Gas del Sur",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TGS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SKYQ",
+          "name": "Sky Quarry",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SKYQ",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.VIVK",
+          "name": "Vivakor",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.VIVK",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SLNG",
+          "name": "Stabilis Solutions",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SLNG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.EOG",
+          "name": "EOG Resources",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.EOG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.DVN",
+          "name": "Devon Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.DVN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.OXY",
+          "name": "Occidental Petroleum",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.OXY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ENB",
+          "name": "Enbridge",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ENB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.WMB",
+          "name": "Williams",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.WMB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FANG",
+          "name": "Diamondback Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FANG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LNG",
+          "name": "Cheniere Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LNG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.OKE",
+          "name": "ONEOK Inc",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.OKE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.EQT",
+          "name": "EQT Corp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.EQT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TRGP",
+          "name": "Targa Resources",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TRGP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CNQ",
+          "name": "Canadian Natural Resources",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CNQ",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ET",
+          "name": "Energy Transfer",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ET",
           "member_from": "2026-07-21T16:00:00-04:00",
           "member_to": null
         }
@@ -303,6 +1493,306 @@
           "security_id": "listing:US.ETN",
           "member_from": "2026-07-21T16:00:00-04:00",
           "member_to": null
+        },
+        {
+          "code": "US.UNP",
+          "name": "Union Pacific",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.UNP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PCAR",
+          "name": "PACCAR Inc",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PCAR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CP",
+          "name": "Canadian Pacific Railway",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CSX",
+          "name": "CSX Corp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CSX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.DE",
+          "name": "Deere",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.DE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NSC",
+          "name": "Norfolk Southern",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NSC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CNI",
+          "name": "Canadian National Railway",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CNI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CNH",
+          "name": "CNH Industrial",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CNH",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.WAB",
+          "name": "Westinghouse Air Brake Technologies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.WAB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.OSK",
+          "name": "Oshkosh",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.OSK",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TEX",
+          "name": "Terex Corp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TEX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AGCO",
+          "name": "AGCO Corp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AGCO",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FSS",
+          "name": "Federal Signal",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FSS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ASTE",
+          "name": "Astec Industries",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ASTE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TRN",
+          "name": "Trinity Industries",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TRN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BLBD",
+          "name": "Blue Bird",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BLBD",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ALG",
+          "name": "Alamo",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ALG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CMCO",
+          "name": "Columbus McKinnon",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CMCO",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LNN",
+          "name": "Lindsay",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LNN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HY",
+          "name": "Hyster-Yale",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HYFM",
+          "name": "Hydrofarm",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HYFM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.WNC",
+          "name": "Wabash National",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.WNC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.GBX",
+          "name": "Greenbrier Companies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GBX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.XOS",
+          "name": "Xos Inc",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.XOS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TWI",
+          "name": "Titan International",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TWI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AEBI",
+          "name": "Aebi Schmidt",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AEBI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MTW",
+          "name": "Manitowoc",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MTW",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FSTR",
+          "name": "L.B. Foster",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FSTR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.RAIL",
+          "name": "FreightCar America",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.RAIL",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HCAI",
+          "name": "Huachen AI Parking Management Technology",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HCAI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
         }
       ]
     },
@@ -359,6 +1849,306 @@
           "weight": 1.0,
           "shared_identity": null,
           "security_id": "listing:US.ABBV",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CVS",
+          "name": "CVS Health",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CVS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CI",
+          "name": "Cigna Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ABT",
+          "name": "Abbott Laboratories",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ABT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PODD",
+          "name": "Insulet",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PODD",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BSX",
+          "name": "Boston Scientific",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BSX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SYK",
+          "name": "Stryker Corp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SYK",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ALNY",
+          "name": "Alnylam Pharmaceuticals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ALNY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.HUM",
+          "name": "Humana",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.HUM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ZBH",
+          "name": "Zimmer Biomet Holdings",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ZBH",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.DXCM",
+          "name": "DexCom",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.DXCM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.INSM",
+          "name": "Insmed",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.INSM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CNC",
+          "name": "Centene",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CNC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ELV",
+          "name": "Elevance Health",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ELV",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MDT",
+          "name": "Medtronic",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MDT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.EW",
+          "name": "Edwards Lifesciences",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.EW",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ARGX",
+          "name": "argenx SE",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ARGX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.APGE",
+          "name": "Apogee Therapeutics",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.APGE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BRKR",
+          "name": "Bruker Corp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BRKR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CRNX",
+          "name": "Crinetics",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CRNX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.EXEL",
+          "name": "Exelixis",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.EXEL",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ITGR",
+          "name": "Integer Holdings",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ITGR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TMDX",
+          "name": "TransMedics",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TMDX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.INCY",
+          "name": "Incyte",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.INCY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.STE",
+          "name": "Steris PLC",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.STE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AMIX",
+          "name": "Autonomix Medical",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AMIX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BBIO",
+          "name": "BridgeBio Pharma",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BBIO",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.OSCR",
+          "name": "Oscar Health",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.OSCR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.GEHC",
+          "name": "GE HealthCare Technologies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GEHC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BIO",
+          "name": "Bio-Rad Laboratories",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BIO",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BNTX",
+          "name": "BioNTech",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BNTX",
           "member_from": "2026-07-21T16:00:00-04:00",
           "member_to": null
         }
@@ -419,10 +2209,668 @@
           "security_id": "listing:US.MCD",
           "member_from": "2026-07-21T16:00:00-04:00",
           "member_to": null
+        },
+        {
+          "code": "US.DIS",
+          "name": "Disney",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.DIS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ROKU",
+          "name": "Roku Inc",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ROKU",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.WBD",
+          "name": "Warner Bros Discovery",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.WBD",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FOXA",
+          "name": "Fox Corp-A",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FOXA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LYV",
+          "name": "Live Nation Entertainment",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LYV",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NWSA",
+          "name": "News Corp-A",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NWSA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FWONK",
+          "name": "Liberty Formula One-C",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FWONK",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TKO",
+          "name": "TKO Group Holdings",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TKO",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PSKY",
+          "name": "Paramount Skydance",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PSKY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SPHR",
+          "name": "Sphere Entertainment",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SPHR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SIRI",
+          "name": "Sirius XM",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SIRI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FOX",
+          "name": "Fox Corp-B",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FOX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BATRK",
+          "name": "Atlanta Braves-C",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BATRK",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AMC",
+          "name": "AMC Entertainment",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AMC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CNK",
+          "name": "Cinemark",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CNK",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.WMG",
+          "name": "Warner Music",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.WMG",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.VSNT",
+          "name": "Versant Media",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.VSNT",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MSGS",
+          "name": "Madison Square Garden Sports",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MSGS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NWS",
+          "name": "News Corp-B",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NWS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.IMAX",
+          "name": "IMAX Corp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.IMAX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MSGE",
+          "name": "Madison Square Garden Entertainment",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MSGE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LION",
+          "name": "Lionsgate Studios",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LION",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PLAY",
+          "name": "Dave & Buster's Entertainment",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PLAY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LLYVK",
+          "name": "Liberty Live-C",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LLYVK",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LLYVA",
+          "name": "Liberty Live-A",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LLYVA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.AMCX",
+          "name": "AMC Global Media",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.AMCX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MCS",
+          "name": "Marcus",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MCS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.FWONA",
+          "name": "Liberty Formula One-A",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.FWONA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BATRA",
+          "name": "Atlanta Braves-A",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BATRA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ANGX",
+          "name": "Angel Studios",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ANGX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        }
+      ]
+    },
+    {
+      "key": "metals-mining",
+      "name": "Metals and Mining",
+      "representative": "US.GDX",
+      "benchmark": "US.SPY",
+      "members": [
+        {
+          "code": "US.GDX",
+          "name": "GDX",
+          "role": "etf",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GDX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.VALE",
+          "name": "Vale SA",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.VALE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MP",
+          "name": "MP Materials",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BHP",
+          "name": "BHP Group Ltd",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BHP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.MTRN",
+          "name": "Materion",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.MTRN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.RIO",
+          "name": "Rio Tinto",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.RIO",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.USAR",
+          "name": "USA Rare Earth",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.USAR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ALM",
+          "name": "Almonty Industries",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ALM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CRML",
+          "name": "Critical Metals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CRML",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ALOY",
+          "name": "REalloys",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ALOY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.UAMY",
+          "name": "United States Antimony",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.UAMY",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.USAS",
+          "name": "Americas Gold And Silver",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.USAS",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SKE",
+          "name": "Skeena Resources",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SKE",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.VZLA",
+          "name": "Vizsla Silver",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.VZLA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LAC",
+          "name": "Lithium Americas",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LAC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.GSM",
+          "name": "Ferroglobe",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GSM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NB",
+          "name": "NioCorp Developments",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NB",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TMC",
+          "name": "TMC the metals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TMC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SGML",
+          "name": "Sigma Lithium",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SGML",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NEXA",
+          "name": "Nexa Resources",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NEXA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CMP",
+          "name": "Compass Minerals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CMP",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LAR",
+          "name": "Lithium Argentina AG",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LAR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.IPX",
+          "name": "IperionX",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.IPX",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NAK",
+          "name": "Northern Dynasty Minerals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NAK",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TMQ",
+          "name": "Trilogy Metals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TMQ",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SCZM",
+          "name": "Santacruz Silver Mining",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SCZM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SSMR",
+          "name": "Sunshine Silver Mining & Refining",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SSMR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.IMC",
+          "name": "IMC Rare Earths",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.IMC",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SLI",
+          "name": "Standard Lithium",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SLI",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.WRN",
+          "name": "Western Copper & Gold",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.WRN",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LZM",
+          "name": "Lifezone Metals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LZM",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NVA",
+          "name": "Nova Minerals",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NVA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.REA",
+          "name": "Rare Earths Americas",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.REA",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ELVR",
+          "name": "Elevra Lithium",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ELVR",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TII",
+          "name": "Titan Mining",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TII",
+          "member_from": "2026-07-21T16:00:00-04:00",
+          "member_to": null
         }
       ]
     }
   ],
   "source": "manual-versioned-universe-v1-migrated-v2",
-  "version_id": "universe:3036dce6b5f7fbef21f1d8847eb231b59f575c65977f0f62b7ed0fa444024653"
+  "version_id": "universe:4929ef7c099cd128167b1776dc87bed0a8a641817212353e66681ad81ad12d93"
 }

@@ -1928,14 +1928,15 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
+      "position_status": "holding",
       "scan_policy": "always",
       "tags": [
         "a-share",
         "broad-screen",
         "metals",
         "cyclical",
-        "value"
+        "value",
+        "holding"
       ]
     },
     {

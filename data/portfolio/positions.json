@@ -20,7 +20,8 @@
     "fx_rates 为近似值，需定期核对。",
     "2026-08-04: 宁德A 396.3 清仓100股；阿里 125.4 减500股余1000；工业富联 58.3 加200股至1500，成本摊薄。",
     "2026-08-04: 小鹏止损自 47.45(已击穿) 下移至 44.93（框架按新结构失效 46.32 重算）；持仓保留，计划反弹至阻力位分批减仓。",
-    "2026-08-05: 四个盈利仓位按 next_trailing_stop 上移止损（GOOGL/腾讯/阿里/LNG）。trailing_lookback_sessions 按持有人告知的持有期设定：GOOGL 约3个月=63场，其余≤1.5个月=32场。"
+    "2026-08-05: 四个盈利仓位按 next_trailing_stop 上移止损（GOOGL/腾讯/阿里/LNG）。trailing_lookback_sessions 按持有人告知的持有期设定：GOOGL 约3个月=63场，其余≤1.5个月=32场。",
+    "2026-08-05 收盘修正: GOOGL 止损从 363.35(结构失效位,盘中数据算出且当日即被击穿) 改为 349.49(exit_plan 的初始止损,结构位下方一个ATR)。教训:止损必须用收盘数据算。"
   ],
   "positions": [
     {
@@ -30,10 +31,10 @@
       "currency": "USD",
       "theme": "ai-compute",
       "trade_id": "googl-core-290",
-      "current_stop": 363.35,
+      "current_stop": 349.49,
       "leverage": 1.0,
       "trailing_lookback_sessions": 63,
-      "trailing_stop": 363.35
+      "trailing_stop": 349.49
     },
     {
       "code": "HK.00700",

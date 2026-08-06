@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import ast
+
 import json
 import os
 import subprocess
@@ -341,6 +343,16 @@ class FutuFetcher:
         payload = self._run_json(command)
         sessions: set[str] = set()
         for row in payload.get("data", []):
+            # OpenD's helper serialises each session as the *repr* of a dict, so a row
+            # arrives as "{'time': '2026-08-03', 'trade_date_type': 'WHOLE'}" rather than
+            # a date or a JSON object. Treating that string as a date made every session
+            # fail to parse and be swallowed by the guard below, which silently emptied
+            # the calendar: discovery then disabled every sector for zero coverage.
+            if isinstance(row, str) and row.lstrip().startswith("{"):
+                try:
+                    row = ast.literal_eval(row)
+                except (ValueError, SyntaxError):
+                    continue
             if isinstance(row, str):
                 value = row
             elif isinstance(row, dict):

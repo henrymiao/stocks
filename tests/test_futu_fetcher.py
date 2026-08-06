@@ -560,3 +560,48 @@ class FutuFetcherTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TradingCalendarParsingTests(unittest.TestCase):
+    """OpenD's helper serialises each session as a dict *repr*, not as JSON."""
+
+    def _fetcher(self, rows):
+        import json as _json
+
+        from tools.stock_skills.futu_fetcher import FutuFetcher
+
+        return FutuFetcher(
+            python_bin="python3",
+            skill_dir="/tmp",
+            runner=lambda command: _json.dumps({"market": "US", "data": rows}),
+        )
+
+    def test_dict_repr_rows_are_parsed_not_silently_dropped(self):
+        rows = [
+            "{'time': '2026-08-03', 'trade_date_type': 'WHOLE'}",
+            "{'time': '2026-08-04', 'trade_date_type': 'WHOLE'}",
+        ]
+        fetcher = self._fetcher(rows)
+
+        # Treating the repr as a date made every session fail to parse and be swallowed,
+        # which emptied the calendar and made discovery disable every sector.
+        self.assertEqual(
+            fetcher.get_trading_days("US", start="2026-08-01", end="2026-08-10"),
+            ["2026-08-03", "2026-08-04"],
+        )
+
+    def test_plain_dates_and_json_objects_still_work(self):
+        self.assertEqual(
+            self._fetcher(["2026-08-03"]).get_trading_days("US", start="a", end="b"),
+            ["2026-08-03"],
+        )
+        self.assertEqual(
+            self._fetcher([{"time": "2026-08-04"}]).get_trading_days("US", start="a", end="b"),
+            ["2026-08-04"],
+        )
+
+    def test_unparseable_rows_are_skipped_without_losing_the_rest(self):
+        rows = ["{'not_a_date': 1}", "garbage", "{'time': '2026-08-05'}"]
+        self.assertEqual(
+            self._fetcher(rows).get_trading_days("US", start="a", end="b"), ["2026-08-05"]
+        )

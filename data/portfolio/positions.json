@@ -1,6 +1,6 @@
 {
   "schema_version": "portfolio-positions-v1",
-  "as_of": "2026-08-04T21:00:00+08:00",
+  "as_of": "2026-08-05T22:30:00+08:00",
   "source": "user-confirmed-2026-08-03",
   "base_currency": "CNY",
   "fx_rates": {
@@ -19,7 +19,8 @@
     "宁德A 与长电的成本暂按 8/3 收盘价填，待用户提供真实成交价。",
     "fx_rates 为近似值，需定期核对。",
     "2026-08-04: 宁德A 396.3 清仓100股；阿里 125.4 减500股余1000；工业富联 58.3 加200股至1500，成本摊薄。",
-    "2026-08-04: 小鹏止损自 47.45(已击穿) 下移至 44.93（框架按新结构失效 46.32 重算）；持仓保留，计划反弹至阻力位分批减仓。"
+    "2026-08-04: 小鹏止损自 47.45(已击穿) 下移至 44.93（框架按新结构失效 46.32 重算）；持仓保留，计划反弹至阻力位分批减仓。",
+    "2026-08-05: 四个盈利仓位按 next_trailing_stop 上移止损（GOOGL/腾讯/阿里/LNG）。trailing_lookback_sessions 按持有人告知的持有期设定：GOOGL 约3个月=63场，其余≤1.5个月=32场。"
   ],
   "positions": [
     {
@@ -29,8 +30,10 @@
       "currency": "USD",
       "theme": "ai-compute",
       "trade_id": "googl-core-290",
-      "current_stop": 326.1,
-      "leverage": 1.0
+      "current_stop": 363.35,
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 63,
+      "trailing_stop": 363.35
     },
     {
       "code": "HK.00700",
@@ -39,8 +42,10 @@
       "currency": "HKD",
       "theme": "china-internet",
       "trade_id": "tencent-00700-core412",
-      "current_stop": 453.03,
-      "leverage": 1.0
+      "current_stop": 480.6,
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32,
+      "trailing_stop": 480.6
     },
     {
       "code": "HK.09868",
@@ -50,7 +55,8 @@
       "theme": "ev-chain",
       "trade_id": "xpeng-09868-5038",
       "current_stop": 44.93,
-      "leverage": 1.0
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32
     },
     {
       "code": "HK.09988",
@@ -59,8 +65,10 @@
       "currency": "HKD",
       "theme": "china-internet",
       "trade_id": "baba-09988-20260718",
-      "current_stop": 110.53,
-      "leverage": 1.0
+      "current_stop": 120.1,
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32,
+      "trailing_stop": 120.1
     },
     {
       "code": "SH.563380",
@@ -70,7 +78,8 @@
       "theme": "aerospace-defense",
       "trade_id": "hangtian-563380-20260718",
       "current_stop": 0.8862,
-      "leverage": 1.0
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32
     },
     {
       "code": "HK.00522",
@@ -80,7 +89,8 @@
       "theme": "semiconductor",
       "trade_id": "asmpt-00522-154",
       "current_stop": 139.72,
-      "leverage": 1.0
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32
     },
     {
       "code": "US.SMH",
@@ -90,7 +100,8 @@
       "theme": "semiconductor",
       "trade_id": "smh-us-core539",
       "current_stop": 511.79,
-      "leverage": 1.0
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32
     },
     {
       "code": "SH.601138",
@@ -100,7 +111,8 @@
       "theme": "ai-compute",
       "trade_id": "fii-601138-599",
       "current_stop": 52.78,
-      "leverage": 1.0
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32
     },
     {
       "code": "US.SOXL",
@@ -110,7 +122,8 @@
       "theme": "semiconductor",
       "trade_id": "soxl-3x-130",
       "current_stop": 90.55,
-      "leverage": 3.0
+      "leverage": 3.0,
+      "trailing_lookback_sessions": 32
     },
     {
       "code": "US.LNG",
@@ -119,8 +132,10 @@
       "currency": "USD",
       "theme": "energy",
       "trade_id": "lng-cheniere-259",
-      "current_stop": 250.33,
-      "leverage": 1.0
+      "current_stop": 253.04,
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32,
+      "trailing_stop": 253.04
     },
     {
       "code": "US.CRCL",
@@ -130,7 +145,8 @@
       "theme": "crypto",
       "trade_id": "circle-crcl-20260718",
       "current_stop": 55.47,
-      "leverage": 1.0
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32
     },
     {
       "code": "SH.600584",
@@ -140,7 +156,8 @@
       "theme": "semiconductor",
       "trade_id": "cjkj-probe-20260803",
       "current_stop": 56.54,
-      "leverage": 1.0
+      "leverage": 1.0,
+      "trailing_lookback_sessions": 32
     }
   ]
 }

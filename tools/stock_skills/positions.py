@@ -21,6 +21,17 @@ class Position:
     trade_id: str | None = None
     current_stop: float | None = None
     leverage: float = 1.0
+    # Execution state. Without it every analysis re-derives a plan for a position it
+    # believes was opened yesterday and never trimmed, so the trailing stop never starts
+    # and a filled target is proposed again on the next run.
+    filled_targets: tuple[str, ...] = ()
+    trailing_stop: float | None = None
+    remaining_fraction: float = 1.0
+    # Approximate holding length, in sessions, supplied by the owner. Not an entry date:
+    # it only bounds how far back "highest close since entry" may look, and a bound that
+    # is roughly right beats a 60-session default that reaches back to prices from before
+    # the position existed and pushes the trailing stop above the current price.
+    trailing_lookback_sessions: int = 32
 
     def __post_init__(self) -> None:
         market_from_code(self.code)  # rejects malformed / unsupported codes
@@ -34,6 +45,12 @@ class Position:
             raise ValueError(f"{self.code} leverage must be positive")
         if self.current_stop is not None and self.current_stop <= 0:
             raise ValueError(f"{self.code} stop must be positive when supplied")
+        if self.trailing_stop is not None and self.trailing_stop <= 0:
+            raise ValueError(f"{self.code} trailing stop must be positive when supplied")
+        if not 0.0 < self.remaining_fraction <= 1.0:
+            raise ValueError(f"{self.code} remaining_fraction must be in (0, 1]")
+        if self.trailing_lookback_sessions <= 0:
+            raise ValueError(f"{self.code} trailing_lookback_sessions must be positive")
 
 
 @dataclass(frozen=True)
@@ -149,6 +166,9 @@ class Portfolio:
             breached_stops=tuple(sorted(breached_stops)),
         )
 
+    def position_of(self, code: str) -> "Position | None":
+        return next((p for p in self.positions if p.code == code), None)
+
     def theme_of(self, code: str) -> str | None:
         for position in self.positions:
             if position.code == code:
@@ -179,6 +199,12 @@ def portfolio_from_record(payload: dict[str, Any]) -> Portfolio:
                     None if row.get("current_stop") is None else float(row["current_stop"])
                 ),
                 leverage=float(row.get("leverage", 1.0)),
+                filled_targets=tuple(str(t) for t in row.get("filled_targets", ())),
+                trailing_stop=(
+                    None if row.get("trailing_stop") is None else float(row["trailing_stop"])
+                ),
+                remaining_fraction=float(row.get("remaining_fraction", 1.0)),
+                trailing_lookback_sessions=int(row.get("trailing_lookback_sessions", 32)),
             )
             for row in rows
         ),

@@ -58,8 +58,15 @@ def suggest_trailing_stop(
     activation_r: float | None,
     risk_per_share: float | None,
     lookback_sessions: int = TRAILING_LOOKBACK_BARS,
+    session_phase: str | None = None,
 ) -> TrailingSuggestion:
-    """Suggest where the trailing stop should sit now. Never lowers, never writes."""
+    """Suggest where the trailing stop should sit now. Never lowers, never writes.
+
+    Refuses to answer from an unfinished session. A stop derived from an intraday price is
+    derived from a number that has not happened yet: written twice from intraday data in
+    this book, once for GOOGL and once for Tencent, and both were breached by the close of
+    the very session that produced them.
+    """
 
     progress_r = (
         (price - cost_basis) / risk_per_share
@@ -75,6 +82,9 @@ def suggest_trailing_stop(
         progress_r=progress_r,
         reason="",
     )
+
+    if session_phase in {"pre-open", "intraday", "midday-break"}:
+        return _with(base, reason=f"数据时段 {session_phase}，止损必须用收盘数据计算")
 
     if activation_r is not None:
         if progress_r is None:

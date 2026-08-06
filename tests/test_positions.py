@@ -148,5 +148,37 @@ class PortfolioHeatTests(unittest.TestCase):
             self.assertEqual(load_portfolio(path), portfolio_from_record(payload))
 
 
+
+class TrailingSessionGuardTests(unittest.TestCase):
+    """A stop from an intraday price is a stop from a number that has not happened yet."""
+
+    def _call(self, session_phase):
+        from tools.stock_skills.models import KLineBar
+        from tools.stock_skills.trailing import suggest_trailing_stop
+
+        bars = [
+            KLineBar(time=f"2026-08-0{i}", open=100.0, high=110.0, low=95.0, close=105.0,
+                     volume=1000, turnover=100000.0)
+            for i in range(1, 6)
+        ]
+        return suggest_trailing_stop(
+            code="US.X", price=120.0, cost_basis=100.0, current_stop=90.0,
+            previous_trailing_stop=None, bars=bars, atr=5.0, atr_multiple=2.0,
+            activation_r=None, risk_per_share=30.0, session_phase=session_phase,
+        )
+
+    def test_an_unfinished_session_yields_no_suggestion(self):
+        for phase in ("pre-open", "intraday", "midday-break"):
+            with self.subTest(phase=phase):
+                result = self._call(phase)
+                self.assertIsNone(result.suggested_stop)
+                self.assertIn("收盘数据", result.reason)
+
+    def test_a_finished_session_is_answered_normally(self):
+        result = self._call("after-close")
+        self.assertIsNotNone(result.suggested_stop)
+        self.assertLess(result.suggested_stop, 120.0)
+
+
 if __name__ == "__main__":
     unittest.main()

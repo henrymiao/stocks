@@ -29,7 +29,7 @@ class WatchlistDataTests(unittest.TestCase):
         self.assertEqual(by_code["SZ.000021"]["position_status"], "exited-watch")
         self.assertEqual(by_code["HK.09868"]["position_status"], "holding")
         self.assertEqual(by_code["HK.09868"]["scan_policy"], "always")
-        self.assertEqual(by_code["SZ.002463"]["position_status"], "exited-watch")
+        self.assertEqual(by_code["SZ.002463"]["position_status"], "holding")
         self.assertEqual(by_code["HK.03690"]["position_status"], "exited-watch")
         self.assertEqual(by_code["HK.02513"]["name"], "智谱")
         self.assertEqual(by_code["HK.07709"]["asset_type"], "leveraged-etf")

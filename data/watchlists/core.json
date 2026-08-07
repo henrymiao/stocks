@@ -16,16 +16,15 @@
       "benchmark": "SZ.399006",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "exited-watch",
-      "scan_policy": "ranked",
+      "position_status": "holding",
+      "scan_policy": "always",
       "tags": [
         "a-share",
         "pcb",
         "ai-hardware",
         "national-tech",
         "growth",
-        "exited-watch",
-        "wait-reentry"
+        "holding"
       ]
     },
     {

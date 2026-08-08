@@ -1,6 +1,6 @@
 {
   "schema_version": "security-identity-registry-v1",
-  "published_at": "2026-08-06T21:00:00+08:00",
+  "published_at": "2026-08-08T12:00:00+08:00",
   "identities": [
     {
       "security_id": "benchmark:HK.800000",
@@ -113,39 +113,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.00068",
-      "company_id": "security:HK.00068",
-      "code": "HK.00068",
-      "name": "MANYCORE TECH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00085",
-      "company_id": "security:HK.00085",
-      "code": "HK.00085",
-      "name": "CE HUADA TECH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00167",
-      "company_id": "security:HK.00167",
-      "code": "HK.00167",
-      "name": "IDT INT'L",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.00175",
       "company_id": "security:HK.00175",
       "code": "HK.00175",
@@ -179,32 +146,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.00290",
-      "company_id": "security:HK.00290",
-      "code": "HK.00290",
-      "name": "GOFINTECH QUANT",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00305",
-      "company_id": "security:HK.00305",
-      "code": "HK.00305",
-      "name": "WULING MOTORS",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00340",
-      "company_id": "security:HK.00340",
-      "code": "HK.00340",
-      "name": "TONGGUAN GOLD",
+      "security_id": "listing:HK.00285",
+      "company_id": "security:HK.00285",
+      "code": "HK.00285",
+      "name": "BYD ELECTRONIC",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -223,32 +168,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.00376",
-      "company_id": "security:HK.00376",
-      "code": "HK.00376",
-      "name": "YUNFENG FIN",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00400",
-      "company_id": "security:HK.00400",
-      "code": "HK.00400",
-      "name": "INGDAN",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00418",
-      "company_id": "security:HK.00418",
-      "code": "HK.00418",
-      "name": "FOUNDER HOLD",
+      "security_id": "listing:HK.00386",
+      "company_id": "security:HK.00386",
+      "code": "HK.00386",
+      "name": "SINOPEC CORP",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -267,131 +190,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.00433",
-      "company_id": "security:HK.00433",
-      "code": "HK.00433",
-      "name": "NORTH MINING",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00465",
-      "company_id": "security:HK.00465",
-      "code": "HK.00465",
-      "name": "FUTONG TECH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00501",
-      "company_id": "security:HK.00501",
-      "code": "HK.00501",
-      "name": "OMNIVISION",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00521",
-      "company_id": "security:HK.00521",
-      "code": "HK.00521",
-      "name": "CWT INT'L",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00564",
-      "company_id": "security:HK.00564",
-      "code": "HK.00564",
-      "name": "ZCZL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00595",
-      "company_id": "security:HK.00595",
-      "code": "HK.00595",
-      "name": "AV CONCEPT HOLD",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00596",
-      "company_id": "security:HK.00596",
-      "code": "HK.00596",
-      "name": "INSPUR DIGI ENT",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00600",
-      "company_id": "security:HK.00600",
-      "code": "HK.00600",
-      "name": "AXERA",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00621",
-      "company_id": "security:HK.00621",
-      "code": "HK.00621",
-      "name": "TAUNG GOLD",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00622",
-      "company_id": "security:HK.00622",
-      "code": "HK.00622",
-      "name": "OSHIDORI",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00668",
-      "company_id": "security:HK.00668",
-      "code": "HK.00668",
-      "name": "ANKER",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00699",
-      "company_id": "security:HK.00699",
-      "code": "HK.00699",
-      "name": "JOYSON ELEC",
+      "security_id": "listing:HK.00522",
+      "company_id": "security:HK.00522",
+      "code": "HK.00522",
+      "name": "ASMPT",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -410,54 +212,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.00710",
-      "company_id": "security:HK.00710",
-      "code": "HK.00710",
-      "name": "BOE VARITRONIX",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00722",
-      "company_id": "security:HK.00722",
-      "code": "HK.00722",
-      "name": "UMP",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00751",
-      "company_id": "security:HK.00751",
-      "code": "HK.00751",
-      "name": "SKYWORTH GROUP",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00805",
-      "company_id": "security:HK.00805",
-      "code": "HK.00805",
-      "name": "NEW GONOW RV",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00815",
-      "company_id": "security:HK.00815",
-      "code": "HK.00815",
-      "name": "CHI SILVER GP",
+      "security_id": "listing:HK.00857",
+      "company_id": "security:HK.00857",
+      "code": "HK.00857",
+      "name": "PETROCHINA",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -469,28 +227,6 @@
       "company_id": "security:HK.00883",
       "code": "HK.00883",
       "name": "中国海洋石油",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00909",
-      "company_id": "security:HK.00909",
-      "code": "HK.00909",
-      "name": "MING YUAN CLOUD",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.00929",
-      "company_id": "security:HK.00929",
-      "code": "HK.00929",
-      "name": "IPE GROUP",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -520,17 +256,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.00945",
-      "company_id": "security:HK.00945",
-      "code": "HK.00945",
-      "name": "MANULIFE-S",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.00966",
       "company_id": "security:HK.00966",
       "code": "HK.00966",
@@ -553,10 +278,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01057",
-      "company_id": "security:HK.01057",
-      "code": "HK.01057",
-      "name": "ZHEJIANG SHIBAO",
+      "security_id": "listing:HK.00998",
+      "company_id": "security:HK.00998",
+      "code": "HK.00998",
+      "name": "CITIC BANK",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -586,10 +311,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01114",
-      "company_id": "security:HK.01114",
-      "code": "HK.01114",
-      "name": "BRILLIANCE CHI",
+      "security_id": "listing:HK.01093",
+      "company_id": "security:HK.01093",
+      "code": "HK.01093",
+      "name": "CSPC PHARMA",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -597,32 +322,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01123",
-      "company_id": "security:HK.01123",
-      "code": "HK.01123",
-      "name": "CHINA-HK PHOTO",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01141",
-      "company_id": "security:HK.01141",
-      "code": "HK.01141",
-      "name": "CMBC CAPITAL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01164",
-      "company_id": "security:HK.01164",
-      "code": "HK.01164",
-      "name": "CGN MINING",
+      "security_id": "listing:HK.01171",
+      "company_id": "security:HK.01171",
+      "code": "HK.01171",
+      "name": "YANKUANG ENERGY",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -674,10 +377,21 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01269",
-      "company_id": "security:HK.01269",
-      "code": "HK.01269",
-      "name": "FIRST CAP GP",
+      "security_id": "listing:HK.01276",
+      "company_id": "security:HK.01276",
+      "code": "HK.01276",
+      "name": "HENGRUI PHARMA",
+      "market": "HK",
+      "instrument_type": "ordinary-stock",
+      "currency": "HKD",
+      "active_from": "2026-07-21T16:00:00+08:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:HK.01288",
+      "company_id": "security:HK.01288",
+      "code": "HK.01288",
+      "name": "ABC",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -689,28 +403,6 @@
       "company_id": "security:HK.01299",
       "code": "HK.01299",
       "name": "友邦保险",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01304",
-      "company_id": "security:HK.01304",
-      "code": "HK.01304",
-      "name": "FORTIOR",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01316",
-      "company_id": "security:HK.01316",
-      "code": "HK.01316",
-      "name": "NEXTEER",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -751,17 +443,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01375",
-      "company_id": "security:HK.01375",
-      "code": "HK.01375",
-      "name": "CC SECURITIES",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.01385",
       "company_id": "security:HK.01385",
       "code": "HK.01385",
@@ -773,10 +454,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01428",
-      "company_id": "security:HK.01428",
-      "code": "HK.01428",
-      "name": "BRIGHT SMART",
+      "security_id": "listing:HK.01398",
+      "company_id": "security:HK.01398",
+      "code": "HK.01398",
+      "name": "ICBC",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -784,10 +465,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01456",
-      "company_id": "security:HK.01456",
-      "code": "HK.01456",
-      "name": "GLMS SEC",
+      "security_id": "listing:HK.01530",
+      "company_id": "security:HK.01530",
+      "code": "HK.01530",
+      "name": "3SBIO",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -795,10 +476,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01508",
-      "company_id": "security:HK.01508",
-      "code": "HK.01508",
-      "name": "CHINA RE",
+      "security_id": "listing:HK.01548",
+      "company_id": "security:HK.01548",
+      "code": "HK.01548",
+      "name": "GENSCRIPT BIO",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -806,87 +487,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01515",
-      "company_id": "security:HK.01515",
-      "code": "HK.01515",
-      "name": "CR MEDICAL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01518",
-      "company_id": "security:HK.01518",
-      "code": "HK.01518",
-      "name": "NC HEALTHCARE",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01526",
-      "company_id": "security:HK.01526",
-      "code": "HK.01526",
-      "name": "RICI HEALTH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01571",
-      "company_id": "security:HK.01571",
-      "code": "HK.01571",
-      "name": "XIN POINT HOLD",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01675",
-      "company_id": "security:HK.01675",
-      "code": "HK.01675",
-      "name": "ASIAINFO TECH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01679",
-      "company_id": "security:HK.01679",
-      "code": "HK.01679",
-      "name": "RISECOMM GP",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01712",
-      "company_id": "security:HK.01712",
-      "code": "HK.01712",
-      "name": "DRAGON MINING",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01760",
-      "company_id": "security:HK.01760",
-      "code": "HK.01760",
-      "name": "INTRON TECH",
+      "security_id": "listing:HK.01658",
+      "company_id": "security:HK.01658",
+      "code": "HK.01658",
+      "name": "PSBC",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -905,28 +509,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01776",
-      "company_id": "security:HK.01776",
-      "code": "HK.01776",
-      "name": "GF SEC",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01782",
-      "company_id": "security:HK.01782",
-      "code": "HK.01782",
-      "name": "IB DIGITAL TECH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.01787",
       "company_id": "security:HK.01787",
       "code": "HK.01787",
@@ -938,10 +520,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01808",
-      "company_id": "security:HK.01808",
-      "code": "HK.01808",
-      "name": "ENTERPRISE DEV",
+      "security_id": "listing:HK.01801",
+      "company_id": "security:HK.01801",
+      "code": "HK.01801",
+      "name": "INNOVENT BIO",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -949,21 +531,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01809",
-      "company_id": "security:HK.01809",
-      "code": "HK.01809",
-      "name": "PRINX CHENGSHAN",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01815",
-      "company_id": "security:HK.01815",
-      "code": "HK.01815",
-      "name": "EVEREST GOLD",
+      "security_id": "listing:HK.01810",
+      "company_id": "security:HK.01810",
+      "code": "HK.01810",
+      "name": "XIAOMI-W",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -982,65 +553,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.01828",
-      "company_id": "security:HK.01828",
-      "code": "HK.01828",
-      "name": "FWD",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01830",
-      "company_id": "security:HK.01830",
-      "code": "HK.01830",
-      "name": "PERFECT MEDICAL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01833",
-      "company_id": "security:HK.01833",
-      "code": "HK.01833",
-      "name": "PA GOODDOCTOR",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01912",
-      "company_id": "security:HK.01912",
-      "code": "HK.01912",
-      "name": "CONTEL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.01958",
-      "company_id": "security:HK.01958",
-      "code": "HK.01958",
-      "name": "BAIC MOTOR",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02013",
-      "company_id": "security:HK.02013",
-      "code": "HK.02013",
-      "name": "WEIMOB INC",
+      "security_id": "listing:HK.01898",
+      "company_id": "security:HK.01898",
+      "code": "HK.01898",
+      "name": "CHINA COAL",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1059,17 +575,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02025",
-      "company_id": "security:HK.02025",
-      "code": "HK.02025",
-      "name": "RUIFENG POWER",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.02099",
       "company_id": "security:HK.02099",
       "code": "HK.02099",
@@ -1081,10 +586,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02138",
-      "company_id": "security:HK.02138",
-      "code": "HK.02138",
-      "name": "EC HEALTHCARE",
+      "security_id": "listing:HK.02162",
+      "company_id": "security:HK.02162",
+      "code": "HK.02162",
+      "name": "KEYMED BIO-B",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1092,87 +597,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02149",
-      "company_id": "security:HK.02149",
-      "code": "HK.02149",
-      "name": "BATELAB",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02158",
-      "company_id": "security:HK.02158",
-      "code": "HK.02158",
-      "name": "YIDU TECH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02159",
-      "company_id": "security:HK.02159",
-      "code": "HK.02159",
-      "name": "MEDIWELCOME",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02166",
-      "company_id": "security:HK.02166",
-      "code": "HK.02166",
-      "name": "SMART-CORE",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02167",
-      "company_id": "security:HK.02167",
-      "code": "HK.02167",
-      "name": "TI CLOUD",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02192",
-      "company_id": "security:HK.02192",
-      "code": "HK.02192",
-      "name": "MEDLIVE",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02238",
-      "company_id": "security:HK.02238",
-      "code": "HK.02238",
-      "name": "GAC GROUP",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02245",
-      "company_id": "security:HK.02245",
-      "code": "HK.02245",
-      "name": "LYGEND RESOURCE",
+      "security_id": "listing:HK.02228",
+      "company_id": "security:HK.02228",
+      "code": "HK.02228",
+      "name": "XTALPI",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1191,6 +619,17 @@
       "active_to": null
     },
     {
+      "security_id": "listing:HK.02252",
+      "company_id": "security:HK.02252",
+      "code": "HK.02252",
+      "name": "MEDBOT-B",
+      "market": "HK",
+      "instrument_type": "ordinary-stock",
+      "currency": "HKD",
+      "active_from": "2026-07-21T16:00:00+08:00",
+      "active_to": null
+    },
+    {
       "security_id": "listing:HK.02259",
       "company_id": "security:HK.02259",
       "code": "HK.02259",
@@ -1202,43 +641,32 @@
       "active_to": null
     },
     {
+      "security_id": "listing:HK.02261",
+      "company_id": "security:HK.02261",
+      "code": "HK.02261",
+      "name": "NASN TECH",
+      "market": "HK",
+      "instrument_type": "ordinary-stock",
+      "currency": "HKD",
+      "active_from": "2026-07-21T16:00:00+08:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:HK.02268",
+      "company_id": "security:HK.02268",
+      "code": "HK.02268",
+      "name": "WUXI XDC",
+      "market": "HK",
+      "instrument_type": "ordinary-stock",
+      "currency": "HKD",
+      "active_from": "2026-07-21T16:00:00+08:00",
+      "active_to": null
+    },
+    {
       "security_id": "listing:HK.02269",
       "company_id": "security:HK.02269",
       "code": "HK.02269",
       "name": "药明生物",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02273",
-      "company_id": "security:HK.02273",
-      "code": "HK.02273",
-      "name": "GUSHENGTANG",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02279",
-      "company_id": "security:HK.02279",
-      "code": "HK.02279",
-      "name": "YONGHE MEDICAL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02302",
-      "company_id": "security:HK.02302",
-      "code": "HK.02302",
-      "name": "CNNC INT'L",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1279,10 +707,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02339",
-      "company_id": "security:HK.02339",
-      "code": "HK.02339",
-      "name": "BWI INT'L",
+      "security_id": "listing:HK.02338",
+      "company_id": "security:HK.02338",
+      "code": "HK.02338",
+      "name": "WEICHAI POWER",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1290,10 +718,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02358",
-      "company_id": "security:HK.02358",
-      "code": "HK.02358",
-      "name": "JIU RONG HOLD",
+      "security_id": "listing:HK.02359",
+      "company_id": "security:HK.02359",
+      "code": "HK.02359",
+      "name": "WUXI APPTEC",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1301,10 +729,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02373",
-      "company_id": "security:HK.02373",
-      "code": "HK.02373",
-      "name": "BEAUTYFARM MED",
+      "security_id": "listing:HK.02388",
+      "company_id": "security:HK.02388",
+      "code": "HK.02388",
+      "name": "BOC HONG KONG",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1312,87 +740,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02378",
-      "company_id": "security:HK.02378",
-      "code": "HK.02378",
-      "name": "PRU",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02392",
-      "company_id": "security:HK.02392",
-      "code": "HK.02392",
-      "name": "XUANWU CLOUD",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02453",
-      "company_id": "security:HK.02453",
-      "code": "HK.02453",
-      "name": "CONCORD HC GP",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02473",
-      "company_id": "security:HK.02473",
-      "code": "HK.02473",
-      "name": "XXF",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02488",
-      "company_id": "security:HK.02488",
-      "code": "HK.02488",
-      "name": "LAUNCH TECH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02506",
-      "company_id": "security:HK.02506",
-      "code": "HK.02506",
-      "name": "XUNFEIHEALTH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02522",
-      "company_id": "security:HK.02522",
-      "code": "HK.02522",
-      "name": "RIMAG GROUP",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02546",
-      "company_id": "security:HK.02546",
-      "code": "HK.02546",
-      "name": "ZHIHUI MINING",
+      "security_id": "listing:HK.02475",
+      "company_id": "security:HK.02475",
+      "code": "HK.02475",
+      "name": "LUXSHARE ICT",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1411,17 +762,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02571",
-      "company_id": "security:HK.02571",
-      "code": "HK.02571",
-      "name": "SAIMO",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.02577",
       "company_id": "security:HK.02577",
       "code": "HK.02577",
@@ -1433,43 +773,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02581",
-      "company_id": "security:HK.02581",
-      "code": "HK.02581",
-      "name": "BENQ HOLDING",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02587",
-      "company_id": "security:HK.02587",
-      "code": "HK.02587",
-      "name": "HEALTHYWAY INC",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.02601",
       "company_id": "security:HK.02601",
       "code": "HK.02601",
       "name": "CPIC",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02609",
-      "company_id": "security:HK.02609",
-      "code": "HK.02609",
-      "name": "BAYZED HEALTH",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1499,10 +806,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02632",
-      "company_id": "security:HK.02632",
-      "code": "HK.02632",
-      "name": "NEW VISION CO",
+      "security_id": "listing:HK.02631",
+      "company_id": "security:HK.02631",
+      "code": "HK.02631",
+      "name": "SICC",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1510,98 +817,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.02651",
-      "company_id": "security:HK.02651",
-      "code": "HK.02651",
-      "name": "DAZHONG DENTAL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02666",
-      "company_id": "security:HK.02666",
-      "code": "HK.02666",
-      "name": "UNI MEDICAL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02667",
-      "company_id": "security:HK.02667",
-      "code": "HK.02667",
-      "name": "TONGRENTANGCARE",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02672",
-      "company_id": "security:HK.02672",
-      "code": "HK.02672",
-      "name": "BAIGE DIGITAL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02676",
-      "company_id": "security:HK.02676",
-      "code": "HK.02676",
-      "name": "NOVOSENSE",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02677",
-      "company_id": "security:HK.02677",
-      "code": "HK.02677",
-      "name": "DISTINCT HEALTH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02691",
-      "company_id": "security:HK.02691",
-      "code": "HK.02691",
-      "name": "NANHUA FUTURES",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02701",
-      "company_id": "security:HK.02701",
-      "code": "HK.02701",
-      "name": "NSING TECH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.02889",
-      "company_id": "security:HK.02889",
-      "code": "HK.02889",
-      "name": "PATEO",
+      "security_id": "listing:HK.02888",
+      "company_id": "security:HK.02888",
+      "code": "HK.02888",
+      "name": "STANCHART",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1631,10 +850,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.03277",
-      "company_id": "security:HK.03277",
-      "code": "HK.03277",
-      "name": "GPIXEL",
+      "security_id": "listing:HK.03296",
+      "company_id": "security:HK.03296",
+      "code": "HK.03296",
+      "name": "HUAQIN",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1642,32 +861,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.03309",
-      "company_id": "security:HK.03309",
-      "code": "HK.03309",
-      "name": "C-MER MEDICAL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.03310",
-      "company_id": "security:HK.03310",
-      "code": "HK.03310",
-      "name": "VIEWTRIX TECH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.03315",
-      "company_id": "security:HK.03315",
-      "code": "HK.03315",
-      "name": "GOLDPAC GROUP",
+      "security_id": "listing:HK.03328",
+      "company_id": "security:HK.03328",
+      "code": "HK.03328",
+      "name": "BANKCOMM",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1697,39 +894,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.03625",
-      "company_id": "security:HK.03625",
-      "code": "HK.03625",
-      "name": "FOURSEMI",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.03636",
-      "company_id": "security:HK.03636",
-      "code": "HK.03636",
-      "name": "JINXUN RESOURCE",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.03661",
-      "company_id": "security:HK.03661",
-      "code": "HK.03661",
-      "name": "SG MICRO",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.03690",
       "company_id": "security:HK.03690",
       "code": "HK.03690",
@@ -1741,10 +905,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.03738",
-      "company_id": "security:HK.03738",
-      "code": "HK.03738",
-      "name": "VOBILE GROUP",
+      "security_id": "listing:HK.03692",
+      "company_id": "security:HK.03692",
+      "code": "HK.03692",
+      "name": "HANSOH PHARMA",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1752,10 +916,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.03774",
-      "company_id": "security:HK.03774",
-      "code": "HK.03774",
-      "name": "FAMEGLOW",
+      "security_id": "listing:HK.03696",
+      "company_id": "security:HK.03696",
+      "code": "HK.03696",
+      "name": "INSILICO",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1763,10 +927,21 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.03833",
-      "company_id": "security:HK.03833",
-      "code": "HK.03833",
-      "name": "XINXIN MINING",
+      "security_id": "listing:HK.03759",
+      "company_id": "security:HK.03759",
+      "code": "HK.03759",
+      "name": "PHARMARON",
+      "market": "HK",
+      "instrument_type": "ordinary-stock",
+      "currency": "HKD",
+      "active_from": "2026-07-21T16:00:00+08:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:HK.03808",
+      "company_id": "security:HK.03808",
+      "code": "HK.03808",
+      "name": "SINOTRUK",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1785,10 +960,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.03886",
-      "company_id": "security:HK.03886",
-      "code": "HK.03886",
-      "name": "TOWN HEALTH",
+      "security_id": "listing:HK.03888",
+      "company_id": "security:HK.03888",
+      "code": "HK.03888",
+      "name": "KINGSOFT",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1796,10 +971,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.03888",
-      "company_id": "security:HK.03888",
-      "code": "HK.03888",
-      "name": "KINGSOFT",
+      "security_id": "listing:HK.03896",
+      "company_id": "security:HK.03896",
+      "code": "HK.03896",
+      "name": "KINGSOFT CLOUD",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1829,10 +1004,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.03958",
-      "company_id": "security:HK.03958",
-      "code": "HK.03958",
-      "name": "DFZQ",
+      "security_id": "listing:HK.03968",
+      "company_id": "security:HK.03968",
+      "code": "HK.03968",
+      "name": "CM BANK",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1851,6 +1026,17 @@
       "active_to": null
     },
     {
+      "security_id": "listing:HK.03988",
+      "company_id": "security:HK.03988",
+      "code": "HK.03988",
+      "name": "BANK OF CHINA",
+      "market": "HK",
+      "instrument_type": "ordinary-stock",
+      "currency": "HKD",
+      "active_from": "2026-07-21T16:00:00+08:00",
+      "active_to": null
+    },
+    {
       "security_id": "listing:HK.03993",
       "company_id": "security:HK.03993",
       "code": "HK.03993",
@@ -1862,54 +1048,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.06051",
-      "company_id": "security:HK.06051",
-      "code": "HK.06051",
-      "name": "YOUZAN-NEW",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06060",
-      "company_id": "security:HK.06060",
-      "code": "HK.06060",
-      "name": "ZA ONLINE",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06066",
-      "company_id": "security:HK.06066",
-      "code": "HK.06066",
-      "name": "CSC",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06078",
-      "company_id": "security:HK.06078",
-      "code": "HK.06078",
-      "name": "HYGEIA HEALTH",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06099",
-      "company_id": "security:HK.06099",
-      "code": "HK.06099",
-      "name": "CMSC",
+      "security_id": "listing:HK.06127",
+      "company_id": "security:HK.06127",
+      "code": "HK.06127",
+      "name": "JOINN",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -1928,105 +1070,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.06162",
-      "company_id": "security:HK.06162",
-      "code": "HK.06162",
-      "name": "TR INTERIORS",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06178",
-      "company_id": "security:HK.06178",
-      "code": "HK.06178",
-      "name": "EB SECURITIES",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06228",
-      "company_id": "security:HK.06228",
-      "code": "HK.06228",
-      "name": "MERDEKAGOLD-DRS",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06608",
-      "company_id": "security:HK.06608",
-      "code": "HK.06608",
-      "name": "BAIRONG-W",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06657",
-      "company_id": "security:HK.06657",
-      "code": "HK.06657",
-      "name": "BAIWANG CO",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06675",
-      "company_id": "security:HK.06675",
-      "code": "HK.06675",
-      "name": "SENASIC",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06680",
-      "company_id": "security:HK.06680",
-      "code": "HK.06680",
-      "name": "JLMAG",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06681",
-      "company_id": "security:HK.06681",
-      "code": "HK.06681",
-      "name": "BRAINAURORA-B",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06687",
-      "company_id": "security:HK.06687",
-      "code": "HK.06687",
-      "name": "JST GROUP",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.06693",
       "company_id": "security:HK.06693",
       "code": "HK.06693",
@@ -2038,32 +1081,21 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.06699",
-      "company_id": "security:HK.06699",
-      "code": "HK.06699",
-      "name": "ANGELALIGN",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06806",
-      "company_id": "security:HK.06806",
-      "code": "HK.06806",
-      "name": "SWHY",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.06809",
       "company_id": "security:HK.06809",
       "code": "HK.06809",
       "name": "MONTAGE TECH",
+      "market": "HK",
+      "instrument_type": "ordinary-stock",
+      "currency": "HKD",
+      "active_from": "2026-07-21T16:00:00+08:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:HK.06821",
+      "company_id": "security:HK.06821",
+      "code": "HK.06821",
+      "name": "ASYMCHEM",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -2093,39 +1125,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.06908",
-      "company_id": "security:HK.06908",
-      "code": "HK.06908",
-      "name": "HG SEMI",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06939",
-      "company_id": "security:HK.06939",
-      "code": "HK.06939",
-      "name": "MEGAIN",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.06963",
-      "company_id": "security:HK.06963",
-      "code": "HK.06963",
-      "name": "SUNSHINE INS",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.06969",
       "company_id": "security:HK.06969",
       "code": "HK.06969",
@@ -2137,10 +1136,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.07489",
-      "company_id": "security:HK.07489",
-      "code": "HK.07489",
-      "name": "VOYAH AUTO",
+      "security_id": "listing:HK.06990",
+      "company_id": "security:HK.06990",
+      "code": "HK.06990",
+      "name": "SKB BIO",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -2148,76 +1147,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.08017",
-      "company_id": "security:HK.08017",
-      "code": "HK.08017",
-      "name": "TRADEGO",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.08037",
-      "company_id": "security:HK.08037",
-      "code": "HK.08037",
-      "name": "CH BIOTECH SER",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.08148",
-      "company_id": "security:HK.08148",
-      "code": "HK.08148",
-      "name": "WUXI LIFE",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.08162",
-      "company_id": "security:HK.08162",
-      "code": "HK.08162",
-      "name": "LOCO HK",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.08299",
-      "company_id": "security:HK.08299",
-      "code": "HK.08299",
-      "name": "GT GOLD",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.08611",
-      "company_id": "security:HK.08611",
-      "code": "HK.08611",
-      "name": "JUFEEL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.08635",
-      "company_id": "security:HK.08635",
-      "code": "HK.08635",
-      "name": "ELEPHANT HLDGS",
+      "security_id": "listing:HK.09606",
+      "company_id": "security:HK.09606",
+      "code": "HK.09606",
+      "name": "DUALITYBIO-B",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -2236,28 +1169,6 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.09636",
-      "company_id": "security:HK.09636",
-      "code": "HK.09636",
-      "name": "JF SMARTINVEST",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.09669",
-      "company_id": "security:HK.09669",
-      "code": "HK.09669",
-      "name": "BEISEN HOLDING",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
       "security_id": "listing:HK.09696",
       "company_id": "security:HK.09696",
       "code": "HK.09696",
@@ -2269,10 +1180,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.09860",
-      "company_id": "security:HK.09860",
-      "code": "HK.09860",
-      "name": "ADICON HOLDINGS",
+      "security_id": "listing:HK.09698",
+      "company_id": "security:HK.09698",
+      "code": "HK.09698",
+      "name": "GDS-SW",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -2313,6 +1224,17 @@
       "active_to": null
     },
     {
+      "security_id": "listing:HK.09887",
+      "company_id": "security:HK.09887",
+      "code": "HK.09887",
+      "name": "LEADS BIOLABS-B",
+      "market": "HK",
+      "instrument_type": "ordinary-stock",
+      "currency": "HKD",
+      "active_from": "2026-07-21T16:00:00+08:00",
+      "active_to": null
+    },
+    {
       "security_id": "listing:HK.09888",
       "company_id": "security:HK.09888",
       "code": "HK.09888",
@@ -2335,10 +1257,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.09927",
-      "company_id": "security:HK.09927",
-      "code": "HK.09927",
-      "name": "SERES",
+      "security_id": "listing:HK.09926",
+      "company_id": "security:HK.09926",
+      "code": "HK.09926",
+      "name": "AKESO",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -2346,43 +1268,10 @@
       "active_to": null
     },
     {
-      "security_id": "listing:HK.09959",
-      "company_id": "security:HK.09959",
-      "code": "HK.09959",
-      "name": "LINKLOGIS-W",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.09960",
-      "company_id": "security:HK.09960",
-      "code": "HK.09960",
-      "name": "KINDSTAR GLOBAL",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.09971",
-      "company_id": "security:HK.09971",
-      "code": "HK.09971",
-      "name": "BASICSEMI",
-      "market": "HK",
-      "instrument_type": "ordinary-stock",
-      "currency": "HKD",
-      "active_from": "2026-07-21T16:00:00+08:00",
-      "active_to": null
-    },
-    {
-      "security_id": "listing:HK.09973",
-      "company_id": "security:HK.09973",
-      "code": "HK.09973",
-      "name": "CHERY AUTO",
+      "security_id": "listing:HK.09969",
+      "company_id": "security:HK.09969",
+      "code": "HK.09969",
+      "name": "INNOCARE",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -2394,6 +1283,17 @@
       "company_id": "security:HK.09988",
       "code": "HK.09988",
       "name": "阿里巴巴-W",
+      "market": "HK",
+      "instrument_type": "ordinary-stock",
+      "currency": "HKD",
+      "active_from": "2026-07-21T16:00:00+08:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:HK.09995",
+      "company_id": "security:HK.09995",
+      "code": "HK.09995",
+      "name": "REMEGEN",
       "market": "HK",
       "instrument_type": "ordinary-stock",
       "currency": "HKD",
@@ -7780,5 +6680,5 @@
       "active_to": null
     }
   ],
-  "version_id": "identity:9178363fd7aa9ee3fbb23a80640675b2c9322417533f4f50241394853114785c"
+  "version_id": "identity:988791111eca506a754b84b34136ebba59975e9905ce95663171cf1b003d838d"
 }

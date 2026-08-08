@@ -3,8 +3,8 @@
   "market": "US",
   "as_of": "2026-07-21T16:00:00-04:00",
   "expires_at": "2026-10-31T23:59:59-04:00",
-  "published_at": "2026-08-06T21:00:00+08:00",
-  "identity_registry_version": "identity:9178363fd7aa9ee3fbb23a80640675b2c9322417533f4f50241394853114785c",
+  "published_at": "2026-08-08T12:00:00+08:00",
+  "identity_registry_version": "identity:988791111eca506a754b84b34136ebba59975e9905ce95663171cf1b003d838d",
   "sectors": [
     {
       "key": "semiconductors",
@@ -2872,5 +2872,5 @@
     }
   ],
   "source": "manual-versioned-universe-v1-migrated-v2",
-  "version_id": "universe:4929ef7c099cd128167b1776dc87bed0a8a641817212353e66681ad81ad12d93"
+  "version_id": "universe:ff606b666850516bd96d2a1541672bad36f24adf3713fea06a2be0114c7b8577"
 }

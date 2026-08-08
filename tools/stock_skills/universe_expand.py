@@ -6,10 +6,18 @@ that sector qualifies" only ever meant "nothing in that sector was in the list".
 fills them from Futu's own industry plates rather than from memory: a mistyped code would
 otherwise enter the identity registry and propagate through every version digest.
 
-Existing sector keys, benchmarks and representatives are preserved and only membership
-grows, so the change is additive and the configured structure that already validates stays
-intact. Members are ranked by turnover and capped, because an illiquid name would be
-rejected by the investability gates anyway and only costs a snapshot to carry.
+Existing sector keys, benchmarks and representatives are preserved, and the configured
+structure that already validates stays intact. Membership itself is not additive: a member
+whose tape has dried up is evicted, because carrying it costs a snapshot and a feature
+computation every session and it can never survive the investability gates anyway.
+
+Liquidity is measured as the median turnover over the last completed sessions, not the
+last one. Ranking on a single session is what filled the HK universe with names that could
+not be traded -- 141 of its 210 members turned over less than HK$100m a day, two thirds of
+the universe, because one busy session was enough to rank a shell into the top 35. The
+floor is the same one `discover` applies, so the build can no longer hand discovery a name
+discovery will refuse. Funds are exempt for the same reason they are exempt there: an ETF
+is quoted against the basket it holds, so its own tape understates what can be traded.
 """
 
 from __future__ import annotations
@@ -19,6 +27,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from .discovery_engine import MINIMUM_MEDIAN_TURNOVER
 from .futu_fetcher import FutuFetcher
 
 
@@ -105,20 +114,94 @@ def rank_by_turnover(
     return turnover
 
 
+def median_daily_turnover(
+    fetcher: FutuFetcher,
+    codes: list[str],
+    *,
+    sessions: int = 20,
+    pause: float = 0.2,
+) -> dict[str, float]:
+    """Median daily turnover per code. A code the feed cannot price is absent, not zero.
+
+    One call per code, so callers shortlist first rather than asking for a whole plate.
+    """
+
+    medians: dict[str, float] = {}
+    for code in codes:
+        try:
+            bars = fetcher.get_daily_bars(code, num=sessions)
+        except Exception:
+            continue
+        values = sorted(bar.turnover for bar in bars[-sessions:] if bar.turnover > 0)
+        if not values:
+            continue
+        middle = len(values) // 2
+        medians[code] = (
+            values[middle]
+            if len(values) % 2
+            else (values[middle - 1] + values[middle]) / 2.0
+        )
+        if pause > 0:
+            time.sleep(pause)
+    return medians
+
+
+def _is_fund_member(member: dict) -> bool:
+    return member.get("role") in {"etf", "index"}
+
+
 def expand_universe(
     path: str | Path,
     plans: list[SectorPlan],
     fetcher: FutuFetcher,
     *,
     per_sector: int = 35,
+    minimum_median_turnover: float | None = None,
+    liquidity_sessions: int = 20,
+    shortlist_multiple: int = 4,
 ) -> dict:
-    """Return the universe record with membership broadened. Does not write."""
+    """Return the universe record with membership rebuilt. Does not write.
+
+    `minimum_median_turnover` defaults to the floor `discover` enforces for this market;
+    pass 0 to rank on turnover without evicting or excluding anything.
+    """
 
     record = json.loads(Path(path).read_text(encoding="utf-8"))
-    market_prefixes = {"CN": ("SH.", "SZ."), "HK": ("HK.",), "US": ("US.",)}[record["market"]]
+    market = record["market"]
+    market_prefixes = {"CN": ("SH.", "SZ."), "HK": ("HK.",), "US": ("US.",)}[market]
+    floor = (
+        MINIMUM_MEDIAN_TURNOVER.get(market, 0.0)
+        if minimum_median_turnover is None
+        else minimum_median_turnover
+    )
+
+    # Evict first, so the plate fill can see the room it opens up. A fund keeps its place,
+    # and so does a name the feed cannot price -- absence of evidence is not illiquidity.
+    evicted: dict[str, float] = {}
+    if floor > 0:
+        held = [
+            member["code"]
+            for sector in record["sectors"]
+            for member in sector["members"]
+            if not _is_fund_member(member)
+        ]
+        measured = median_daily_turnover(
+            fetcher, held, sessions=liquidity_sessions
+        )
+        evicted = {
+            code: value for code, value in measured.items() if value < floor
+        }
+        for sector in record["sectors"]:
+            sector["members"] = [
+                member
+                for member in sector["members"]
+                if member["code"] not in evicted
+            ]
+
     by_key = {sector["key"]: sector for sector in record["sectors"]}
     taken = {member["code"] for sector in record["sectors"] for member in sector["members"]}
     taken |= {sector["benchmark"] for sector in record["sectors"]}
+    taken |= set(evicted)  # an evicted name must not be re-added by the plate fill
 
     for plan in plans:
         candidates: list[tuple[str, str]] = []
@@ -169,6 +252,23 @@ def expand_universe(
             by_key[plan.key] = sector
 
         room = max(0, per_sector - len(sector["members"]))
+        if floor > 0 and room:
+            # One session's turnover is cheap but noisy, and a median needs a call per
+            # code. So rank on the snapshot to shortlist, then let the median decide the
+            # order and who is admitted at all -- a busy session can rank a shell into the
+            # top 35, but it cannot hold a median there.
+            shortlist = [code for code, _ in ranked[: room * shortlist_multiple]]
+            medians = median_daily_turnover(
+                fetcher, shortlist, sessions=liquidity_sessions
+            )
+            admitted = {
+                code: value for code, value in medians.items() if value >= floor
+            }
+            ranked = sorted(
+                ((c, n) for c, n in ranked if c in admitted),
+                key=lambda item: -admitted[item[0]],
+            )
+
         for code, name in ranked[:room]:
             sector["members"].append(
                 {

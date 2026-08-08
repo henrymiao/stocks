@@ -3,8 +3,8 @@
   "market": "CN",
   "as_of": "2026-07-21T16:00:00+08:00",
   "expires_at": "2026-10-31T23:59:59+08:00",
-  "published_at": "2026-08-06T21:00:00+08:00",
-  "identity_registry_version": "identity:9178363fd7aa9ee3fbb23a80640675b2c9322417533f4f50241394853114785c",
+  "published_at": "2026-08-08T12:00:00+08:00",
+  "identity_registry_version": "identity:988791111eca506a754b84b34136ebba59975e9905ce95663171cf1b003d838d",
   "sectors": [
     {
       "key": "semiconductor-ai-hardware",
@@ -2156,5 +2156,5 @@
     }
   ],
   "source": "manual-versioned-universe-v1-migrated-v2",
-  "version_id": "universe:adc8b59bdceda0d58c31f28e6cc428e5fdca97b1f6e415b7768435f166c06760"
+  "version_id": "universe:23017d991323e2f887bf6a8ecdb5a3a98339a7c5a52e2367379df281dd6bdf0b"
 }

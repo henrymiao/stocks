@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import math
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, time, timedelta
 from typing import Any, Callable
 
@@ -20,6 +20,14 @@ from .universe import MarketUniverse, SectorUniverse, market_timezone, normalize
 DISCOVERY_SCHEMA = "opportunity-discovery-v1"
 DISCOVERY_STATES = {"forming", "armed", "triggered", "invalidated", "expired"}
 
+# Median daily turnover, in each market's own currency, below which an instrument is not
+# investable and therefore cannot be an opportunity. A bad setup and an untradable listing
+# are different refusals: the first is a veto on the setup, this is a veto on the name.
+# `analyze` already refuses these downstream, so without the same floor here discovery
+# spends its alert budget on names that could never be traded -- on 2026-08-07, 36 of the
+# 65 armed HK candidates turned over less than HK$100m and the top-scoring one was a shell.
+MINIMUM_MEDIAN_TURNOVER = {"CN": 2.0e8, "HK": 1.0e8, "US": 2.0e7}
+
 
 @dataclass(frozen=True)
 class DiscoveryConfig:
@@ -36,6 +44,8 @@ class DiscoveryConfig:
     invalidation_breadth: float = 0.30
     invalidation_capital_improvement: float = 20.0
     maximum_intraday_bar_age_minutes: int = 10
+    liquidity_sessions: int = 20
+    liquidity_floor: float | None = None  # overrides the per-market table below
 
 
 @dataclass(frozen=True)
@@ -201,16 +211,38 @@ def _transition(
     )
 
 
+def _median_turnover(bars: list[KLineBar], sessions: int) -> float | None:
+    values = sorted(bar.turnover for bar in bars[-sessions:] if bar.turnover > 0)
+    if not values:
+        return None
+    middle = len(values) // 2
+    return (
+        values[middle]
+        if len(values) % 2
+        else (values[middle - 1] + values[middle]) / 2.0
+    )
+
+
 def _initial_state(
     track: TrackFeatureSet,
     context: SectorFeatureContext,
     config: DiscoveryConfig,
 ) -> str | None:
+    """Score and evidence decide `forming` vs `armed`; sector strength only gates.
+
+    Arming counts `instrument_supporting_groups`, not every supporting group. `breadth` is
+    a required gate here, and `breadth` and `leaders` are both computed from the sector, so
+    counting them toward the two-group minimum let a hot sector satisfy the whole evidence
+    requirement on its own -- the gate doubled as one of the two votes it was gating. On
+    2026-08-07 that armed 34 of 35 resources names and 33 of 35 innovative-medicine names
+    in CN, 57% of the universe, with the price and flow groups never consulted.
+    """
+
     if track.score < config.forming_score:
         return None
     can_arm = (
         track.score >= config.armed_score
-        and len(track.supporting_groups) >= config.minimum_supporting_groups
+        and len(track.instrument_supporting_groups) >= config.minimum_supporting_groups
         and "breadth" in track.supporting_groups
         and context.breadth is not None
         and context.breadth >= config.minimum_armed_breadth
@@ -388,6 +420,29 @@ def discover_universe(
     }
     candidates: list[DiscoveryCandidate] = []
     disabled_sectors: list[dict[str, Any]] = []
+    floor = (
+        config.liquidity_floor
+        if config.liquidity_floor is not None
+        else MINIMUM_MEDIAN_TURNOVER.get(market, 0.0)
+    )
+    # Funds are exempt. Daily turnover is the right liquidity proxy for an ordinary stock,
+    # but an ETF is quoted by market makers against the basket it holds, so its own tape
+    # understates what can be traded. Applying the stock floor to them excluded the
+    # innovative-medicine and ev-battery representatives at CNY 174m and 144m a day --
+    # both perfectly tradable, and both the safest way to express a view on their sector.
+    priced_as_stock = {
+        member.code
+        for sector in universe.sectors
+        for member in sector.members
+        if member.role not in {"etf", "index"}
+    }
+    illiquid: dict[str, float] = {}
+    for code in sorted(priced_as_stock):
+        turnover = _median_turnover(completed.get(code, []), config.liquidity_sessions)
+        # Unknown turnover is not a refusal: the fixture and offline paths carry bars
+        # without it, and silently dropping every name there would hide the whole universe.
+        if turnover is not None and turnover < floor:
+            illiquid[code] = turnover
 
     for sector in universe.sectors:
         context = build_sector_context(sector, completed)
@@ -413,6 +468,23 @@ def discover_universe(
             for track in (trend, reversal):
                 state = _initial_state(track, context, config)
                 previous = existing.get((sector.key, member.code, track.track))
+                if member.code in illiquid:
+                    # Never a new candidate, and an active one is retired with its reason
+                    # rather than dropped, so the store never keeps a stale armed row.
+                    if previous is not None and previous.state in {
+                        "forming",
+                        "armed",
+                        "triggered",
+                    }:
+                        candidates.append(
+                            _transition(
+                                previous,
+                                "invalidated",
+                                evaluated_at,
+                                "below-liquidity-floor",
+                            )
+                        )
+                    continue
                 if (
                     previous is not None
                     and previous.state in {"forming", "armed"}
@@ -545,6 +617,14 @@ def discover_universe(
         "forming": [candidate.to_record() for candidate in forming],
         "candidates": [candidate.to_record() for candidate in candidates],
         "disabled_sectors": disabled_sectors,
+        "liquidity_floor": {
+            "minimum_median_turnover": floor,
+            "sessions": config.liquidity_sessions,
+            "excluded": [
+                {"code": code, "median_turnover": round(value, 2)}
+                for code, value in sorted(illiquid.items(), key=lambda row: -row[1])
+            ],
+        },
         "limits": {"sector_opportunities": 5, "armed": 10, "forming": 5},
         "entry_recommendation": None,
         "notes": [

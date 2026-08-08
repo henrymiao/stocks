@@ -10,12 +10,20 @@ from unittest import mock
 
 from tools.stock_skills.cli import main as cli_main
 from tools.stock_skills.discovery_engine import (
+    MINIMUM_MEDIAN_TURNOVER,
+    DiscoveryConfig,
+    _initial_state,
     candidate_from_record,
     confirm_discoveries,
     discover_universe,
     review_discovery,
 )
-from tools.stock_skills.discovery_features import completed_daily_bars
+from tools.stock_skills.discovery_features import (
+    FeatureValue,
+    SectorFeatureContext,
+    TrackFeatureSet,
+    completed_daily_bars,
+)
 from tools.stock_skills.discovery_store import DiscoveryStore
 from tools.stock_skills.discovery_runtime import (
     freeze_discovery_inputs,
@@ -36,7 +44,7 @@ from tools.stock_skills.universe import (
 )
 
 
-def _bar(day, close, *, previous=None, volume=1_000_000, close_location=0.6):
+def _bar(day, close, *, previous=None, volume=10_000_000, close_location=0.6):
     previous = close if previous is None else previous
     span = max(2.0, abs(close - previous) + 1.0)
     low = close - span * close_location
@@ -69,8 +77,8 @@ def _series(*, recovery=True, future=False, leader=False):
             high=88.0,
             low=77.5,
             close=87.0 if not leader else 88.0,
-            volume=3_400_000,
-            turnover=295_800_000.0,
+            volume=34_000_000,
+            turnover=2_958_000_000.0,
         )
     else:
         # High-volume decline that finishes near the low must not look like exhaustion.
@@ -80,8 +88,8 @@ def _series(*, recovery=True, future=False, leader=False):
             high=87.0,
             low=77.5,
             close=78.0,
-            volume=3_400_000,
-            turnover=265_200_000.0,
+            volume=34_000_000,
+            turnover=2_652_000_000.0,
         )
     bars.append(latest)
     if future:
@@ -92,8 +100,8 @@ def _series(*, recovery=True, future=False, leader=False):
                 high=99.0,
                 low=86.0,
                 close=98.0,
-                volume=4_000_000,
-                turnover=392_000_000.0,
+                volume=40_000_000,
+                turnover=3_920_000_000.0,
             )
         )
     return bars
@@ -1018,6 +1026,189 @@ class OpportunityDiscoveryTests(unittest.TestCase):
             self.assertEqual(result, 0)
             reviewed = json.loads(review_output.read_text(encoding="utf-8"))
             self.assertGreaterEqual(reviewed["reviewed"], 1)
+
+
+class ArmingNeedsInstrumentEvidenceTests(unittest.TestCase):
+    """A hot sector must not arm its members by itself.
+
+    `breadth` is a required gate for arming, and `breadth` and `leaders` are both computed
+    from the sector, so counting them toward the two-group minimum let the gate double as
+    the evidence it was gating. On 2026-08-07 that armed 34 of 35 CN resources names and
+    33 of 35 innovative-medicine names -- 57% of the universe -- while the price and flow
+    groups were never consulted.
+    """
+
+    def _track(self, *, sector_score, instrument_score):
+        """A track carried by its sector: name-level groups score below the 55 support line.
+
+        With breadth and leader_sync at `sector_score` on 0.30 of the trend-buildup weight
+        and every instrument feature at `instrument_score`, the total clears the 65 arming
+        score while neither the price nor the flow group reaches 55.
+        """
+
+        features = {
+            "breadth": FeatureValue(sector_score, "breadth", "", {}),
+            "leader_sync": FeatureValue(sector_score, "leaders", "", {}),
+            "relative_strength": FeatureValue(instrument_score, "price", "", {}),
+            "pivot_distance": FeatureValue(instrument_score, "price", "", {}),
+            "contraction": FeatureValue(instrument_score, "flow", "", {}),
+            "volume_accumulation": FeatureValue(instrument_score, "flow", "", {}),
+        }
+        weights = {
+            "relative_strength": 0.25,
+            "breadth": 0.20,
+            "volume_accumulation": 0.20,
+            "contraction": 0.15,
+            "pivot_distance": 0.10,
+            "leader_sync": 0.10,
+        }
+        group_scores = {
+            "breadth": float(sector_score),
+            "leaders": float(sector_score),
+            "price": float(instrument_score),
+            "flow": float(instrument_score),
+        }
+        return TrackFeatureSet(
+            track="trend-buildup",
+            score=sum(weights[name] * value.score for name, value in features.items()),
+            feature_coverage=1.0,
+            supporting_groups=tuple(
+                sorted(group for group, value in group_scores.items() if value >= 55.0)
+            ),
+            group_scores=group_scores,
+            features=features,
+            trigger_level=100.0,
+            invalidation_level=90.0,
+        )
+
+    def _context(self):
+        return SectorFeatureContext(
+            coverage=1.0,
+            breadth=1.0,
+            previous_breadth=0.5,
+            breadth_change=0.5,
+            leader_breadth=1.0,
+            leader_stabilization=100.0,
+            synchronization=100.0,
+        )
+
+    def test_a_hot_sector_alone_cannot_arm_an_ordinary_instrument(self):
+        track = self._track(sector_score=100.0, instrument_score=54.0)
+
+        # The setup the old rule armed on: score over the line, breadth present, and the
+        # two-group minimum met entirely by groups that every member of the sector shares.
+        self.assertGreaterEqual(track.score, 65.0)
+        self.assertEqual(track.supporting_groups, ("breadth", "leaders"))
+        self.assertEqual(track.instrument_supporting_groups, ())
+
+        self.assertEqual(
+            _initial_state(track, self._context(), DiscoveryConfig()), "forming"
+        )
+
+    def test_the_same_instrument_arms_once_its_own_evidence_shows_up(self):
+        # Identical sector, identical weights; only the instrument's own features move
+        # across the support line. That is the only thing arming should turn on.
+        track = self._track(sector_score=100.0, instrument_score=56.0)
+
+        self.assertEqual(track.instrument_supporting_groups, ("flow", "price"))
+        self.assertEqual(
+            _initial_state(track, self._context(), DiscoveryConfig()), "armed"
+        )
+
+
+class LiquidityFloorTests(unittest.TestCase):
+    """An untradable listing is not an opportunity, whatever its setup looks like.
+
+    A hard veto says the setup is bad; this says the name cannot be bought. On 2026-08-07
+    the top-scoring HK candidate was a shell turning over under HK$100m, and 36 of the 65
+    armed HK candidates were below that floor.
+    """
+
+    def _thin_bars(self):
+        bars = _golden_bars()
+        bars["SH.688012"] = [
+            replace(bar, volume=bar.volume // 5_000, turnover=bar.turnover / 5_000.0)
+            for bar in bars["SH.688012"]
+        ]
+        return bars
+
+    def test_a_name_below_the_floor_never_becomes_a_candidate(self):
+        as_of = "2026-07-20T15:15:00+08:00"
+        report = discover_universe(
+            _star_universe(),
+            self._thin_bars(),
+            evaluated_at=as_of,
+            capital_improvement={},
+        )
+        codes = {row["code"] for row in report["candidates"]}
+        self.assertNotIn("SH.688012", codes)
+        self.assertIn(
+            "SH.688012",
+            {row["code"] for row in report["liquidity_floor"]["excluded"]},
+        )
+        self.assertEqual(
+            report["liquidity_floor"]["minimum_median_turnover"],
+            MINIMUM_MEDIAN_TURNOVER["CN"],
+        )
+        # The liquid members are untouched, so the floor is not disabling the sector.
+        self.assertTrue(codes)
+
+    def test_an_active_candidate_that_dries_up_is_retired_with_its_reason(self):
+        as_of = "2026-07-20T15:15:00+08:00"
+        first = discover_universe(
+            _star_universe(),
+            _golden_bars(),
+            evaluated_at=as_of,
+            capital_improvement={"SH.688012": 70.0},
+        )
+        active = {
+            (row["sector"], row["code"], row["track"]): candidate_from_record(row)
+            for row in first["candidates"]
+            if row["code"] == "SH.688012" and row["state"] in {"forming", "armed"}
+        }
+        self.assertTrue(active, "fixture must produce an active candidate to retire")
+
+        later = discover_universe(
+            _star_universe(),
+            self._thin_bars(),
+            evaluated_at="2026-07-21T15:15:00+08:00",
+            existing=active,
+            capital_improvement={},
+        )
+        retired = [row for row in later["candidates"] if row["code"] == "SH.688012"]
+        self.assertEqual(len(retired), len(active))
+        for row in retired:
+            self.assertEqual(row["state"], "invalidated")
+            self.assertEqual(
+                row["transition_history"][-1]["reason"], "below-liquidity-floor"
+            )
+
+    def test_a_thin_tape_does_not_exclude_the_sector_etf(self):
+        # SH.000688 is the star50 representative. A fund is quoted against its basket, so
+        # its own turnover is not the constraint, and excluding it would remove the safest
+        # way to act on the sector it represents.
+        as_of = "2026-07-20T15:15:00+08:00"
+        bars = _golden_bars()
+        bars["SH.000688"] = [
+            replace(bar, volume=bar.volume // 5_000, turnover=bar.turnover / 5_000.0)
+            for bar in bars["SH.000688"]
+        ]
+        report = discover_universe(
+            _star_universe(), bars, evaluated_at=as_of, capital_improvement={}
+        )
+        self.assertEqual(report["liquidity_floor"]["excluded"], [])
+        self.assertIn(
+            "SH.000688", {row["code"] for row in report["candidates"]}
+        )
+
+    def test_bars_without_turnover_are_not_treated_as_illiquid(self):
+        as_of = "2026-07-20T15:15:00+08:00"
+        bars = _golden_bars()
+        bars["SH.688012"] = [replace(bar, turnover=0.0) for bar in bars["SH.688012"]]
+        report = discover_universe(
+            _star_universe(), bars, evaluated_at=as_of, capital_improvement={}
+        )
+        self.assertEqual(report["liquidity_floor"]["excluded"], [])
 
 
 if __name__ == "__main__":

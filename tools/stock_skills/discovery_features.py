@@ -11,6 +11,14 @@ from .models import KLineBar
 from .universe import SectorUniverse, market_timezone, normalize_market
 
 
+# Groups whose features are computed from the sector, not the instrument, and therefore
+# carry the identical value for every member: `breadth`/`breadth_stabilization` and
+# `leader_sync`/`leader_stabilization`. Measured within one armed sector, both have a
+# standard deviation of exactly 0.0 across members while the price and flow groups spread
+# over 15-33 points. They say a sector moved; they say nothing about which name to look at.
+SECTOR_LEVEL_GROUPS = frozenset({"breadth", "leaders"})
+
+
 def _clamp(value: float, low: float = 0.0, high: float = 100.0) -> float:
     return max(low, min(high, value))
 
@@ -137,12 +145,21 @@ class TrackFeatureSet:
     hard_vetoes: tuple[str, ...] = ()
     notes: tuple[str, ...] = ()
 
+    @property
+    def instrument_supporting_groups(self) -> tuple[str, ...]:
+        """Supporting groups that describe this instrument rather than its sector."""
+
+        return tuple(
+            group for group in self.supporting_groups if group not in SECTOR_LEVEL_GROUPS
+        )
+
     def to_record(self) -> dict[str, Any]:
         return {
             "track": self.track,
             "score": self.score,
             "feature_coverage": self.feature_coverage,
             "supporting_groups": list(self.supporting_groups),
+            "instrument_supporting_groups": list(self.instrument_supporting_groups),
             "group_scores": self.group_scores,
             "features": {name: value.to_record() for name, value in self.features.items()},
             "trigger_level": self.trigger_level,

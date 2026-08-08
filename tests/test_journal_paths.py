@@ -87,3 +87,50 @@ class JournalPathTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReplayPairingTests(unittest.TestCase):
+    """`run_path_backtest` drops repeated trade_ids, which would misalign the pairing.
+
+    Scenario results are matched back to their scenarios by position to decide which
+    trades the plan actually closed. A position id such as `xpeng-09868-core83` recurs
+    across entry sessions, so reusing it as the scenario id shortened the results list and
+    paired every later trade with the wrong scenario -- silently, and in the direction of
+    reporting open trades as closed.
+    """
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.store = MarketStore(Path(self._tmp.name) / "market.db")
+        self.store.upsert_bars("A", "1d", [_bar(d, 100.0 + d) for d in range(1, 26)])
+
+    def tearDown(self):
+        self.store.close()
+        self._tmp.cleanup()
+
+    def test_one_position_entered_twice_yields_two_distinct_scenarios(self):
+        from tools.stock_skills.journal_paths import replay_journal
+
+        recs = [
+            {"code": "A", "timestamp": f"2026-07-{day:02d}T15:00:00+08:00",
+             "trade_id": "same-position", "exit_plan": _plan(maximum_holding_days=3)}
+            for day in (2, 9)
+        ]
+        payload, report = scenarios_from_journal(recs, self.store)
+        ids = [t["trade_id"] for t in payload["trades"]]
+        self.assertEqual(len(set(ids)), 2, ids)
+        self.assertEqual(report["replayed"], 2)
+        # And the replay must survive its own alignment assertion.
+        replay_journal(recs, self.store)
+
+    def test_a_trade_the_plan_never_closed_is_reported_open_not_counted(self):
+        from tools.stock_skills.journal_paths import replay_journal
+
+        # Rising bars that never reach the target and never hit the stop: the replay runs
+        # out of data with the position still open.
+        recs = [{"code": "A", "timestamp": "2026-07-20T15:00:00+08:00",
+                 "exit_plan": _plan(maximum_holding_days=20)}]
+        report = replay_journal(recs, self.store)
+        self.assertEqual(report["journal_coverage"]["still_open"], 1)
+        self.assertEqual(report["journal_coverage"]["closed_by_plan"], 0)
+        self.assertEqual(report["summary"]["trades"], 0)

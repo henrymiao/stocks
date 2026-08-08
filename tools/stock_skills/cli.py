@@ -1490,30 +1490,25 @@ def _cmd_path_backtest(args: argparse.Namespace) -> int:
     if not args.from_journal and not args.scenario:
         raise SystemExit("path-backtest needs either --scenario or --from-journal")
 
-    journal_report: dict | None = None
     if args.from_journal:
-        from .journal_paths import scenarios_from_journal
+        from .journal_paths import replay_journal
         from .store import MarketStore
 
         with MarketStore(args.market_db) as store:
-            payload, journal_report = scenarios_from_journal(
-                read_records(args.recommendations), store
-            )
-        if not payload["trades"]:
-            print(json.dumps(journal_report, ensure_ascii=False, indent=2))
-            print("No journalled recommendation carries a replayable exit plan.")
-            return 0
-        scenarios = scenarios_from_record(payload)
-    else:
-        source = Path(args.scenario)
-        payload = json.loads(source.read_text(encoding="utf-8"))
-        if not isinstance(payload, dict):
-            raise ValueError("path-backtest scenario must be a JSON object")
-        scenarios = scenarios_from_record(payload)
+            report = replay_journal(read_records(args.recommendations), store)
+        text = json.dumps(report, ensure_ascii=False, indent=2)
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text, encoding="utf-8")
+        print(text)
+        return 0
 
-    report = run_path_backtest(scenarios)
-    if journal_report is not None:
-        report["journal_coverage"] = journal_report
+    source = Path(args.scenario)
+    payload = json.loads(source.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("path-backtest scenario must be a JSON object")
+
+    report = run_path_backtest(scenarios_from_record(payload))
     text = json.dumps(report, ensure_ascii=False, indent=2)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)

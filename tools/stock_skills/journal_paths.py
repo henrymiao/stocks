@@ -100,7 +100,11 @@ def scenarios_from_journal(
 
         seen.add((code, entry))
         trade: dict[str, Any] = {
-            "trade_id": record.get("trade_id") or f"{code}@{entry}",
+            # Unique per replayed call, not per position. A position id like
+            # `xpeng-09868-core83` recurs across entry sessions, and `run_path_backtest`
+            # drops repeated trade_ids -- which would silently shorten its trades list and
+            # misalign it against the scenarios it was built from.
+            "trade_id": f"{record.get('trade_id') or code}@{entry}",
             "exit_plan": plan,
             "bars": [
                 {
@@ -125,3 +129,57 @@ def scenarios_from_journal(
         "skipped": dict(sorted(skipped.items())),
         "skipped_total": sum(skipped.values()),
     }
+
+
+# The replay reports this when it runs out of bars before the plan reaches an exit: the
+# trade is still open, not closed at the last price we happen to hold.
+UNDECIDED_EXIT = "end-of-data"
+
+
+def replay_journal(
+    recommendations: list[dict[str, Any]],
+    store: MarketStore,
+    *,
+    costs: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Replay journalled exit plans, counting only the trades the plan actually closed.
+
+    A position whose horizon has not elapsed is open, and marking it to the last bar we
+    hold is not a result. The first pass over the 2026-08 journal closed 7 of 14 trades on
+    `end-of-data` after 3 to 5 bars against a 20-day plan -- they were cut short by the
+    calendar, not by the plan, and blending them in reported a capture ratio that partly
+    measured when we stopped watching. That is the same error the fixed-window backtest
+    makes, so it must not be repeated here.
+    """
+
+    from .path_backtest import run_path_backtest, scenarios_from_record
+
+    payload, coverage = scenarios_from_journal(recommendations, store, costs=costs)
+    if not payload["trades"]:
+        return {"summary": {"trades": 0}, "trades": [], "journal_coverage": coverage}
+
+    scenarios = scenarios_from_record(payload)
+    provisional = run_path_backtest(scenarios)
+    if len(provisional["trades"]) != len(scenarios):
+        raise RuntimeError(
+            "path replay returned a different number of trades than scenarios; "
+            "the result-to-scenario pairing below would be misaligned"
+        )
+    decided = [
+        scenario
+        for scenario, trade in zip(scenarios, provisional["trades"])
+        if trade.get("exit_reason") != UNDECIDED_EXIT
+    ]
+    still_open = len(provisional["trades"]) - len(decided)
+
+    report = (
+        run_path_backtest(decided)
+        if decided
+        else {"summary": {"trades": 0}, "trades": []}
+    )
+    report["journal_coverage"] = coverage | {
+        "closed_by_plan": len(decided),
+        "still_open": still_open,
+    }
+    report["provisional_including_open"] = provisional["summary"]
+    return report

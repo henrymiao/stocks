@@ -73,7 +73,10 @@ Replay structured exits through chronological OHLC paths:
 
 ```bash
 python3 -m tools.stock_skills.cli path-backtest --scenario /tmp/path-scenarios.json --output /tmp/path-report.json
+python3 -m tools.stock_skills.cli path-backtest --from-journal --output /tmp/path-report.json
 ```
+
+`--from-journal` replays every journalled `exit_plan` against stored daily bars over the plan's own `maximum_holding_days`, and reports `journal_coverage` so a short list reads as "most were skipped" rather than "the plans did fine". Use it, not `backtest`, to judge exits: `backtest` measures a fixed forward window with no stop, target or trailing rule, and grades a 20-day plan at day 5. `backtest` now also reports an `independent` block — the same statistics over non-overlapping windows only, since reviewing daily counts one price path once per session. Treat `independent.reviewed` as the sample size.
 
 `path-backtest` is distinct from the frozen fixed-window baseline: it applies partial fills, conservative same-bar ordering, gap-through-stop fills, monotonic trailing stops, time exits, optional completed-close add-ons, and configurable execution costs, then reports R-based expectancy, profit factor, drawdown, capture/giveback, and holding metrics. Each serialized add-on supplies `trigger_r`, `fraction`, and `stop_after_add`; the simulator rejects it unless the raised stop keeps total open risk at or below the original 1R budget.
 

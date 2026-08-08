@@ -1,6 +1,11 @@
 import unittest
 
-from tools.stock_skills.backtest import component_edge, run_backtest, summarize_outcomes
+from tools.stock_skills.backtest import (
+    component_edge,
+    independent_reviews,
+    run_backtest,
+    summarize_outcomes,
+)
 
 
 class BacktestTests(unittest.TestCase):
@@ -80,3 +85,58 @@ class BacktestTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IndependentSampleTests(unittest.TestCase):
+    """Daily reviewing counts one price path many times over.
+
+    On 2026-08-07 the journal held 95 realised rows from 29 codes, with 36 adjacent pairs
+    closer together than the 5-day window is long -- three CRCL rows on a single day. The
+    headline `reviewed` therefore claimed a sample size the evidence did not support.
+    """
+
+    def _review(self, code, day, ret, win, window="5d"):
+        return {
+            "code": code,
+            "source_timestamp": f"2026-07-{day:02d}T15:00:00+08:00",
+            "review_window": window,
+            "label": "hold",
+            "final_return_pct": ret,
+            "directional_success": win,
+            "maximum_favorable_pct": abs(ret),
+            "maximum_adverse_pct": -abs(ret),
+            "invalidated": False,
+            "evidence_kind": "realized-ohlc",
+        }
+
+    def test_windows_that_overlap_are_counted_once(self):
+        reviews = [
+            self._review("A", 1, 5.0, True),
+            self._review("A", 2, 5.0, True),   # 1 day later, 5d window: overlaps
+            self._review("A", 3, 5.0, True),   # overlaps too
+        ]
+        self.assertEqual(len(independent_reviews(reviews)), 1)
+
+    def test_a_gap_wider_than_the_window_keeps_both(self):
+        reviews = [self._review("A", 1, 5.0, True), self._review("A", 15, -2.0, False)]
+        kept = independent_reviews(reviews)
+        self.assertEqual([r["source_timestamp"][8:10] for r in kept], ["01", "15"])
+
+    def test_different_instruments_never_crowd_each_other_out(self):
+        reviews = [self._review("A", 1, 5.0, True), self._review("B", 1, 5.0, True)]
+        self.assertEqual(len(independent_reviews(reviews)), 2)
+
+    def test_the_summary_reports_the_independent_sample_alongside_the_raw_one(self):
+        reviews = [
+            self._review("A", 1, 5.0, True),
+            self._review("A", 2, 5.0, True),
+            self._review("A", 3, 5.0, True),
+        ]
+        summary = summarize_outcomes(reviews)
+        self.assertEqual(summary["reviewed"], 3)
+        self.assertEqual(summary["independent"]["reviewed"], 1)
+        self.assertEqual(summary["independent"]["overlapping_dropped"], 2)
+
+    def test_a_row_without_a_known_window_is_not_silently_counted_as_independent(self):
+        reviews = [self._review("A", 1, 5.0, True, window="md-backfill")]
+        self.assertEqual(independent_reviews(reviews), [])

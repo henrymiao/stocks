@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import date, datetime, timedelta
+from math import ceil
 from statistics import mean
 from typing import Any
 
@@ -76,6 +78,53 @@ def _group_by(rows: list[dict[str, Any]], key: str) -> dict[str, dict[str, Any]]
     return {name: _bucket_stats(items) for name, items in sorted(groups.items())}
 
 
+REVIEW_WINDOW_TRADING_DAYS = {"1d": 1, "3d": 3, "5d": 5, "10d": 10, "20d": 20}
+
+
+def _entry_date(review: dict[str, Any]) -> date | None:
+    stamp = review.get("source_timestamp")
+    if not isinstance(stamp, str):
+        return None
+    try:
+        return datetime.fromisoformat(stamp).date()
+    except ValueError:
+        return None
+
+
+def independent_reviews(reviews: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep one review per instrument per non-overlapping window.
+
+    Reviewing daily produces one row per session on a fixed forward window, so the same
+    price path is counted many times over. On 2026-08-07 the journal held 80 realised rows
+    from 29 codes with 36 adjacent pairs closer together than the window is long -- three
+    CRCL rows shared a single day. XPeng's late-July decline was one event counted ten
+    times, and a win rate built that way reports a confidence it has not earned.
+
+    Overlap is judged in calendar days against the widest span the window can occupy
+    (trading days x 7/5), so a pair is dropped only when it certainly overlaps.
+    """
+
+    by_code: dict[str, list[dict[str, Any]]] = {}
+    for review in reviews:
+        if _entry_date(review) is not None:
+            by_code.setdefault(str(review.get("code")), []).append(review)
+
+    kept: list[dict[str, Any]] = []
+    for rows in by_code.values():
+        rows.sort(key=lambda row: (_entry_date(row), str(row.get("source_timestamp"))))
+        window_end: date | None = None
+        for row in rows:
+            entry = _entry_date(row)
+            window = REVIEW_WINDOW_TRADING_DAYS.get(str(row.get("review_window")))
+            if window is None:
+                continue
+            if window_end is None or entry >= window_end:
+                kept.append(row)
+                window_end = entry + timedelta(days=ceil(window * 7 / 5))
+    kept.sort(key=lambda row: (str(row.get("source_timestamp")), str(row.get("code"))))
+    return kept
+
+
 def summarize_outcomes(reviews: list[dict[str, Any]]) -> dict[str, Any]:
     """Aggregate review outcomes into win rate, expectancy, MFE/MAE and groupings.
 
@@ -106,6 +155,14 @@ def summarize_outcomes(reviews: list[dict[str, Any]]) -> dict[str, Any]:
         summary.setdefault("notes", []).append(
             "basis-mismatch rows (entry price and fetched bars on different split-adjustment bases) are excluded; "
             "their return arithmetic is meaningless."
+        )
+    if realized:
+        independent = independent_reviews(realized)
+        summary["independent"] = _outcome_stats(independent) if independent else {"reviewed": 0}
+        summary["independent"]["overlapping_dropped"] = len(realized) - len(independent)
+        summary.setdefault("notes", []).append(
+            "`independent` is the same statistic over non-overlapping windows only; treat its "
+            "`reviewed` as the sample size, not the headline `reviewed`."
         )
     return summary
 

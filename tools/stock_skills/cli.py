@@ -1487,11 +1487,33 @@ def _cmd_backtest(args: argparse.Namespace) -> int:
 def _cmd_path_backtest(args: argparse.Namespace) -> int:
     from .path_backtest import run_path_backtest, scenarios_from_record
 
-    source = Path(args.scenario)
-    payload = json.loads(source.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise ValueError("path-backtest scenario must be a JSON object")
-    report = run_path_backtest(scenarios_from_record(payload))
+    if not args.from_journal and not args.scenario:
+        raise SystemExit("path-backtest needs either --scenario or --from-journal")
+
+    journal_report: dict | None = None
+    if args.from_journal:
+        from .journal_paths import scenarios_from_journal
+        from .store import MarketStore
+
+        with MarketStore(args.market_db) as store:
+            payload, journal_report = scenarios_from_journal(
+                read_records(args.recommendations), store
+            )
+        if not payload["trades"]:
+            print(json.dumps(journal_report, ensure_ascii=False, indent=2))
+            print("No journalled recommendation carries a replayable exit plan.")
+            return 0
+        scenarios = scenarios_from_record(payload)
+    else:
+        source = Path(args.scenario)
+        payload = json.loads(source.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("path-backtest scenario must be a JSON object")
+        scenarios = scenarios_from_record(payload)
+
+    report = run_path_backtest(scenarios)
+    if journal_report is not None:
+        report["journal_coverage"] = journal_report
     text = json.dumps(report, ensure_ascii=False, indent=2)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -2120,7 +2142,14 @@ def main(argv: list[str] | None = None) -> int:
     backtest.add_argument("--output", default=None, help="Optional path to also write the JSON report")
 
     path_backtest = subparsers.add_parser("path-backtest", help="Replay structured exit plans through chronological OHLC bars")
-    path_backtest.add_argument("--scenario", required=True, help="JSON file containing serialized exit plans, bars, and optional execution costs")
+    path_backtest.add_argument("--scenario", help="JSON file containing serialized exit plans, bars, and optional execution costs")
+    path_backtest.add_argument(
+        "--from-journal",
+        action="store_true",
+        help="Replay every journalled exit plan against stored daily bars instead of a scenario file",
+    )
+    path_backtest.add_argument("--recommendations", default=DEFAULT_RECOMMENDATIONS, help="Recommendation journal path (--from-journal)")
+    path_backtest.add_argument("--market-db", default="data/market.db", help="Bar store to replay against (--from-journal)")
     path_backtest.add_argument("--output", required=True, help="Path for the JSON path-backtest report")
 
     evidence_optimize = subparsers.add_parser(

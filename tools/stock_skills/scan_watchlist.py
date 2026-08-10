@@ -61,19 +61,33 @@ def _valuation(code: str, script: str | None) -> dict[str, Any] | None:
     return None
 
 
-def _explicit_entries(codes: str) -> list[dict[str, Any]]:
-    entries = [
-        normalize_watchlist_entry(
-            {"code": code.strip(), "name": code.strip(), "tags": [], "tier": "thematic"}
-        )
-        for code in codes.split(",")
-        if code.strip()
-    ]
+def _explicit_entries(codes: str, watchlist: str | Path) -> list[dict[str, Any]]:
+    """Resolve `--codes` against the canonical watchlist, stubbing only unknown codes.
+
+    A stub carries no tags, so `valuation_profile` defaults to `neutral` and the
+    fundamental component is scored on the wrong yardstick. On 2026-08-10 that made Zijin
+    read `cheap` at 75 under a `--codes` scan and `fair` at 66 under a plain `analyze`,
+    off the same PE of 15.28 -- and 9 points there is the difference between `probe` and
+    `watch`. Scanning a code by name must not answer differently from scanning it as part
+    of its own watchlist.
+    """
+
+    known = {entry["code"]: entry for entry in load_watchlist(watchlist)}
+    entries: list[dict[str, Any]] = []
     seen: set[str] = set()
-    for entry in entries:
-        if entry["code"] in seen:
-            raise ValueError(f"Duplicate watchlist code: {entry['code']}")
-        seen.add(entry["code"])
+    for raw in codes.split(","):
+        code = raw.strip()
+        if not code:
+            continue
+        if code in seen:
+            raise ValueError(f"Duplicate watchlist code: {code}")
+        seen.add(code)
+        entries.append(
+            known.get(code)
+            or normalize_watchlist_entry(
+                {"code": code, "name": code, "tags": [], "tier": "thematic"}
+            )
+        )
     return entries
 
 
@@ -169,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", default=None, help="Optional JSON scan result")
     args = parser.parse_args(argv)
 
-    entries = _explicit_entries(args.codes) if args.codes else load_watchlist(args.watchlist)
+    entries = _explicit_entries(args.codes, args.watchlist) if args.codes else load_watchlist(args.watchlist)
     if args.tag:
         entries = [entry for entry in entries if args.tag in entry["tags"]]
     if args.market:

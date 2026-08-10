@@ -107,3 +107,36 @@ class BookAndWatchlistAgreeTests(unittest.TestCase):
         self.assertEqual(
             booked - flagged, set(), "book holds a position the watchlist does not flag"
         )
+
+
+class ExplicitCodesKeepWatchlistMetadataTests(unittest.TestCase):
+    """`--codes` must not answer differently from scanning the same name in its watchlist.
+
+    The stub entry it used to build carried no tags, so `valuation_profile` fell back to
+    `neutral` and the fundamental component was scored on the wrong yardstick. On
+    2026-08-10 Zijin read `cheap` at 75 under `--codes` and `fair` at 66 under a plain
+    `analyze`, off the same PE of 15.28 -- and those 9 points were the difference between
+    `probe` and `watch`.
+    """
+
+    def test_a_known_code_keeps_its_profile_and_tags(self):
+        from tools.stock_skills.scan_watchlist import _explicit_entries
+
+        entry = _explicit_entries("SH.601899", CORE)[0]
+        canonical = {e["code"]: e for e in load_watchlist(CORE)}["SH.601899"]
+        self.assertEqual(entry["valuation_profile"], canonical["valuation_profile"])
+        self.assertEqual(entry["tags"], canonical["tags"])
+        self.assertNotEqual(entry["valuation_profile"], "neutral")
+
+    def test_an_unknown_code_still_scans_as_a_neutral_stub(self):
+        from tools.stock_skills.scan_watchlist import _explicit_entries
+
+        entry = _explicit_entries("US.NOTINLIST", CORE)[0]
+        self.assertEqual(entry["code"], "US.NOTINLIST")
+        self.assertEqual(entry["valuation_profile"], "neutral")
+
+    def test_duplicates_are_still_refused(self):
+        from tools.stock_skills.scan_watchlist import _explicit_entries
+
+        with self.assertRaisesRegex(ValueError, "Duplicate"):
+            _explicit_entries("SH.601899,SH.601899", CORE)

@@ -1047,6 +1047,35 @@ def _cmd_dry_run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> i
     return 0
 
 
+def _resolve_event_days(args: argparse.Namespace) -> int | None:
+    """Sessions until the next scheduled earnings date, from the local store.
+
+    `--event-days` stays authoritative when given. Without this lookup the flag was the
+    only source, so `event-window` abstained for every name -- and abstention outranks
+    failure in the decision ladder, quietly capping the whole book at `probe`. The store
+    had the dates and nothing but `monitor` ever read them: on 2026-08-10 Tencent and FII
+    were both two sessions from reporting and every gate was silent about it.
+    """
+
+    if getattr(args, "event_days", None) is not None:
+        return args.event_days
+    try:
+        from .store import MarketStore
+
+        with MarketStore(getattr(args, "market_db", None) or "data/market.db") as store:
+            rows = store.upcoming_earnings(within_days=60)
+    except Exception:  # a missing or unreadable store must not block an analysis
+        return None
+    today = datetime.now().date()
+    days = [
+        (date.fromisoformat(str(row["event_date"])[:10]) - today).days
+        for row in rows
+        if str(row.get("code")) == args.code
+    ]
+    upcoming = [d for d in days if d >= 0]
+    return min(upcoming) if upcoming else None
+
+
 def _resolve_portfolio_heat(
     args: argparse.Namespace, fetcher: Any
 ) -> tuple[float | None, float | None, list[str]]:
@@ -1245,7 +1274,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         inverse=inverse,
         leveraged=leveraged,
         horizon=args.horizon,
-        event_days=args.event_days,
+        event_days=_resolve_event_days(args),
         underlying_confirmed=args.underlying_confirmed,
         portfolio_open_risk_pct=portfolio_pct,
         theme_open_risk_pct=theme_pct,
@@ -1423,7 +1452,7 @@ def _cmd_analyze_offline(args: argparse.Namespace) -> int:
         inverse=inverse,
         leveraged=leveraged,
         horizon=args.horizon,
-        event_days=args.event_days,
+        event_days=_resolve_event_days(args),
         underlying_confirmed=args.underlying_confirmed,
         portfolio_open_risk_pct=args.portfolio_open_risk_pct,
         theme_open_risk_pct=args.theme_open_risk_pct,

@@ -636,6 +636,35 @@ class FutuFetcher:
             after_volume=row.get("after_volume"),
         )
 
+    def get_earnings_dates(self, code: str, *, after: str) -> list[tuple[str, str]]:
+        """Scheduled reporting dates on or after `after`, as (date, period) pairs.
+
+        The `event-window` gate abstains without a date, and abstention outranks failure
+        in the decision ladder, so an empty earnings table quietly caps every name at
+        `probe`. It was empty for the whole book: on 2026-08-10 Tencent was two sessions
+        from reporting and the gate had nothing to say about it.
+
+        Rows repeat per fiscal period, so identical dates are collapsed.
+        """
+
+        try:
+            payload = self._run_json(
+                [
+                    self.python_bin,
+                    self._script("quote", "get_financials_earnings_price_history.py"),
+                    code,
+                    "--json",
+                ]
+            )
+        except (RuntimeError, subprocess.CalledProcessError):
+            return []
+        seen: dict[str, str] = {}
+        for row in payload.get("data") or []:
+            day = str(row.get("pub_trading_day_str") or "")[:10]
+            if day and day >= after and day not in seen:
+                seen[day] = str(row.get("period_text") or "")
+        return sorted(seen.items())
+
     def get_financials(self, code: str) -> FinancialsSnapshot | None:
         """Quality metrics from the latest income statement (+ revenue breakdown).
 

@@ -37,7 +37,7 @@
       "currency": "USD",
       "theme": "ai-compute",
       "trade_id": "googl-core-290",
-      "current_stop": 349.49,
+      "current_stop": 339.49,
       "leverage": 1.0,
       "trailing_lookback_sessions": 63,
       "trailing_stop": 349.49
@@ -118,7 +118,7 @@
       "currency": "USD",
       "theme": "semiconductor",
       "trade_id": "smh-us-core539",
-      "current_stop": 511.79,
+      "current_stop": 557.02,
       "leverage": 1.0,
       "trailing_lookback_sessions": 32
     },
@@ -155,7 +155,7 @@
       "currency": "USD",
       "theme": "crypto",
       "trade_id": "circle-crcl-20260718",
-      "current_stop": 55.47,
+      "current_stop": 62.23,
       "leverage": 1.0,
       "trailing_lookback_sessions": 32
     },

@@ -17,7 +17,9 @@ not be traded -- 141 of its 210 members turned over less than HK$100m a day, two
 the universe, because one busy session was enough to rank a shell into the top 35. The
 floor is the same one `discover` applies, so the build can no longer hand discovery a name
 discovery will refuse. Funds are exempt for the same reason they are exempt there: an ETF
-is quoted against the basket it holds, so its own tape understates what can be traded.
+is quoted against the basket it holds, so its own tape understates what can be traded. So
+is each sector's representative, which is a structural exemption rather than a liquidity
+one -- a sector that loses its proxy is a sector that no longer loads.
 """
 
 from __future__ import annotations
@@ -150,6 +152,24 @@ def _is_fund_member(member: dict) -> bool:
     return member.get("role") in {"etf", "index"}
 
 
+def _check_structure(record: dict) -> None:
+    """Refuse a record `load_universe` would refuse, before it can be written.
+
+    Over every sector, not only the planned ones. Eviction runs across the whole file
+    while `PLANS_BY_MARKET` covers HK alone, so a check inside the plan loop leaves the
+    CN and US sectors -- and any HK sector without a plan -- free to lose their proxy.
+    """
+
+    for sector in record["sectors"]:
+        codes = {member["code"] for member in sector["members"]}
+        if not codes:
+            raise ValueError(f"Sector {sector['key']} has no members")
+        if sector["representative"] not in codes:
+            raise ValueError(
+                f"{sector['key']} representative {sector['representative']} is not a member"
+            )
+
+
 def expand_universe(
     path: str | Path,
     plans: list[SectorPlan],
@@ -177,13 +197,20 @@ def expand_universe(
 
     # Evict first, so the plate fill can see the room it opens up. A fund keeps its place,
     # and so does a name the feed cannot price -- absence of evidence is not illiquidity.
+    #
+    # A representative keeps its place too, whatever its role. Every sector is required to
+    # hold its own proxy, so evicting one writes a file that no longer loads, and six of
+    # them are ordinary leaders rather than funds -- HK.00005, HK.00981, HK.01211,
+    # HK.01177, HK.02899 and SH.600406. Exempting it also keeps a sector from emptying:
+    # the proxy is always one surviving member.
+    representatives = {sector["representative"] for sector in record["sectors"]}
     evicted: dict[str, float] = {}
     if floor > 0:
         held = [
             member["code"]
             for sector in record["sectors"]
             for member in sector["members"]
-            if not _is_fund_member(member)
+            if not _is_fund_member(member) and member["code"] not in representatives
         ]
         measured = median_daily_turnover(
             fetcher, held, sessions=liquidity_sessions
@@ -281,8 +308,5 @@ def expand_universe(
             )
             taken.add(code)
 
-        representative = sector["representative"]
-        if representative not in {m["code"] for m in sector["members"]}:
-            raise ValueError(f"{plan.key} representative {representative} is not a member")
-
+    _check_structure(record)
     return record

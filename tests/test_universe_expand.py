@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from tools.stock_skills.models import KLineBar, MarketSnapshot
+from tools.stock_skills.universe import universe_from_record
 from tools.stock_skills.universe_expand import (
     SectorPlan,
     expand_universe,
@@ -57,7 +58,13 @@ def _universe(path, sectors):
 
 
 def _member(code, role="constituent"):
-    return {"code": code, "name": code, "role": role, "weight": 1.0, "shared_identity": None}
+    # `security_id`/`member_from` as a real v2 file carries them, so a record built from
+    # existing members alone can be handed straight back to the loader. Members the plate
+    # fill appends are stamped later, by `foundation_migrate`.
+    return {
+        "code": code, "name": code, "role": role, "weight": 1.0, "shared_identity": None,
+        "security_id": f"listing:{code}", "member_from": "2026-07-21T16:00:00-04:00",
+    }
 
 
 class RankByTurnoverTests(unittest.TestCase):
@@ -272,6 +279,46 @@ class LiquidityFloorTests(unittest.TestCase):
             self.assertNotIn(
                 "US.THIN", [m["code"] for m in record["sectors"][0]["members"]]
             )
+
+    def test_a_representative_that_is_not_a_fund_survives_a_thin_tape(self):
+        # Six representatives are role `leader`, not funds -- HK.00005, HK.00981,
+        # HK.01211, HK.01177, HK.02899 and SH.600406. Evicting one writes a universe
+        # that `load_universe` then refuses, breaking every downstream command.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "us.json"
+            _universe(path, [{
+                "key": "financials", "name": "Financials", "representative": "US.LEAD",
+                "benchmark": "US.SPY",
+                "members": [_member("US.LEAD", "leader"), _member("US.STAYS")],
+            }])
+            fetcher = self._fetcher(
+                {}, {"US.LEAD": [1_000.0] * 20, "US.STAYS": [5.0e7] * 20}
+            )
+
+            record = _run(path, [], fetcher, floor=2.0e7)
+
+            self.assertIn("US.LEAD", [m["code"] for m in record["sectors"][0]["members"]])
+            universe_from_record(record)  # and the result still loads
+
+    def test_an_unplanned_sector_cannot_be_emptied_by_eviction(self):
+        # `PLANS_BY_MARKET` covers HK only, so the CN and US sectors reach the structure
+        # check through no plan at all -- eviction there used to be unchecked.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "us.json"
+            _universe(path, [{
+                "key": "grid", "name": "Grid", "representative": "US.LEAD",
+                "benchmark": "US.SPY",
+                "members": [_member("US.LEAD", "leader"), _member("US.GONE")],
+            }])
+            fetcher = self._fetcher(
+                {}, {"US.LEAD": [1_000.0] * 20, "US.GONE": [1_000.0] * 20}
+            )
+
+            record = _run(path, [], fetcher, floor=2.0e7)
+            members = [m["code"] for m in record["sectors"][0]["members"]]
+
+            self.assertEqual(members, ["US.LEAD"])
+            universe_from_record(record)
 
     def test_a_code_the_feed_cannot_price_is_kept_not_evicted(self):
         # Absence of evidence is not illiquidity; a feed outage must not empty the universe.

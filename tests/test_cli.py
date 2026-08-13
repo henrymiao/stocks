@@ -13,7 +13,10 @@ from tools.stock_skills.cli import (
     FIXTURE_CODE,
     _bars_for_horizon,
     _completed_daily_bars,
+    _default_cross_codes_for,
+    _default_index_codes_for,
     _manual_evidence,
+    _method_reference_codes,
     _recommend,
     _snapshots_for_codes,
     main,
@@ -720,9 +723,13 @@ class CliTests(unittest.TestCase):
 
         refs = " ".join(payload["source_refs"])
         self.assertIn("macro: neutral default", refs)
-        self.assertEqual(payload["data_quality"]["missing_components"], ["cross_market", "macro_risk"])
-        self.assertEqual(payload["data_quality"]["confidence"], 0.75)
-        self.assertFalse(payload["data_quality"]["entry_eligible"])
+        # `--no-macro` suppresses macro only. `cross_market` used to be missing here too,
+        # but not because it was suppressed -- SZ.002463 is an AI-hardware name that got
+        # no cross-market reference at all, so its absence read as "no evidence" when it
+        # was really "never fetched". It is now referenced against the US AI cycle.
+        self.assertEqual(payload["data_quality"]["missing_components"], ["macro_risk"])
+        self.assertIn("cross_market:US.NVDA", refs)
+        self.assertEqual(payload["data_quality"]["confidence"], 0.875)
 
     def test_analyze_appends_to_journal_by_default(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1310,6 +1317,64 @@ class CliTests(unittest.TestCase):
             self.assertEqual(updated_weights, DEFAULT_WEIGHTS)
             self.assertFalse(weights.with_suffix(".json.bak").exists())
             self.assertFalse(history_path.exists())
+
+
+class DriverCrossReferenceTests(unittest.TestCase):
+    """A name must be referenced against what moves it, not against where it lists.
+
+    SH.601899 is a gold and copper miner. Its cross-market references were empty because
+    the driver branch sat under `if prefix == "US"`, so `linkage` carried a beta against
+    the Shanghai composite and nothing else -- there was no gold beta to read, and a
+    hand-computed one off five sessions said 1.4 when the 60-day figure is 0.70.
+    """
+
+    def _refs(self, code, tags):
+        cross = _default_cross_codes_for(code, tags)
+        return cross, _method_reference_codes(code, _default_index_codes_for(code), list(cross))
+
+    def test_an_a_share_miner_is_referenced_against_its_metals(self):
+        cross, refs = self._refs("SH.601899", ["a-share", "metals", "cyclical", "value"])
+        self.assertEqual(cross, ["US.FCX", "US.GLD"])
+        self.assertEqual(refs, ["SH.000001", "SZ.399006", "US.FCX", "US.GLD"])
+
+    def test_a_gold_miner_gets_gold_not_copper(self):
+        cross, _ = self._refs("SH.600489", ["a-share", "gold", "cyclical", "value"])
+        self.assertEqual(cross, ["US.GLD", "US.GDX"])
+
+    def test_an_a_share_ai_hardware_name_is_referenced_against_the_us_ai_cycle(self):
+        # 601138 and 002463 sell into US hyperscaler capex; the local index does not
+        # carry that, and both had no cross-market reference at all.
+        for code, tags in (
+            ("SH.601138", ["a-share", "ai-infrastructure", "server"]),
+            ("SZ.002463", ["a-share", "pcb", "ai-hardware"]),
+        ):
+            cross, _ = self._refs(code, tags)
+            self.assertEqual(cross, ["US.NVDA", "US.SMH"], code)
+
+    def test_hk_keeps_its_indices_and_gains_the_driver(self):
+        cross, refs = self._refs("HK.00522", ["hk", "semiconductor", "equipment"])
+        self.assertEqual(cross, ["HK.800000", "HK.800700", "US.NVDA", "US.SMH"])
+        self.assertEqual(len(refs), 4)
+
+    def test_us_behaviour_is_unchanged(self):
+        self.assertEqual(
+            _default_cross_codes_for("US.CRCL", ["us", "crypto-equity", "stablecoin"]),
+            ["US.QQQ", "US.SPY", "CC.BTC", "CC.ETH"],
+        )
+        self.assertEqual(
+            _default_cross_codes_for("US.GOOGL", ["us", "mega-cap", "ai"]),
+            ["US.QQQ", "US.SPY", "US.NVDA", "US.SMH"],
+        )
+
+    def test_a_name_with_no_driver_tag_costs_nothing_extra(self):
+        # The references are fetched per analysis, so an untagged name must not pick up
+        # calls it has no use for.
+        self.assertEqual(_default_cross_codes_for("SH.600519", ["a-share", "liquor"]), [])
+
+    def test_the_target_is_never_its_own_reference(self):
+        self.assertNotIn(
+            "US.SMH", _default_cross_codes_for("US.SMH", ["us", "semiconductor", "etf"])
+        )
 
 
 if __name__ == "__main__":

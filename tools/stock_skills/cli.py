@@ -391,18 +391,51 @@ def _default_index_codes_for(code: str) -> list[str]:
     return A_SHARE_INDEX_CODES
 
 
+# What actually moves a name, keyed off its tags rather than its listing venue.
+_DRIVER_REFERENCES: tuple[tuple[frozenset[str], tuple[str, ...]], ...] = (
+    (
+        frozenset(
+            {
+                "ai",
+                "ai-hardware",
+                "ai-infrastructure",
+                "ai-compute",
+                "semiconductor",
+                "optical-module",
+                "datacenter",
+                "server",
+                "pcb",
+                "growth-proxy",
+            }
+        ),
+        ("US.NVDA", "US.SMH"),
+    ),
+    (frozenset({"crypto-equity", "stablecoin", "crypto"}), ("CC.BTC", "CC.ETH")),
+    (frozenset({"gold", "gold-miners", "precious-metal"}), ("US.GLD", "US.GDX")),
+    (frozenset({"metals", "copper", "materials", "resources"}), ("US.FCX", "US.GLD")),
+    (frozenset({"oil", "energy", "lng", "natural-gas"}), ("US.USO", "US.XOM")),
+)
+
+
 def _default_cross_codes_for(code: str, tags: list[str]) -> list[str]:
     prefix = _prefix_for_code(code)
     lowered = {str(tag).lower() for tag in tags}
     refs: list[str] = []
     if prefix == "US":
         refs.extend(["US.QQQ", "US.SPY"])
-        if lowered & {"ai", "ai-hardware", "ai-infrastructure", "semiconductor", "growth-proxy"}:
-            refs.extend(["US.NVDA", "US.SMH"])
-        if lowered & {"crypto-equity", "stablecoin"}:
-            refs.extend(["CC.BTC", "CC.ETH"])
     elif prefix == "HK":
         refs.extend(["HK.800000", "HK.800700"])
+
+    # Driver references were nested under the US branch, so an A-share or HK resource,
+    # AI-hardware or crypto name got no cross-market reference at all. Two things follow
+    # from that, and both are silent: `cross_market` falls back to the 50.0 neutral
+    # default, which reads as "no cross-market risk" rather than "the driver was never
+    # fetched"; and `linkage` then carries beta and downside correlation against the
+    # local index only. SH.601899 is a gold and copper miner that was scored without a
+    # single reference to either metal.
+    for trigger_tags, driver_codes in _DRIVER_REFERENCES:
+        if lowered & trigger_tags:
+            refs.extend(driver_codes)
 
     seen: set[str] = set()
     unique: list[str] = []

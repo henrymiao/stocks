@@ -244,13 +244,12 @@
       "benchmark": "US.SPY",
       "underlying_proxy": "US.SMH",
       "event_policy": "standard",
-      "position_status": "holding",
-      "scan_policy": "always",
+      "position_status": "watch",
+      "scan_policy": "ranked",
       "tags": [
         "us",
         "semiconductor",
-        "leveraged",
-        "holding"
+        "leveraged"
       ]
     },
     {
@@ -2323,7 +2322,7 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "holding",
+      "position_status": "watch",
       "scan_policy": "always",
       "tags": [
         "a-share",

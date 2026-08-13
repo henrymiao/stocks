@@ -121,7 +121,10 @@ class PortfolioHeatTests(unittest.TestCase):
         book = load_portfolio("data/portfolio/positions.json")
         self.assertEqual(book.schema_version, "portfolio-positions-v1")
         self.assertGreaterEqual(len(book.positions), 10)
-        self.assertEqual(book.theme_of("US.SOXL"), "semiconductor")
+        # A code that is actually in the book: pinning a specific position here made the
+        # test fail the day that position was closed, which is a book change, not a defect.
+        self.assertEqual(book.theme_of("US.SMH"), "semiconductor")
+        self.assertIsNone(book.theme_of("US.SOXL"))  # closed 2026-08-12
         self.assertTrue(all(p.current_stop is not None for p in book.positions))
 
     def test_roundtrip_from_record(self):

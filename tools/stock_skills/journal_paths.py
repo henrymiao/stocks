@@ -17,11 +17,20 @@ rest of the system does and needs no network.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime, timedelta
+from math import ceil
 from typing import Any
 
 from .models import KLineBar
 from .store import MarketStore
+
+# How far the first forward bar may sit from the call's own session before the replay is
+# no longer a replay of that call. Daily bars are synced with a bounded `num`, so a
+# recommendation older than the store's coverage would otherwise be settled against a
+# window starting weeks later while `exit_plan.entry_price` is still the original -- an
+# instant gap-stop and a fabricated loss, counted as `closed_by_plan`. Five calendar days
+# spans a weekend plus a holiday without admitting a genuine coverage hole.
+MAXIMUM_ENTRY_GAP_DAYS = 5
 
 
 def _entry_date(timestamp: str) -> str:
@@ -39,10 +48,20 @@ def forward_bars(
 
     Strictly after: the call was made from that session's data, so including it would
     settle the trade on a bar the recommendation had already seen.
+
+    Returns nothing when the first available bar is not adjacent to that session, so a
+    call the store no longer covers is skipped rather than replayed against a later,
+    unrelated window.
     """
 
     bars = [bar for bar in store.get_bars(code, "1d") if _bar_date(bar) > after]
     bars.sort(key=_bar_date)
+    if not bars:
+        return []
+    if date.fromisoformat(_bar_date(bars[0])) - date.fromisoformat(after) > timedelta(
+        days=MAXIMUM_ENTRY_GAP_DAYS
+    ):
+        return []
     return bars[:limit]
 
 
@@ -64,7 +83,14 @@ def scenarios_from_journal(
 
     scenarios: list[dict[str, Any]] = []
     skipped: dict[str, int] = {}
-    seen: set[tuple[str, str]] = set()
+    # Per instrument, the end of the window the last accepted replay occupies. A held
+    # position is re-journalled every session it is reviewed, and keying only on the entry
+    # date drops just the same-day repeats: `baba-09988-20260718` still replayed three
+    # times over overlapping windows at entry prices 112.6, 116.8 and 125.2, so whichever
+    # position was reviewed most often dominated expectancy. This is the same
+    # non-overlapping rule `independent_reviews` applies on the review side, measured
+    # against the plan's own holding period rather than a fixed review window.
+    window_end: dict[str, date] = {}
 
     def skip(reason: str) -> None:
         skipped[reason] = skipped.get(reason, 0) + 1
@@ -84,21 +110,25 @@ def scenarios_from_journal(
         except ValueError:
             skip("unparsable-timestamp")
             continue
-        # One replay per instrument per entry session: the same plan re-journalled the
-        # same day would otherwise weight that trade twice, the flaw `independent_reviews`
-        # fixes on the review side.
-        if (code, entry) in seen:
-            skip("duplicate-entry-session")
-            continue
-
         holding = plan.get("maximum_holding_days")
         horizon = int(holding) if isinstance(holding, (int, float)) else 20
+
+        # One replay per instrument per non-overlapping holding period. Records are
+        # processed in timestamp order, so the first call of a window is the one kept.
+        entry_day = date.fromisoformat(entry)
+        occupied = window_end.get(code)
+        if occupied is not None and entry_day < occupied:
+            skip("overlapping-holding-window")
+            continue
+
         bars = forward_bars(store, code, entry, horizon)
         if len(bars) < 2:
             skip("insufficient-forward-bars")
             continue
 
-        seen.add((code, entry))
+        # Calendar span of the trading-day horizon, the same widest-span convention
+        # `independent_reviews` uses, so a pair is dropped only when it certainly overlaps.
+        window_end[code] = entry_day + timedelta(days=ceil(horizon * 7 / 5))
         trade: dict[str, Any] = {
             # Unique per replayed call, not per position. A position id like
             # `xpeng-09868-core83` recurs across entry sessions, and `run_path_backtest`

@@ -327,6 +327,20 @@ def run_live_discovery(
     report["capital_candidates_refreshed"] = sorted(capital_scores)
     report["expected_completed_session"] = expected_session
     report["stale_daily_codes"] = stale_daily_codes
+    # Say so on the face of the report. Running before the close blanks every code's
+    # bars, so each sector reads 0% coverage and the whole universe is disabled -- and
+    # what comes back is the previous run's state, preserved verbatim. That is the
+    # intended behaviour, but it is indistinguishable from a fresh scan unless you dig
+    # `expected_completed_session: null` out of the payload. Three runs were read as
+    # today's answer when they carried candidates a week old.
+    if expected_session is None:
+        report.setdefault("notes", []).append(
+            f"Ran before the close for {universe.market}: full discovery is an after-close job "
+            f"(from 15 minutes past the local close). Every code was treated as stale, every "
+            f"sector disabled at 0% coverage, and the states below are the previous run's, "
+            f"preserved unchanged -- not today's. Re-run after the close."
+        )
+        report["preserved_prior_state"] = True
     report["data_failures"] = {
         "snapshots": snapshot_failure,
         "trading_calendar": calendar_failure,

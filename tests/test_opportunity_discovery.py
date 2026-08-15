@@ -866,6 +866,63 @@ class OpportunityDiscoveryTests(unittest.TestCase):
         self.assertTrue(report["data_failures"]["daily_bars"])
         self.assertTrue(report["stale_daily_codes"])
 
+    def test_running_before_the_close_says_so_instead_of_looking_fresh(self):
+        """An early run returns the previous run's state; the report must admit it.
+
+        Before the close `_expected_completed_session` is None, which marks every code
+        stale, blanks its bars, and disables every sector at 0% coverage -- so what comes
+        back is the prior state preserved verbatim. That is intended, but it used to be
+        visible only as `expected_completed_session: null` buried in the payload, and
+        three runs were read as the current day's answer while carrying week-old
+        candidates.
+        """
+
+        class Fetcher:
+            def get_snapshots(self, codes):
+                return []
+
+            def get_daily_bars(self, code, num=260):
+                return []
+
+            def get_capital(self, code):
+                return None
+
+            def get_trading_days(self, market, start, end):
+                return ["2026-07-23", "2026-07-24"]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with (
+                MarketStore(Path(tmpdir) / "market.db") as market_store,
+                DiscoveryStore(Path(tmpdir) / "discovery.db") as discovery_store,
+            ):
+                for code, bars in _golden_bars().items():
+                    market_store.upsert_bars(code, "1d", bars)
+                early = run_live_discovery(
+                    _star_universe(),
+                    evaluated_at="2026-07-24T11:39:00+08:00",  # 午间休市
+                    discovery_store=discovery_store,
+                    market_store=market_store,
+                    fetcher=Fetcher(),
+                )
+                after = run_live_discovery(
+                    _star_universe(),
+                    evaluated_at="2026-07-24T15:15:00+08:00",  # 收盘后
+                    discovery_store=discovery_store,
+                    market_store=market_store,
+                    fetcher=Fetcher(),
+                )
+
+        self.assertIsNone(early["expected_completed_session"])
+        self.assertTrue(early["preserved_prior_state"])
+        self.assertTrue(
+            any("after-close job" in note for note in early.get("notes", [])),
+            early.get("notes"),
+        )
+        # And the after-close run must not carry the warning.
+        self.assertEqual(after["expected_completed_session"], "2026-07-24")
+        self.assertNotIn("preserved_prior_state", after)
+        self.assertFalse([n for n in after.get("notes", []) if "after-close job" in n])
+
     def test_expiry_uses_supplied_exchange_sessions_not_weekdays(self):
         report = discover_universe(
             _star_universe(),

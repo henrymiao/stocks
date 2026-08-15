@@ -16,6 +16,7 @@ to the book. Raising a stop is a decision with real consequences and stays expli
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 
 from .exit_engine import next_trailing_stop
 from .models import KLineBar
@@ -59,6 +60,7 @@ def suggest_trailing_stop(
     risk_per_share: float | None,
     lookback_sessions: int = TRAILING_LOOKBACK_BARS,
     session_phase: str | None = None,
+    entry_date: str | None = None,
 ) -> TrailingSuggestion:
     """Suggest where the trailing stop should sit now. Never lowers, never writes.
 
@@ -94,7 +96,15 @@ def suggest_trailing_stop(
                 base, reason=f"进展 {progress_r:.2f}R 未达启动线 {activation_r}R，移动止损尚未启动"
             )
 
-    usable = [bar for bar in bars if bar.low > 0][-max(3, lookback_sessions):]
+    # A trailing stop locks in the best the position actually reached, so the window is
+    # the holding period -- not a session count typed in by hand. `trailing_lookback_
+    # sessions` was a guess ("GOOGL 约3个月=63场"), and the guess reached back before the
+    # entry: JCET was bought 2026-08-03 but its 32-session window still held the
+    # 2026-07-01 close of 106.64, a high the position never earned. Subtracting 2.5 ATR
+    # from someone else's high is what pushed the stop above the market.
+    priced = [bar for bar in bars if bar.low > 0]
+    held = _bars_since(priced, entry_date) if entry_date else []
+    usable = held if len(held) >= 3 else priced[-max(3, lookback_sessions):]
     if len(usable) < 3 or not atr or atr <= 0:
         return _with(base, reason="K线或 ATR 不足，无法计算")
 
@@ -114,6 +124,28 @@ def suggest_trailing_stop(
             reason=f"算出的止损 {suggested:.2f} 已高于现价，窗口内的旧高点失真，本次不建议",
         )
     return _with(base, suggested_stop=suggested, activated=True, reason="移动止损已启动")
+
+
+def _bars_since(bars: list[KLineBar], entry_date: str) -> list[KLineBar]:
+    """Bars from the entry session onward. Empty when the date is unusable.
+
+    Falling back to the session-count window is deliberate: a position whose entry
+    predates the cached history would otherwise get a window of two bars and an
+    arbitrarily tight stop.
+    """
+
+    try:
+        entry = datetime.fromisoformat(entry_date).date()
+    except (TypeError, ValueError):
+        return []
+    kept: list[KLineBar] = []
+    for bar in bars:
+        try:
+            if datetime.fromisoformat(bar.time).date() >= entry:
+                kept.append(bar)
+        except ValueError:
+            continue
+    return kept
 
 
 def _with(base: TrailingSuggestion, **changes) -> TrailingSuggestion:

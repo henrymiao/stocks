@@ -1,10 +1,10 @@
 {
   "schema_version": "opportunity-universe-v2",
   "market": "US",
-  "as_of": "2026-07-21T16:00:00-04:00",
+  "as_of": "2026-08-14T16:00:00-04:00",
   "expires_at": "2026-10-31T23:59:59-04:00",
-  "published_at": "2026-08-08T12:00:00+08:00",
-  "identity_registry_version": "identity:988791111eca506a754b84b34136ebba59975e9905ce95663171cf1b003d838d",
+  "published_at": "2026-08-14T16:00:00-04:00",
+  "identity_registry_version": "identity:a22ca88de188c1990ae6368235b3b2cf26648c61daaea2d11844e43c0f624d5e",
   "sectors": [
     {
       "key": "semiconductors",
@@ -2869,8 +2869,256 @@
           "member_to": null
         }
       ]
+    },
+    {
+      "key": "utilities-power",
+      "name": "Utilities and Power",
+      "representative": "US.GEV",
+      "benchmark": "US.SPY",
+      "members": [
+        {
+          "code": "US.GEV",
+          "name": "GE Vernova",
+          "role": "leader",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.GEV",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NEE",
+          "name": "NextEra Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NEE",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CEG",
+          "name": "Constellation Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CEG",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.VST",
+          "name": "Vistra Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.VST",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.DUK",
+          "name": "Duke Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.DUK",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SO",
+          "name": "Southern",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SO",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.EMR",
+          "name": "Emerson Electric",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.EMR",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.OKLO",
+          "name": "Oklo Inc",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.OKLO",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NRG",
+          "name": "NRG Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NRG",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.EXC",
+          "name": "Exelon",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.EXC",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.SMR",
+          "name": "NuScale Power",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.SMR",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.CCJ",
+          "name": "Cameco",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.CCJ",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.ETR",
+          "name": "Entergy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.ETR",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.TLN",
+          "name": "Talen Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.TLN",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PPL",
+          "name": "PPL Corp",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PPL",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.D",
+          "name": "Dominion Resources",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.D",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.PEG",
+          "name": "Public Service Enterprise Group",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.PEG",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.BWXT",
+          "name": "BWX Technologies",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.BWXT",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.LEU",
+          "name": "Centrus Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.LEU",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.XE",
+          "name": "X-Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.XE",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.UUUU",
+          "name": "Energy Fuels",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.UUUU",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.UEC",
+          "name": "Uranium Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.UEC",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NXE",
+          "name": "NexGen Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NXE",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        },
+        {
+          "code": "US.NNE",
+          "name": "NANO Nuclear Energy",
+          "role": "constituent",
+          "weight": 1.0,
+          "shared_identity": null,
+          "security_id": "listing:US.NNE",
+          "member_from": "2026-08-14T16:00:00-04:00",
+          "member_to": null
+        }
+      ]
     }
   ],
   "source": "manual-versioned-universe-v1-migrated-v2",
-  "version_id": "universe:ff606b666850516bd96d2a1541672bad36f24adf3713fea06a2be0114c7b8577"
+  "version_id": "universe:cd3a94862f5e53a8e1561e283f1126df54fdc5f06e0b2bfdd14ec05f958c522d"
 }

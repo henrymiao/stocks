@@ -1,6 +1,6 @@
 {
   "schema_version": "security-identity-registry-v1",
-  "published_at": "2026-08-08T12:00:00+08:00",
+  "published_at": "2026-08-14T16:00:00-04:00",
   "identities": [
     {
       "security_id": "benchmark:HK.800000",
@@ -6678,7 +6678,271 @@
       "currency": "USD",
       "active_from": "2026-07-21T16:00:00-04:00",
       "active_to": null
+    },
+    {
+      "security_id": "listing:US.GEV",
+      "company_id": "security:US.GEV",
+      "code": "US.GEV",
+      "name": "GE Vernova",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.NEE",
+      "company_id": "security:US.NEE",
+      "code": "US.NEE",
+      "name": "NextEra Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.CEG",
+      "company_id": "security:US.CEG",
+      "code": "US.CEG",
+      "name": "Constellation Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.VST",
+      "company_id": "security:US.VST",
+      "code": "US.VST",
+      "name": "Vistra Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.DUK",
+      "company_id": "security:US.DUK",
+      "code": "US.DUK",
+      "name": "Duke Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.SO",
+      "company_id": "security:US.SO",
+      "code": "US.SO",
+      "name": "Southern",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.EMR",
+      "company_id": "security:US.EMR",
+      "code": "US.EMR",
+      "name": "Emerson Electric",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.OKLO",
+      "company_id": "security:US.OKLO",
+      "code": "US.OKLO",
+      "name": "Oklo Inc",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.NRG",
+      "company_id": "security:US.NRG",
+      "code": "US.NRG",
+      "name": "NRG Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.EXC",
+      "company_id": "security:US.EXC",
+      "code": "US.EXC",
+      "name": "Exelon",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.SMR",
+      "company_id": "security:US.SMR",
+      "code": "US.SMR",
+      "name": "NuScale Power",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.CCJ",
+      "company_id": "security:US.CCJ",
+      "code": "US.CCJ",
+      "name": "Cameco",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.ETR",
+      "company_id": "security:US.ETR",
+      "code": "US.ETR",
+      "name": "Entergy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.TLN",
+      "company_id": "security:US.TLN",
+      "code": "US.TLN",
+      "name": "Talen Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.PPL",
+      "company_id": "security:US.PPL",
+      "code": "US.PPL",
+      "name": "PPL Corp",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.D",
+      "company_id": "security:US.D",
+      "code": "US.D",
+      "name": "Dominion Resources",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.PEG",
+      "company_id": "security:US.PEG",
+      "code": "US.PEG",
+      "name": "Public Service Enterprise Group",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.BWXT",
+      "company_id": "security:US.BWXT",
+      "code": "US.BWXT",
+      "name": "BWX Technologies",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.LEU",
+      "company_id": "security:US.LEU",
+      "code": "US.LEU",
+      "name": "Centrus Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.XE",
+      "company_id": "security:US.XE",
+      "code": "US.XE",
+      "name": "X-Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.UUUU",
+      "company_id": "security:US.UUUU",
+      "code": "US.UUUU",
+      "name": "Energy Fuels",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.UEC",
+      "company_id": "security:US.UEC",
+      "code": "US.UEC",
+      "name": "Uranium Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.NXE",
+      "company_id": "security:US.NXE",
+      "code": "US.NXE",
+      "name": "NexGen Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
+    },
+    {
+      "security_id": "listing:US.NNE",
+      "company_id": "security:US.NNE",
+      "code": "US.NNE",
+      "name": "NANO Nuclear Energy",
+      "market": "US",
+      "instrument_type": "ordinary-stock",
+      "currency": "USD",
+      "active_from": "2026-08-14T16:00:00-04:00",
+      "active_to": null
     }
   ],
-  "version_id": "identity:988791111eca506a754b84b34136ebba59975e9905ce95663171cf1b003d838d"
+  "version_id": "identity:a22ca88de188c1990ae6368235b3b2cf26648c61daaea2d11844e43c0f624d5e"
 }

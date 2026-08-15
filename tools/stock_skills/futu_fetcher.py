@@ -223,6 +223,63 @@ class FutuFetcher:
         except (KeyError, ValueError, TypeError):
             return None
 
+    # Fields `get_stock_filter` will only accept once across the whole filter list.
+    # Passing a bound and a sort on the same field builds two conditions on it and the
+    # server rejects the entire call, so the sort is dropped rather than the bound.
+    _SCREEN_SORT_FIELD = {
+        "min_market_cap": "market_val",
+        "max_market_cap": "market_val",
+        "min_pe": "pe",
+        "max_pe": "pe",
+        "min_pb": "pb",
+        "max_pb": "pb",
+        "min_price": "price",
+        "max_price": "price",
+    }
+
+    def screen_market(
+        self,
+        market: str,
+        *,
+        sort: str = "market_val",
+        limit: int = 200,
+        **bounds: float,
+    ) -> list[dict]:
+        """Codes matching numeric bounds, straight from the exchange.
+
+        Every scan so far has been limited to the hand-maintained universe files, so an
+        instrument nobody typed in was invisible however liquid it was: Lenovo turns over
+        HK$2.7bn a day and the power names behind the AI build-out are a whole sector, and
+        neither was ever screened. This asks the exchange instead of the file.
+
+        Only the fields used as bounds come back populated -- the rest arrive as 0.0 --
+        so treat the result as a code list and fetch snapshots for anything you intend to
+        score.
+        """
+
+        command = [
+            self.python_bin,
+            self._script("quote", "get_stock_filter.py"),
+            "--market",
+            market,
+            "--limit",
+            str(limit),
+            "--json",
+        ]
+        bound_fields = {
+            self._SCREEN_SORT_FIELD[key]
+            for key in bounds
+            if bounds[key] is not None and key in self._SCREEN_SORT_FIELD
+        }
+        if sort and sort not in bound_fields:
+            command.extend(["--sort", sort])
+        for key, value in bounds.items():
+            if value is None:
+                continue
+            command.extend([f"--{key.replace('_', '-')}", str(value)])
+        payload = self._run_json(command)
+        return [row for row in (payload.get("data") or []) if row.get("code")]
+
     def get_owner_plates(self, code: str) -> list[dict]:
         command = [self.python_bin, self._script("quote", "get_owner_plate.py"), code, "--json"]
         try:

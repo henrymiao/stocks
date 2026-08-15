@@ -605,3 +605,54 @@ class TradingCalendarParsingTests(unittest.TestCase):
         self.assertEqual(
             self._fetcher(rows).get_trading_days("US", start="a", end="b"), ["2026-08-05"]
         )
+
+
+class ScreenMarketTests(unittest.TestCase):
+    """Screening asks the exchange, so it can see what the universe file never listed.
+
+    Lenovo turns over HK$2.7bn a day and the whole power sector sits behind the AI
+    build-out; neither was ever screened, because every scan read a hand-maintained
+    file. The one sharp edge is that `get_stock_filter` rejects the entire call when two
+    conditions land on the same field, which a bound plus a sort on that field does.
+    """
+
+    def _fetcher(self, captured):
+        def runner(command):
+            captured.append(command)
+            return json.dumps({"data": [{"code": "US.AAA", "name": "A", "market_val": 1.0}]})
+
+        return FutuFetcher(runner=runner)
+
+    def test_a_sort_that_collides_with_a_bound_is_dropped_not_the_bound(self):
+        captured: list[list[str]] = []
+        rows = self._fetcher(captured).screen_market(
+            "US", sort="market_val", min_market_cap=100
+        )
+        command = captured[0]
+        self.assertIn("--min-market-cap", command)
+        self.assertNotIn("--sort", command)
+        self.assertEqual([row["code"] for row in rows], ["US.AAA"])
+
+    def test_a_sort_on_a_free_field_is_kept(self):
+        captured: list[list[str]] = []
+        self._fetcher(captured).screen_market("US", sort="turnover", min_market_cap=100)
+        command = captured[0]
+        self.assertIn("--min-market-cap", command)
+        self.assertEqual(command[command.index("--sort") + 1], "turnover")
+
+    def test_both_bounds_on_one_field_still_drop_only_the_sort(self):
+        captured: list[list[str]] = []
+        self._fetcher(captured).screen_market("US", sort="pe", min_pe=5, max_pe=30)
+        command = captured[0]
+        self.assertIn("--min-pe", command)
+        self.assertIn("--max-pe", command)
+        self.assertNotIn("--sort", command)
+
+    def test_rows_without_a_code_are_dropped(self):
+        def runner(command):
+            return json.dumps({"data": [{"code": "US.AAA"}, {"name": "no code"}, {}]})
+
+        self.assertEqual(
+            [row["code"] for row in FutuFetcher(runner=runner).screen_market("US")],
+            ["US.AAA"],
+        )

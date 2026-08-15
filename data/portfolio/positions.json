@@ -1,6 +1,6 @@
 {
   "schema_version": "portfolio-positions-v1",
-  "as_of": "2026-08-12T10:55:00+08:00",
+  "as_of": "2026-08-14T17:30:00-04:00",
   "source": "user-confirmed-2026-08-03",
   "base_currency": "CNY",
   "fx_rates": {
@@ -9,11 +9,15 @@
     "HKD": 0.912
   },
   "cash": {
-    "CNY": 1594170.0,
-    "HKD": 246520.0,
-    "USD": 18260.0
+    "CNY": 1578090.0,
+    "HKD": 380380.0,
+    "USD": 7494.0
   },
   "notes": [
+    "2026-08-14 建仓: 甲骨文 US.ORCL 70股 @153.80（10,766 USD ≈ 76,762 CNY，占NAV约2.36%）。止损 144.13 取自 8/13 收盘数据的 exit_plan.initial_stop（非盘中价），目标 174.35/186.44，时间止损：5个交易日内进展不足0.5R（约+3.9%）则全部退出，最长持有20个交易日。来源：8/13 美股收盘后280只全市场扫描，软件云板块第一(82.6)，甲骨文发现分79.3、深度评估62.60、判定probe——当日22只候选中唯一给出仓位建议的美股。PE-TTM 26.8、ROE 44.7%(全年口径)、资金流76.6。成交价153.80低于建议时的155.60。注意：150日线163.05与200日线175.73仍在价格上方且200日线下行，六项趋势检查只过两项——这是下跌趋势中的反弹，probe规模即按此设定。美元现金 18,260 -> 7,494。",
+    "2026-08-13 止损口径重大修正（收盘数据）: 此前每日用当日 exit_plan.initial_stop 覆盖 current_stop 是错的——那是「今天以现价新建仓」的止损，不是已持有仓位的止损，它随价格一路收紧。正确口径见 trailing.suggest_trailing_stop: 进展未达 activation_r=2.5R 时，止损应停在建仓初始止损不动；达到后才按两日低点/ATR 上移，且永不下移、盘中拒绝计算。按 journal 首条 exit_plan 复位: ASMPT 157.74->139.72(2.06R)、SMH 557.02->490.24(0.95R)、CRCL 62.23->55.92(-0.16R)、航天ETF 0.928->0.857(-2.14R)；紫金33.34/沪电115.16/药明A153.40 本就等于原始值，不变。阿里 123.52->121.30（3.36R 已启动，trailing 给两日低点；注意距收盘121.90仅0.49%，极紧）。长电(3.77R)与GOOGL(4.89R) trailing 已启动但算出 92.73/372.12 均高于现价，窗口内陈旧高点失真，模块拒绝出值，暂维持原值待定。小鹏原始止损49.19已高于现价45.38，复位即出局，需持有人单独决定。此错误是 path-backtest 里「MFE 捕获率仅 40%、利润回吐 73%」的一个可能成因：止损被系统性设紧，正常波动即被扫出。",
+    "2026-08-13 建仓: 药明康德 A股 SH.603259 100股 @160.80（16,080 CNY，占NAV约0.49%）。止损 153.40 取自当日 analyze 的 exit_plan.initial_stop，结构失效 157.15，止损距离 4.60%——盘中口径，收盘后需重算。选A股而非H股: A 160.80 vs H 202.0 HKD(=184.22 CNY)，A股折价 12.7%，同一家公司同一份现金流。框架读数(A股,盘中): setup 66.52、entry watch、stage-2、gate_effect none、资金流87.51、PE-TTM 22.16、ROE 26.0(2026/Q2)。H股同时读到 setup 68.44、entry probe、建议3.9%(约12.7万)；实际买入 0.49%，远小于框架上限，是持有人对'60日涨81.8%、距高点1.2%'的主动降规模。买区在 166.66 之上(现价上方3.6%)，本笔属于买区下方建仓，非突破跟随。",
+    "2026-08-13 清仓: 腾讯 HK.00700 剩余300股 @446.20，持仓归零。已实现 +17,760 HKD ≈ +16,197 CNY（成本387，+15.30%）。腾讯全程累计已实现 +43,960 HKD（8/6 100@481、8/11 100@472、8/11 100@470、8/13 300@446.20）。执行价较 8/12 收盘 461.60 低 3.34%——Q2财报(8/12盘后)后低开: 营收2047.85亿(+11%,首破2000亿但落在预期2016-2111亿中位偏下)、Non-IFRS净利684亿(+9%,低于营收增速即利润率压缩)、资本开支527.8亿(+176%)。止损462.91在8/11、8/12连续两日收盘被跌破，清仓依据是止损而非财报。",
     "股数与成本由用户 2026-08-03 逐个确认，取代此前所有快照。",
     "current_stop 取自当日 analyze 的 exit_plan.initial_stop，随每次复盘更新。",
     "工业富联成本 59.25 为前复权口径（实付 59.90，8/3 除息每股 0.65）。",
@@ -53,25 +57,8 @@
       "current_stop": 339.49,
       "leverage": 1.0,
       "trailing_lookback_sessions": 63,
-      "trailing_stop": 349.49
-    },
-    {
-      "code": "HK.00700",
-      "shares": 300,
-      "cost_basis": 387.0,
-      "currency": "HKD",
-      "theme": "china-internet",
-      "trade_id": "tencent-00700-core412",
-      "current_stop": 462.91,
-      "leverage": 1.0,
-      "trailing_lookback_sessions": 32,
-      "trailing_stop": null,
-      "remaining_fraction": 0.5,
-      "filled_targets": [
-        "manual-trim-20260806",
-        "manual-trim-20260811",
-        "manual-trim-20260811b"
-      ]
+      "trailing_stop": 349.49,
+      "entry_date": "2026-07-18"
     },
     {
       "code": "HK.09868",
@@ -82,7 +69,8 @@
       "trade_id": "xpeng-09868-5038",
       "current_stop": 44.65,
       "leverage": 1.0,
-      "trailing_lookback_sessions": 32
+      "trailing_lookback_sessions": 32,
+      "entry_date": "2026-07-18"
     },
     {
       "code": "HK.09988",
@@ -91,14 +79,15 @@
       "currency": "HKD",
       "theme": "china-internet",
       "trade_id": "baba-09988-20260718",
-      "current_stop": 123.52,
+      "current_stop": 121.3,
       "leverage": 1.0,
       "trailing_lookback_sessions": 32,
-      "trailing_stop": 120.1,
+      "trailing_stop": 121.3,
       "remaining_fraction": 0.8,
       "filled_targets": [
         "manual-trim-20260806"
-      ]
+      ],
+      "entry_date": "2026-07-18"
     },
     {
       "code": "SH.563380",
@@ -107,9 +96,10 @@
       "currency": "CNY",
       "theme": "aerospace-defense",
       "trade_id": "hangtian-563380-20260718",
-      "current_stop": 0.928,
+      "current_stop": 0.857,
       "leverage": 1.0,
-      "trailing_lookback_sessions": 32
+      "trailing_lookback_sessions": 32,
+      "entry_date": "2026-07-18"
     },
     {
       "code": "HK.00522",
@@ -118,13 +108,14 @@
       "currency": "HKD",
       "theme": "semiconductor",
       "trade_id": "asmpt-00522-154",
-      "current_stop": 157.74,
+      "current_stop": 139.72,
       "leverage": 1.0,
       "trailing_lookback_sessions": 32,
       "remaining_fraction": 0.8333,
       "filled_targets": [
         "manual-trim-20260806"
-      ]
+      ],
+      "entry_date": "2026-08-03"
     },
     {
       "code": "US.SMH",
@@ -133,9 +124,10 @@
       "currency": "USD",
       "theme": "semiconductor",
       "trade_id": "smh-us-core539",
-      "current_stop": 557.02,
+      "current_stop": 490.24,
       "leverage": 1.0,
-      "trailing_lookback_sessions": 32
+      "trailing_lookback_sessions": 32,
+      "entry_date": "2026-07-30"
     },
     {
       "code": "US.CRCL",
@@ -144,9 +136,10 @@
       "currency": "USD",
       "theme": "crypto",
       "trade_id": "circle-crcl-20260718",
-      "current_stop": 62.23,
+      "current_stop": 55.92,
       "leverage": 1.0,
-      "trailing_lookback_sessions": 32
+      "trailing_lookback_sessions": 32,
+      "entry_date": "2026-07-18"
     },
     {
       "code": "SH.600584",
@@ -161,7 +154,8 @@
       "remaining_fraction": 0.3333,
       "filled_targets": [
         "manual-trim-20260806"
-      ]
+      ],
+      "entry_date": "2026-08-03"
     },
     {
       "code": "SH.601899",
@@ -175,7 +169,8 @@
       "filled_targets": [],
       "trailing_stop": null,
       "remaining_fraction": 1.0,
-      "trailing_lookback_sessions": 32
+      "trailing_lookback_sessions": 32,
+      "entry_date": "2026-08-10"
     },
     {
       "code": "SZ.002463",
@@ -189,7 +184,38 @@
       "filled_targets": [],
       "trailing_stop": null,
       "remaining_fraction": 1.0,
-      "trailing_lookback_sessions": 32
+      "trailing_lookback_sessions": 32,
+      "entry_date": "2026-08-10"
+    },
+    {
+      "code": "SH.603259",
+      "shares": 100,
+      "cost_basis": 160.8,
+      "currency": "CNY",
+      "theme": "healthcare",
+      "trade_id": "wuxi-603259-1608",
+      "current_stop": 153.4,
+      "leverage": 1.0,
+      "filled_targets": [],
+      "trailing_stop": null,
+      "remaining_fraction": 1.0,
+      "trailing_lookback_sessions": 32,
+      "entry_date": "2026-08-12"
+    },
+    {
+      "code": "US.ORCL",
+      "shares": 70,
+      "cost_basis": 153.8,
+      "currency": "USD",
+      "theme": "software-cloud",
+      "trade_id": "orcl-20260814",
+      "current_stop": 144.13,
+      "leverage": 1.0,
+      "filled_targets": [],
+      "trailing_stop": null,
+      "remaining_fraction": 1.0,
+      "trailing_lookback_sessions": 32,
+      "entry_date": "2026-08-14"
     }
   ]
 }

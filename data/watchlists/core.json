@@ -589,7 +589,7 @@
       "benchmark": "HK.800000",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "reduced-holding",
+      "position_status": "exited-watch",
       "scan_policy": "always",
       "tags": [
         "hk",
@@ -602,7 +602,6 @@
         "cloud",
         "platform",
         "growth",
-        "holding",
         "hk-focus",
         "reduced-position"
       ]
@@ -1656,8 +1655,8 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "watch",
-      "scan_policy": "ranked",
+      "position_status": "holding",
+      "scan_policy": "always",
       "tags": [
         "a-share",
         "pharma",
@@ -1666,7 +1665,8 @@
         "broad-screen",
         "growth",
         "national-tech",
-        "biotech"
+        "biotech",
+        "holding"
       ]
     },
     {
@@ -3442,6 +3442,32 @@
         "optical-module",
         "ai-infrastructure",
         "high-volatility"
+      ]
+    },
+    {
+      "code": "US.ORCL",
+      "name": "甲骨文",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 80,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "holding",
+      "scan_policy": "always",
+      "tags": [
+        "us",
+        "software-cloud",
+        "enterprise-software",
+        "cloud",
+        "ai-infrastructure",
+        "holding"
       ]
     }
   ]

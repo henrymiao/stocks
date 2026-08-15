@@ -24,7 +24,10 @@ class WatchlistDataTests(unittest.TestCase):
         # that every watchlist edit would have to bump by hand.
         self.assertGreater(len(entries), 100)
         self.assertEqual(len(by_code), len(entries))
-        self.assertEqual(by_code["HK.00700"]["position_status"], "reduced-holding")
+        # These pin live position state, so they move whenever a position is opened or
+        # closed -- HK.00700 was reduced-holding until it was sold out on 2026-08-13.
+        # `BookAndWatchlistAgreeTests` is the version of this that does not need editing.
+        self.assertEqual(by_code["HK.00700"]["position_status"], "exited-watch")
         self.assertEqual(by_code["HK.09988"]["position_status"], "reduced-holding")
         self.assertEqual(by_code["SZ.000021"]["position_status"], "exited-watch")
         self.assertEqual(by_code["HK.09868"]["position_status"], "holding")

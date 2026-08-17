@@ -68,7 +68,7 @@
       "benchmark": "SH.000001",
       "underlying_proxy": null,
       "event_policy": "standard",
-      "position_status": "holding",
+      "position_status": "exited-watch",
       "scan_policy": "always",
       "tags": [
         "a-share",
@@ -77,9 +77,7 @@
         "cyclical",
         "valuation-reference-only",
         "national-tech",
-        "advanced-packaging",
-        "holding",
-        "probe"
+        "advanced-packaging"
       ]
     },
     {
@@ -3468,6 +3466,131 @@
         "cloud",
         "ai-infrastructure",
         "holding"
+      ]
+    },
+    {
+      "code": "SH.603186",
+      "name": "华正新材",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 60,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SH.000001",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "a-share",
+        "ccl",
+        "pcb-materials",
+        "ai-hardware",
+        "national-tech",
+        "growth"
+      ]
+    },
+    {
+      "code": "HK.00992",
+      "name": "联想集团",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 60,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "ai-hardware",
+        "server",
+        "pc",
+        "china"
+      ]
+    },
+    {
+      "code": "US.GEV",
+      "name": "GE Vernova",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 60,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "utilities-power",
+        "grid-equipment",
+        "ai-infrastructure",
+        "growth"
+      ]
+    },
+    {
+      "code": "US.CEG",
+      "name": "星座能源",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 60,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "neutral",
+      "benchmark": "US.SPY",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "us",
+        "utilities-power",
+        "nuclear",
+        "ai-infrastructure"
+      ]
+    },
+    {
+      "code": "HK.02099",
+      "name": "中国黄金国际",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 60,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "value",
+      "benchmark": "HK.800000",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "watch",
+      "scan_policy": "ranked",
+      "tags": [
+        "hk",
+        "gold",
+        "metals",
+        "cyclical",
+        "value"
       ]
     }
   ]

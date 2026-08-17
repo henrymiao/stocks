@@ -656,3 +656,23 @@ class ScreenMarketTests(unittest.TestCase):
             [row["code"] for row in FutuFetcher(runner=runner).screen_market("US")],
             ["US.AAA"],
         )
+
+    def test_an_oversized_screen_is_clamped_instead_of_returning_nothing(self):
+        """The server rejects the whole request past 200, it does not truncate.
+
+        `--limit 400` came back as "The number of requests exceeds the limit" with no
+        rows at all, and the script pins `begin=0` so there is no paging to fall back on.
+        Clamping returns the largest screen the feed will actually serve.
+        """
+
+        captured: list[list[str]] = []
+        self._fetcher(captured).screen_market("SH", limit=400)
+        command = captured[0]
+        self.assertEqual(command[command.index("--limit") + 1], "200")
+
+    def test_a_limit_below_the_cap_is_passed_through(self):
+        captured: list[list[str]] = []
+        self._fetcher(captured).screen_market("SH", limit=50)
+        command = captured[0]
+        self.assertEqual(command[command.index("--limit") + 1], "50")
+

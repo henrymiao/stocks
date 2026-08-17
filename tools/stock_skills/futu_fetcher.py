@@ -237,6 +237,11 @@ class FutuFetcher:
         "max_price": "price",
     }
 
+    # The server refuses a single screen larger than this with "The number of requests
+    # exceeds the limit", and the underlying script pins `begin=0`, so there is no paging
+    # to fall back on. Asking for more returns nothing at all rather than a short list.
+    SCREEN_MAXIMUM = 200
+
     def screen_market(
         self,
         market: str,
@@ -255,6 +260,10 @@ class FutuFetcher:
         Only the fields used as bounds come back populated -- the rest arrive as 0.0 --
         so treat the result as a code list and fetch snapshots for anything you intend to
         score.
+
+        `market` selects the exchange, but the A-share markets are one venue to this
+        feed: SH and SZ return the same rows, spanning both prefixes. Screen either, not
+        both.
         """
 
         command = [
@@ -263,7 +272,7 @@ class FutuFetcher:
             "--market",
             market,
             "--limit",
-            str(limit),
+            str(min(limit, self.SCREEN_MAXIMUM)),
             "--json",
         ]
         bound_fields = {

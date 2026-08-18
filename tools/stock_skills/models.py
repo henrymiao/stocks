@@ -146,13 +146,32 @@ class ExtendedHoursSnapshot:
     outside the relevant session, or for markets without extended-hours trading.
     """
     code: str
-    prev_close: float | None          # regular-session close, the change reference
+    prev_close: float | None          # feed's prev_close_price -- see reference_close
     pre_price: float | None           # pre-market last price
-    pre_change_rate: float | None     # pre-market % vs prev close
+    pre_change_rate: float | None     # pre-market % vs the last completed session close
     pre_volume: float | None
     after_price: float | None         # after-hours last price
-    after_change_rate: float | None   # after-hours % vs prev close
+    after_change_rate: float | None   # after-hours % vs the last completed session close
     after_volume: float | None
+    reference_close: float | None = None  # the close the change rates are measured against
+
+    def baseline(self) -> float | None:
+        """The close the extended-hours change rates are actually quoted against.
+
+        `prev_close_price` from the feed lags: during the 2026-08-18 pre-market it returned
+        the 08-14 close for every US name while both change rates were measured against
+        08-17 -- SMH read 587.82 there against a real reference of 594.07. Prefer the
+        reference recovered from a change rate, which is internally consistent with the
+        price beside it, and fall back to the feed only when neither session has traded.
+        """
+
+        for price, rate in (
+            (self.pre_price, self.pre_change_rate),
+            (self.after_price, self.after_change_rate),
+        ):
+            if price is not None and rate is not None and rate != -100.0:
+                return round(price / (1.0 + rate / 100.0), 4)
+        return self.reference_close if self.reference_close is not None else self.prev_close
 
 
 @dataclass(frozen=True)

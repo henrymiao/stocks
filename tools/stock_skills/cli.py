@@ -1609,6 +1609,9 @@ def _cmd_prepost(args: argparse.Namespace) -> int:
         rows.append(
             {
                 "code": eh.code,
+                # `prev_close` is the raw feed field and lags by a session; `baseline` is
+                # the close the change rates are actually measured against.
+                "baseline": eh.baseline(),
                 "prev_close": eh.prev_close,
                 "pre_price": eh.pre_price,
                 "pre_change_rate": eh.pre_change_rate,
@@ -1627,7 +1630,9 @@ def _cmd_prepost(args: argparse.Namespace) -> int:
                 continue
             pre = f"pre {r['pre_price']} ({r['pre_change_rate']:+.2f}%)" if r["pre_price"] is not None else "pre —"
             post = f"after {r['after_price']} ({r['after_change_rate']:+.2f}%)" if r["after_price"] is not None else "after —"
-            print(f"{r['code']:10s} prev_close {r['prev_close']}  |  {pre}  |  {post}")
+            base = "—" if r["baseline"] is None else f"{r['baseline']:g}"
+            stale = "" if r["baseline"] is None or r["prev_close"] is None or abs(r["baseline"] - r["prev_close"]) < 0.01 else f" (feed prev_close {r['prev_close']:g} is stale)"
+            print(f"{r['code']:10s} base {base}  |  {pre}  |  {post}{stale}")
     return 0
 
 

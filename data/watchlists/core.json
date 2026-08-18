@@ -3592,6 +3592,33 @@
         "cyclical",
         "value"
       ]
+    },
+    {
+      "code": "SZ.002156",
+      "name": "通富微电",
+      "enabled": true,
+      "tier": "thematic",
+      "priority": 75,
+      "strategy_profiles": [
+        "short",
+        "swing"
+      ],
+      "asset_type": "equity",
+      "valuation_profile": "growth",
+      "benchmark": "SZ.399006",
+      "underlying_proxy": null,
+      "event_policy": "standard",
+      "position_status": "holding",
+      "scan_policy": "always",
+      "tags": [
+        "a-share",
+        "semiconductor",
+        "packaging",
+        "ai-hardware",
+        "national-tech",
+        "growth",
+        "holding"
+      ]
     }
   ]
 }
